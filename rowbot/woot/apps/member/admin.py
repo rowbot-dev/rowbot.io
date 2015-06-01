@@ -8,7 +8,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 # local
-from apps.member .models import Member
+from apps.member.models import Member
 
 # vars
 

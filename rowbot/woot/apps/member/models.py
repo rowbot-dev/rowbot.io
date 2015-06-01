@@ -7,6 +7,7 @@ from django.contrib.auth.models import (
 )
 
 # local
+from apps.org.models import RowingClub, Team, TeamInstance
 
 # vars
 
@@ -42,6 +43,16 @@ class MemberManager(BaseUserManager):
     return user
 
 class Member(AbstractBaseUser, PermissionsMixin):
+  '''
+  What will I want to know about a member?
+  1. Does he/she row/cox/coach? How much? How many times in the past?
+  2. What types of activities/excercises have they done? and when?
+  3. What clubs are they a part of and what teams in those clubs?
+  4. What is the overall experience or rating of this rower?
+  5. What are their current vitals? Heart rate? Weight? Erg times?
+
+  '''
+
   # properties
   username = models.CharField(max_length=255, unique=True)
   email = models.EmailField(verbose_name='email address',max_length=255)
@@ -53,7 +64,8 @@ class Member(AbstractBaseUser, PermissionsMixin):
   REQUIRED_FIELDS = ['email']
 
   # member properties
-
+  clubs = models.ManyToManyField(RowingClub, related_name='members') # Fitzwilliam and Eddies
+  teams = models.ManyToManyField(Team, related_name='members') # row M1 and cox M2
 
   # methods
   def get_full_name(self):
@@ -85,7 +97,36 @@ class Member(AbstractBaseUser, PermissionsMixin):
 
 ### Instance
 class Role(models.Model): # a token held by a member to describe their current status is the club
-  pass
+  # connections
+  member = models.ForeignKey(Member, related_name='roles')
 
-class MemberInstance(models.Model): # an object added to a member at each event to hold details specific to that member/event
-  pass
+  # properties
+  name = models.CharField(max_length=255)
+
+class MemberRoleInstance(models.Model): # an object added to a member at each event to hold details specific to that member/event
+  '''
+  A member will not be the same from outing to outing or race to race. What things do I want to know about this member after those events?
+  1. Did they win?
+  2. What was their time?
+  3. What excercises did they do?
+  4. What position or role did they fill?
+  5. Were they late/recieve any penalty?
+  6. What comments were left about this event?
+  7. Which club and team did they participate for?
+  8. What is the overall experience or rating of this rower on a running basis?
+  5. What are their current vitals before this event? Heart rate? Weight? Erg times after?
+
+  '''
+
+  #connections
+  club = models.ForeignKey(Club, related_name='member_role_instances') # what club is the member rowing for in this event?
+  team = models.ForeignKey(TeamInstance, related_name='member_role_instances') # what team is this member currently a part of?
+  event = models.ForeignKey(Event, related_name='participants') # what event is the reason for creating this instance?
+  member = models.ForeignKey(Member, related_name='instances') # member this is attached to
+  role = models.ForeignKey(Role, related_name='instances') # what role were they filling at this time?
+
+  # properties
+  race_count = models.IntegerField(default=0)
+  outing_count = models.IntegerField(default=0)
+  experience = models.IntegerField(default=0)
+  weight = models.DecimalField(default=0.0, max_digits=5, decimal_places=2)
