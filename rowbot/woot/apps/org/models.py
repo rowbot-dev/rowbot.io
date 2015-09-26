@@ -88,7 +88,6 @@ class Team(models.Model):
   #properties
   name = models.CharField(max_length=255)
 
-class
 
 class TeamInstance(models.Model):
   #connections

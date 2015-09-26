@@ -3,8 +3,10 @@
 # django
 from django.db import models
 from django.contrib.auth.models import (
-  BaseUserManager, AbstractBaseUser, PermissionsMixin
-)
+                                         BaseUserManager,
+                                         AbstractBaseUser,
+                                         PermissionsMixin
+                                       )
 
 # local
 from apps.org.models import RowingClub, Team, TeamInstance
@@ -119,9 +121,9 @@ class MemberRoleInstance(models.Model): # an object added to a member at each ev
   '''
 
   #connections
-  club = models.ForeignKey(Club, related_name='member_role_instances') # what club is the member rowing for in this event?
+  club = models.ForeignKey(RowingClub, related_name='member_role_instances') # what club is the member rowing for in this event?
   team = models.ForeignKey(TeamInstance, related_name='member_role_instances') # what team is this member currently a part of?
-  event = models.ForeignKey(Event, related_name='participants') # what event is the reason for creating this instance?
+  # event = models.ForeignKey(Event, related_name='participants') # what event is the reason for creating this instance?
   member = models.ForeignKey(Member, related_name='instances') # member this is attached to
   role = models.ForeignKey(Role, related_name='instances') # what role were they filling at this time?
 
