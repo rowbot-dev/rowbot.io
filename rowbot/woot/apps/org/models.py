@@ -12,19 +12,19 @@ from django.db import models
 ### Models
 
 # role specific managers
-class ComitteeMemberManager(models.Manager): # search for all the members of a boatclub that are captains
+class RowingClubComitteeMemberManager(models.Manager): # search for all the members of a boatclub that are captains, etc.
   pass
 
-class RowerManager(models.Manager):
+class RowingClubRowerManager(models.Manager):
   pass
 
-class CoachManager(models.Manager):
+class RowingClubCoachManager(models.Manager):
   pass
 
-class CoxManager(models.Manager):
+class RowingClubCoxManager(models.Manager):
   pass
 
-class SubscriberManager(models.Manager):
+class RowingClubSubscriberManager(models.Manager):
   pass
 
 # 1. boat club definitions
@@ -43,14 +43,14 @@ class RowingClub(models.Model):
 
 
   # properties
-
+  name = models.CharField(max_length=255)
 
   # managers
-  committee_members = ComitteeMemberManager()
-  rowers = RowerManager()
-  coaches = CoachManager()
-  coxes = CoxManager()
-  subscribers = SubscriberManager()
+  # committee_members = ComitteeMemberManager()
+  # rowers = RowerManager()
+  # coaches = CoachManager()
+  # coxes = CoxManager()
+  # subscribers = SubscriberManager()
 
 # 2. boats
 class Boat(models.Model):
@@ -70,6 +70,12 @@ class Boat(models.Model):
   #properties
   # type? make? weight? age? cost? size? status? spares?
 
+class BoatInstance(models.Model):
+  # connections
+  pass
+
+  # properties
+
 # 3. teams
 class Team(models.Model):
   '''
@@ -87,7 +93,6 @@ class Team(models.Model):
 
   #properties
   name = models.CharField(max_length=255)
-
 
 class TeamInstance(models.Model):
   #connections

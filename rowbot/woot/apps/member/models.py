@@ -100,6 +100,7 @@ class Member(AbstractBaseUser, PermissionsMixin):
 ### Instance
 class Role(models.Model): # a token held by a member to describe their current status is the club
   # connections
+  club = models.ForeignKey(RowingClub, related_name='roles')
   member = models.ForeignKey(Member, related_name='roles')
 
   # properties
