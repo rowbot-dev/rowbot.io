@@ -1,1 +1,0 @@
-# woot.apps.event.middleware

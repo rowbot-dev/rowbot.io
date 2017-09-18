@@ -1,0 +1,9 @@
+
+Reason for being:
+1. Combine members of rowing clubs to form teams
+2. Schedule events (land training, ergs, water training, races, bootcamps) with teams
+3. Notify team members of upcoming events via email.
+4. Aggregate member stats based on recorded performance (power-weight, 500m, 2k, 5k, race performance)
+5. Share members between teams
+6. Organise races between teams
+7. Members should be able to have multiple roles and be members of multiple clubs.
