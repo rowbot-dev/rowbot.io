@@ -7,3 +7,44 @@ Reason for being:
 5. Share members between teams
 6. Organise races between teams
 7. Members should be able to have multiple roles and be members of multiple clubs.
+
+As a manager, what do I want to see?
+1. List of all members from my clubs and other clubs that have made themselves available
+2. Add a member or members, new, current, or invite
+3. List of all teams under my management
+4. Create or disband a team
+5. List of events I have access to
+6. Create or cancel an event
+7. Schedule a recurring event
+8. Hire and advertise for coaches
+9. Budget schedules
+10. Message members
+11. List of boats that I own
+12. Location of boathouse and other locations
+13. Other inventory
+
+As a coach, what do I want to see?
+1. List of members I am responsible for
+2. List of teams I am responsible for
+3. List of locations
+4. Inventory
+5. Member stats and performance
+6. Message members
+7. Advertise for coxes / crew
+8. See advertisements
+
+As a cox?
+1. Advertisements
+2. Events
+3. Teams
+4. Clubs
+5. Stats
+6. Cancel availability / advertise availability
+
+As a crew?
+1. Advertisements
+2. Events
+3. Teams
+4. Clubs
+5. Stats
+6. Cancel availability / advertise availability
