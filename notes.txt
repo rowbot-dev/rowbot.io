@@ -48,3 +48,10 @@ As a crew?
 4. Clubs
 5. Stats
 6. Cancel availability / advertise availability
+
+Plan:
+
+1. Basic website (crest is selling point)
+2. quick iPhone app
+3. quick Android app
+
