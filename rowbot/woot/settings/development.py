@@ -24,24 +24,24 @@ db_data = get_access()
 # http://stackoverflow.com/questions/7975556/how-to-start-postgresql-server-on-mac-os-x
 # psql -d postgres -U <root_user> -W
 DATABASES = {
-  'default': {
-    'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2' for PG django.db.backends.mysql
-    'NAME': db_data['name'],
-    'USER': db_data['user'],
-    'PASSWORD': db_data['pwd'],
-    'HOST': db_data['host'],
-    'PORT': db_data['port'],
-  }
+	'default': {
+		'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2' for PG django.db.backends.mysql
+		'NAME': db_data['name'],
+		'USER': db_data['user'],
+		'PASSWORD': db_data['pwd'],
+		'HOST': db_data['host'],
+		'PORT': db_data['port'],
+	}
 }
 ########## END DATABASE CONFIGURATION
 
 
 ########## CACHE CONFIGURATION
 CACHES = {
-  'default': {
-    'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-    'LOCATION': '127.0.0.1:11211',
-  }
+	'default': {
+		'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+		'LOCATION': '127.0.0.1:11211',
+	}
 }
 ########## END CACHE CONFIGURATION
 
@@ -61,7 +61,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ########## TOOLBAR CONFIGURATION
 # See: https://github.com/django-debug-toolbar/django-debug-toolbar#installation
 INSTALLED_APPS += (
-  'debug_toolbar',
+	'debug_toolbar',
 )
 
 # See: https://github.com/django-debug-toolbar/django-debug-toolbar#installation
@@ -69,7 +69,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 # See: https://github.com/django-debug-toolbar/django-debug-toolbar#installation
 MIDDLEWARE_CLASSES += (
-  'debug_toolbar.middleware.DebugToolbarMiddleware',
+	'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 DEBUG_TOOLBAR_CONFIG = {

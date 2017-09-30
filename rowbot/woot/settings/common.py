@@ -25,7 +25,7 @@ AUTH_USER_MODEL = 'member.Member'
 
 ########## ALLOWED HOSTS CONFIGURATION
 ALLOWED_HOSTS = (
-  'localhost',
+	'localhost',
 )
 ########## END ALLOWED HOSTS CONFIGURATION
 
@@ -54,12 +54,12 @@ SITE_NAME = basename(dirname(DJANGO_ROOT))
 path.append(DJANGO_ROOT)
 
 def get_access():
-  path = os.path.join(CODE_ROOT, '.access/{}.json'.format(SITE_NAME))
-  data = {}
-  with open(path) as access:
-    data = json.load(access)
+	path = os.path.join(CODE_ROOT, '.access/{}.json'.format(SITE_NAME))
+	data = {}
+	with open(path) as access:
+		data = json.load(access)
 
-  return data
+	return data
 ########## END PATH CONFIGURATION
 
 
@@ -75,7 +75,7 @@ TEMPLATE_DEBUG = DEBUG
 ########## MANAGER CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#admins
 ADMINS = (
-  ('Your name', 'youremail@domain.com'),
+	('Your name', 'youremail@domain.com'),
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#managers
@@ -127,8 +127,8 @@ STATICFILES_DIRS = (
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = (
-  'django.contrib.staticfiles.finders.FileSystemFinder',
-  'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+	'django.contrib.staticfiles.finders.FileSystemFinder',
+	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 ########## END STATIC FILE CONFIGURATION
 
@@ -142,7 +142,7 @@ SECRET_KEY = '#za#m48_9in&i!9rodpp)r6$4_)_94l0sij7+06&mw6t*9f1t9'
 ########## FIXTURE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-FIXTURE_DIRS
 FIXTURE_DIRS = (
-  normpath(join(DJANGO_ROOT, 'fixtures')),
+	normpath(join(DJANGO_ROOT, 'fixtures')),
 )
 ########## END FIXTURE CONFIGURATION
 
@@ -150,26 +150,26 @@ FIXTURE_DIRS = (
 ########## TEMPLATE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-context-processors
 TEMPLATE_CONTEXT_PROCESSORS = (
-  'django.contrib.auth.context_processors.auth',
-  'django.core.context_processors.debug',
-  'django.core.context_processors.i18n',
-  'django.core.context_processors.media',
-  'django.core.context_processors.static',
-  'django.core.context_processors.tz',
-  'django.contrib.messages.context_processors.messages',
-  'django.core.context_processors.request',
+	'django.contrib.auth.context_processors.auth',
+	'django.core.context_processors.debug',
+	'django.core.context_processors.i18n',
+	'django.core.context_processors.media',
+	'django.core.context_processors.static',
+	'django.core.context_processors.tz',
+	'django.contrib.messages.context_processors.messages',
+	'django.core.context_processors.request',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
 TEMPLATE_LOADERS = (
-  'django.template.loaders.filesystem.Loader',
-  'django.template.loaders.app_directories.Loader',
-  'django.template.loaders.eggs.Loader',
+	'django.template.loaders.filesystem.Loader',
+	'django.template.loaders.app_directories.Loader',
+	'django.template.loaders.eggs.Loader',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
-  normpath(join(DJANGO_ROOT, 'templates')),
+	normpath(join(DJANGO_ROOT, 'templates')),
 )
 ########## END TEMPLATE CONFIGURATION
 
@@ -177,18 +177,18 @@ TEMPLATE_DIRS = (
 ########## MIDDLEWARE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = (
-  # Use GZip compression to reduce bandwidth.
-  'django.middleware.gzip.GZipMiddleware',
+	# Use GZip compression to reduce bandwidth.
+	'django.middleware.gzip.GZipMiddleware',
 
-  # Django debug toolbar
-  'debug_toolbar.middleware.DebugToolbarMiddleware',
+	# Django debug toolbar
+	'debug_toolbar.middleware.DebugToolbarMiddleware',
 
-  # Default Django middleware.
-  'django.middleware.common.CommonMiddleware',
-  'django.contrib.sessions.middleware.SessionMiddleware',
-  'django.middleware.csrf.CsrfViewMiddleware',
-  'django.contrib.auth.middleware.AuthenticationMiddleware',
-  'django.contrib.messages.middleware.MessageMiddleware',
+	# Default Django middleware.
+	'django.middleware.common.CommonMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -201,36 +201,35 @@ ROOT_URLCONF = 'woot.urls'
 
 ########## APP CONFIGURATION
 DJANGO_APPS = (
-  # Default Django apps:
-  'django.contrib.auth',
-  'django.contrib.contenttypes',
-  'django.contrib.sessions',
-  'django.contrib.sites',
-  'django.contrib.messages',
-  'django.contrib.staticfiles',
+	# Default Django apps:
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.sites',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
 
-  # Useful template tags:
-  'django.contrib.humanize',
+	# Useful template tags:
+	'django.contrib.humanize',
 
-  # Admin panel and documentation:
-  'django.contrib.admin',
-  'django.contrib.admindocs',
+	# Admin panel and documentation:
+	'django.contrib.admin',
+	'django.contrib.admindocs',
 
-  # flatpages for static pages
-  'django.contrib.flatpages',
+	# flatpages for static pages
+	'django.contrib.flatpages',
 )
 
 THIRD_PARTY_APPS = (
-  # Asynchronous task scheduling
-  'djcelery',
+	# Asynchronous task scheduling
+	# 'djcelery',
 
-  # Static file management:
-  'compressor',
+	# Static file management:
+	# 'compressor',
 )
 
 LOCAL_APPS = (
-  'apps.member',
-  'apps.org',
+	'apps.rowbot',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -241,31 +240,31 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 ########## LOGGING CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#logging
 LOGGING = {
-  'version': 1,
-  'disable_existing_loggers': False,
-  'filters': {
-    'require_debug_false': {
-      '()': 'django.utils.log.RequireDebugFalse'
-    }
-  },
-  'handlers': {
-    'mail_admins': {
-      'level': 'ERROR',
-      'filters': ['require_debug_false'],
-      'class': 'django.utils.log.AdminEmailHandler'
-    },
-    'console': {
-      'level': 'DEBUG',
-      'class': 'logging.StreamHandler'
-    }
-  },
-  'loggers': {
-    'django.request': {
-      'handlers': ['mail_admins', 'console'],
-      'level': 'ERROR',
-      'propagate': True,
-    },
-  }
+	'version': 1,
+	'disable_existing_loggers': False,
+	'filters': {
+		'require_debug_false': {
+			'()': 'django.utils.log.RequireDebugFalse'
+		}
+	},
+	'handlers': {
+		'mail_admins': {
+			'level': 'ERROR',
+			'filters': ['require_debug_false'],
+			'class': 'django.utils.log.AdminEmailHandler'
+		},
+		'console': {
+			'level': 'DEBUG',
+			'class': 'logging.StreamHandler'
+		}
+	},
+	'loggers': {
+		'django.request': {
+			'handlers': ['mail_admins', 'console'],
+			'level': 'ERROR',
+			'propagate': True,
+		},
+	}
 }
 ########## END LOGGING CONFIGURATION
 
@@ -285,16 +284,16 @@ COMPRESS_CSS_HASHING_METHOD = 'content'
 
 # See: http://django_compressor.readthedocs.org/en/latest/settings/#django.conf.settings.COMPRESS_CSS_FILTERS
 COMPRESS_CSS_FILTERS = [
-    'compressor.filters.template.TemplateFilter',
+		'compressor.filters.template.TemplateFilter',
 ]
 
 # See: http://django_compressor.readthedocs.org/en/latest/settings/#django.conf.settings.COMPRESS_JS_FILTERS
 COMPRESS_JS_FILTERS = [
-    'compressor.filters.template.TemplateFilter',
+		'compressor.filters.template.TemplateFilter',
 ]
 
 STATICFILES_FINDERS += (
-  'compressor.finders.CompressorFinder',
+	'compressor.finders.CompressorFinder',
 )
 ########## END COMPRESSION CONFIGURATION
 
@@ -326,7 +325,7 @@ setup_loader()
 
 ########## FILE UPLOAD CONFIGURATION
 FILE_UPLOAD_HANDLERS = (
-  'django.core.files.uploadhandler.MemoryFileUploadHandler',
-  'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+	'django.core.files.uploadhandler.MemoryFileUploadHandler',
+	'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 )
 ########## END FILE UPLOAD CONFIGURATION
