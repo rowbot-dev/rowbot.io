@@ -1,3 +1,5 @@
+var l = console.log;
+
 var Util = {
 
 	// String formatting
@@ -119,7 +121,7 @@ var Util = {
 
 	css: {
 		check: function (selector) {
-			
+
 		},
 		create: function (selector, style) {
 			if (!document.styleSheets) return;

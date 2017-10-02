@@ -207,7 +207,7 @@ Components.searchableList = function (id, args) {
 								(
 									(
 										// lower case query match at beginning
-										datum.main.toLowerCase().indexOf(base.data.query.toLowerCase()) === 0
+										datum.main.toLowerCase().indexOf(base.data.query.toLowerCase()) !== -1
 										&&
 										base.data.query.toLowerCase() !== ''
 									)
@@ -225,10 +225,6 @@ Components.searchableList = function (id, args) {
 								(!base.autocomplete || (base.autocomplete && base.data.query !== '') || (base.data.autocompleteOverride || false)), // autocomplete mode or no query
 								datum.id in base.data.storage.dataset, // datum is currently in dataset (prevent bleed over from change of dataset)
 							];
-
-							console.log(conditions.reduce(function (a,b) {
-								return a && b;
-							}));
 
 							return Util.ep(conditions.reduce(function (a,b) {
 								return a && b;

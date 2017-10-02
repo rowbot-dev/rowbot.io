@@ -28,6 +28,16 @@ Components.text = function (id, args) {
 			}),
 		],
 	}).then(function (_text) {
+
+		_text.title = args.title;
+		_text.value = args.value;
+		_text.update = function (_args) {
+			return Promise.all([
+				_text.cc.title.setAppearance({html: (_args.title || _text.title), style: {'display': (_args.title !== undefined ? 'block' : 'none')}}),
+				_text.cc.value.setAppearance({html: (_args.value || _text.value), style: {'display': (_args.value !== undefined ? 'block' : 'none')}}),
+			]);
+		}
+
 		return _text;
 	})
 }

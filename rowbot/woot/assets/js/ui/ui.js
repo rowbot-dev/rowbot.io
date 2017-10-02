@@ -2,18 +2,16 @@
 var UI = {
 	// GLOBAL STATE
 	// store current global state
-	// This is a path like 'client-state.reload' -> later, James.
+	// This is a path like 'client.reload' -> later, James.
 	globalState: undefined,
 	previousState: undefined,
 
 	// changeState
 	changeState: function (stateName, trigger) {
 		UI.previousState = UI.globalState;
-		if (!stateName.startsWith('-')) {
-			UI.globalState = stateName;
-		}
+		UI.globalState = stateName;
 		return Promise.all(UI.states.filter(function (state) {
-			return state.name === stateName;
+			return stateName.indexOf(state.name) === 0;
 		}).map(function (state) {
 			return state.change();
 		}));
@@ -764,6 +762,7 @@ var Context = {
 	get: function (path, args) {
 		// force load from the server?
 		var force = ((args || {}).force || false);
+		// l(force, (((args || {}).options || {}).data || {}).kwargs);
 		var options = ((args || {}).options || {});
 		var overwrite = ((args || {}).overwrite || false);
 		if (path !== null) {
@@ -846,6 +845,7 @@ var Context = {
 			path: path,
 			kwargs: (data.kwargs || {}),
 			permissions: (data.permissions || {}),
+			query: data.query,
 			methods: (data.methods || {}),
 			limit: data.limit,
 			count: (data.count || false),
@@ -916,7 +916,7 @@ var Active = {
 				}
 			}
 
-			resolve((sub || ''));
+			resolve(sub);
 		});
 	},
 

@@ -60,3 +60,12 @@ class Member(AbstractBaseUser, PermissionsMixin, Model):
 		self.is_activated = activation_key == self.activation_key.hex if activation_key is not None else self.is_activated
 		self.save()
 		return self.is_activated
+
+class AccessToken(Model):
+	_label = 'accesstoken'
+
+	### Connections
+	member = models.ForeignKey('rowbot.Member', related_name='access_tokens')
+
+	### Properties
+	is_active = models.BooleanField(default=True)
