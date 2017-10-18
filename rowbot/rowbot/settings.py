@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from os.path import abspath, basename, dirname, join, normpath
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Build paths inside the project like this: join(BASE_DIR, ...)
+BASE_DIR = dirname(dirname(abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -70,7 +71,6 @@ ROOT_URLCONF = 'rowbot.urls'
 TEMPLATES = [
   {
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': [],
     'APP_DIRS': True,
     'OPTIONS': {
       'context_processors': [
@@ -80,6 +80,9 @@ TEMPLATES = [
         'django.contrib.messages.context_processors.messages',
       ],
     },
+    'DIRS': [
+			normpath(join(BASE_DIR, 'templates')),
+		],
   },
 ]
 
@@ -92,7 +95,7 @@ WSGI_APPLICATION = 'rowbot.wsgi.application'
 DATABASES = {
   'default': {
     'ENGINE': 'django.db.backends.sqlite3',
-    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    'NAME': join(BASE_DIR, 'db.sqlite3'),
   }
 }
 
