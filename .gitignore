@@ -1,3 +1,4 @@
+# python
 *.pyc
 
 # venv
@@ -7,3 +8,4 @@ include/
 pyvenv.cfg
 
 # pip
+pip-selfcheck.json
