@@ -40,6 +40,7 @@ class Role(Model):
 
   # Properties
   nickname = models.CharField(max_length=255)
+  is_active = models.BooleanField(default=True)
 
 
 class RoleInstance(Model):

@@ -34,12 +34,10 @@ class Team(Model):
 
   # Connections
   club = models.ForeignKey('row.Club', related_name='teams')
-  team = models.ForeignKey('row.Team', related_name='teams')
   type = models.ForeignKey('row.TeamType', related_name='instances')
-  member = models.ForeignKey('row.Member', related_name='teams')
 
   # Properties
-  nickname = models.CharField(max_length=255)
+  name = models.CharField(max_length=255)
 
 
 class TeamInstance(Model):
