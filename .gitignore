@@ -9,3 +9,6 @@ pyvenv.cfg
 
 # pip
 pip-selfcheck.json
+
+# django
+*.sqlite3
