@@ -10,52 +10,28 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 
 # Local
-from row.models import EventCategory, EventType, Event, EventInstance
-from row.serializers import EventCategorySerializer, EventTypeSerializer, EventSerializer, EventInstanceSerializer
+from row.models import EventModel, Event, EventInstance
+from row.serializers import EventModelSerializer, EventSerializer, EventInstanceSerializer
 
 # API
-class EventCategoryViewSet(viewsets.ViewSet):
-  queryset = EventCategory.objects.all()
+class EventModelViewSet(viewsets.ViewSet):
+  queryset = EventModel.objects.all()
   permission_classes = (IsAuthenticated, DjangoObjectPermissions)
 
   # GET
   def list(self, request):
-    serializer = EventCategorySerializer(self.queryset, many=True)
+    serializer = EventModelSerializer(self.queryset, many=True)
     return Response(serializer.data)
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = EventCategorySerializer(club)
+    event_model = get_object_or_404(self.queryset, pk=pk)
+    serializer = EventModelSerializer(event_model)
     return Response(serializer.data)
 
   # POST
   def create(self, request):
-    serializer = EventCategorySerializer(data=request.data)
-    if serializer.is_valid():
-      serializer.save()
-      return Response(serializer.data)
-    else:
-      return Response(serializer.errors)
-
-class EventTypeViewSet(viewsets.ViewSet):
-  queryset = EventType.objects.all()
-  permission_classes = (IsAuthenticated, DjangoObjectPermissions)
-
-  # GET
-  def list(self, request):
-    serializer = EventTypeSerializer(self.queryset, many=True)
-    return Response(serializer.data)
-
-  # GET
-  def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = EventTypeSerializer(club)
-    return Response(serializer.data)
-
-  # POST
-  def create(self, request):
-    serializer = EventTypeSerializer(data=request.data)
+    serializer = EventModelSerializer(data=request.data)
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data)
@@ -73,8 +49,8 @@ class EventViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = EventSerializer(club)
+    event = get_object_or_404(self.queryset, pk=pk)
+    serializer = EventSerializer(event)
     return Response(serializer.data)
 
   # POST
@@ -97,8 +73,8 @@ class EventInstanceViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = EventInstanceSerializer(club)
+    event_instance = get_object_or_404(self.queryset, pk=pk)
+    serializer = EventInstanceSerializer(event_instance)
     return Response(serializer.data)
 
   # POST

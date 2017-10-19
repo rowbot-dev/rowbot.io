@@ -10,52 +10,28 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 
 # Local
-from row.models import AssetCategory, AssetType, Asset, AssetInstance
-from row.serializers import AssetCategorySerializer, AssetTypeSerializer, AssetSerializer, AssetInstanceSerializer
+from row.models import AssetModel, Asset, AssetInstance
+from row.serializers import AssetModelSerializer, AssetSerializer, AssetInstanceSerializer
 
 # API
-class AssetCategoryViewSet(viewsets.ViewSet):
-  queryset = AssetCategory.objects.all()
+class AssetModelViewSet(viewsets.ViewSet):
+  queryset = AssetModel.objects.all()
   permission_classes = (IsAuthenticated, DjangoObjectPermissions)
 
   # GET
   def list(self, request):
-    serializer = AssetCategorySerializer(self.queryset, many=True)
+    serializer = AssetModelSerializer(self.queryset, many=True)
     return Response(serializer.data)
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = AssetCategorySerializer(club)
+    asset_model = get_object_or_404(self.queryset, pk=pk)
+    serializer = AssetModelSerializer(asset_model)
     return Response(serializer.data)
 
   # POST
   def create(self, request):
-    serializer = AssetCategorySerializer(data=request.data)
-    if serializer.is_valid():
-      serializer.save()
-      return Response(serializer.data)
-    else:
-      return Response(serializer.errors)
-
-class AssetTypeViewSet(viewsets.ViewSet):
-  queryset = AssetType.objects.all()
-  permission_classes = (IsAuthenticated, DjangoObjectPermissions)
-
-  # GET
-  def list(self, request):
-    serializer = AssetTypeSerializer(self.queryset, many=True)
-    return Response(serializer.data)
-
-  # GET
-  def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = AssetTypeSerializer(club)
-    return Response(serializer.data)
-
-  # POST
-  def create(self, request):
-    serializer = AssetTypeSerializer(data=request.data)
+    serializer = AssetModelSerializer(data=request.data)
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data)
@@ -73,8 +49,8 @@ class AssetViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = AssetSerializer(club)
+    asset = get_object_or_404(self.queryset, pk=pk)
+    serializer = AssetSerializer(asset)
     return Response(serializer.data)
 
   # POST
@@ -97,8 +73,8 @@ class AssetInstanceViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = AssetInstanceSerializer(club)
+    asset_instance = get_object_or_404(self.queryset, pk=pk)
+    serializer = AssetInstanceSerializer(asset_instance)
     return Response(serializer.data)
 
   # POST

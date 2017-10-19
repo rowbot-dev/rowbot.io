@@ -22,5 +22,41 @@
         },
       },
     },
+    "E0002": {
+      "datetime": "2017-10-19:10-00",
+      "comment": "Installing django-guardian and making some more backend changes before continuing. For example, invitations and advertisements need to be added.",
+      "thoughts": {
+        "P0001": {
+          "title": "A realisation",
+          "details": "django-guardian cannot give me role-based object permissions, only user-based. I have to check everything against the member. Will this slow me down?"
+        },
+        "P0002": {
+          "title": "Role heirarchy?",
+          "details": "Should you be able to place some roles over others in terms of permission?"
+        },
+        "P0003": {
+          "title": "Asset heirarchy?",
+          "details": "Nested asset relationships?"
+        },
+        "P0004": {
+          "title": "Event heirarchy?",
+          "details": "Nested event relationships?"
+        },
+      },
+      "tasks": {
+        "T0005": {
+          "title": "Configure django-guardian and permissions",
+          "detail": "Give each model that needs it appropriate permissions for use with DRF.",
+        },
+        "T0006": {
+          "title": "Add invitations and advertisements",
+          "detail": "Invitations should be from one club to another about an event_instance. Advertisements are role offers for members.",
+        },
+        "T0007": {
+          "title": "Create user view",
+          "detail": "Standard user signup view.",
+        },
+      },
+    },
   }
 }

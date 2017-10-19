@@ -9,17 +9,13 @@ from django.db import models
 from row.models.base import Model
 
 # Asset
-class AssetCategory(Model):
-  # Properties
-  reference = models.CharField(max_length=255)
-  verbose_name = models.CharField(max_length=255)
-  verbose_name_plural = models.CharField(max_length=255)
-  description = models.TextField()
+class AssetModel(Model):
+  class Meta:
+    permissions = ()
 
-
-class AssetType(Model):
   # Connections
-  category = models.ForeignKey('row.AssetCategory', related_name='types')
+  club = models.ForeignKey('row.Club', related_name='asset_models')
+  parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
   # Properties
   reference = models.CharField(max_length=255)
@@ -34,11 +30,11 @@ class Asset(Model):
 
   # Connections
   club = models.ForeignKey('row.Club', related_name='assets')
-  type = models.ForeignKey('row.AssetType', related_name='instances')
+  model = models.ForeignKey('row.AssetModel', related_name='assets')
+  parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
   # Properties
   name = models.CharField(max_length=255)
-  location = models.CharField(max_length=255)
   description = models.TextField()
 
 
@@ -49,7 +45,7 @@ class AssetInstance(Model):
   # Connections
   asset = models.ForeignKey('row.Asset', related_name='instances')
   team = models.ForeignKey('row.Team', related_name='assets')
-  in_possession_of = models.ForeignKey('row.Team', related_name='external_assets')
+  in_possession_of = models.ForeignKey('row.Team', related_name='external_assets', null=True)
 
   # Properties
   metadata = models.TextField() # replace with django.contrib.postgres.fields.JSONField

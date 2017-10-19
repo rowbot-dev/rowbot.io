@@ -10,52 +10,28 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 
 # Local
-from row.models import TeamCategory, TeamType, Team, TeamInstance, TeamRecord
-from row.serializers import TeamCategorySerializer, TeamTypeSerializer, TeamSerializer, TeamInstanceSerializer, TeamRecordSerializer
+from row.models import TeamModel, Team, TeamInstance, TeamRecord
+from row.serializers import TeamModelSerializer, TeamSerializer, TeamInstanceSerializer, TeamRecordSerializer
 
 # API
-class TeamCategoryViewSet(viewsets.ViewSet):
-  queryset = TeamCategory.objects.all()
+class TeamModelViewSet(viewsets.ViewSet):
+  queryset = TeamModel.objects.all()
   permission_classes = (IsAuthenticated, DjangoObjectPermissions)
 
   # GET
   def list(self, request):
-    serializer = TeamCategorySerializer(self.queryset, many=True)
+    serializer = TeamModelSerializer(self.queryset, many=True)
     return Response(serializer.data)
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = TeamCategorySerializer(club)
+    team_model = get_object_or_404(self.queryset, pk=pk)
+    serializer = TeamModelSerializer(team_model)
     return Response(serializer.data)
 
   # POST
   def create(self, request):
-    serializer = TeamCategorySerializer(data=request.data)
-    if serializer.is_valid():
-      serializer.save()
-      return Response(serializer.data)
-    else:
-      return Response(serializer.errors)
-
-class TeamTypeViewSet(viewsets.ViewSet):
-  queryset = TeamType.objects.all()
-  permission_classes = (IsAuthenticated, DjangoObjectPermissions)
-
-  # GET
-  def list(self, request):
-    serializer = TeamTypeSerializer(self.queryset, many=True)
-    return Response(serializer.data)
-
-  # GET
-  def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = TeamTypeSerializer(club)
-    return Response(serializer.data)
-
-  # POST
-  def create(self, request):
-    serializer = TeamTypeSerializer(data=request.data)
+    serializer = TeamModelSerializer(data=request.data)
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data)
@@ -73,8 +49,8 @@ class TeamViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = TeamSerializer(club)
+    team = get_object_or_404(self.queryset, pk=pk)
+    serializer = TeamSerializer(team)
     return Response(serializer.data)
 
   # POST
@@ -97,8 +73,8 @@ class TeamInstanceViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = TeamInstanceSerializer(club)
+    team_instance = get_object_or_404(self.queryset, pk=pk)
+    serializer = TeamInstanceSerializer(team_instance)
     return Response(serializer.data)
 
   # POST
@@ -121,8 +97,8 @@ class TeamRecordViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = TeamRecordSerializer(club)
+    team_record = get_object_or_404(self.queryset, pk=pk)
+    serializer = TeamRecordSerializer(team_record)
     return Response(serializer.data)
 
   # POST

@@ -10,52 +10,52 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 
 # Local
-from row.models import RoleCategory, RoleType, Role, RoleInstance, RoleRecord
-from row.serializers import RoleCategorySerializer, RoleTypeSerializer, RoleSerializer, RoleInstanceSerializer, RoleRecordSerializer
+from row.models import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
+from row.serializers import RoleModelSerializer, RolePermissionSerializer, RoleSerializer, RoleInstanceSerializer, RoleRecordSerializer
 
 # API
-class RoleCategoryViewSet(viewsets.ViewSet):
-  queryset = RoleCategory.objects.all()
+class RoleModelViewSet(viewsets.ViewSet):
+  queryset = RoleModel.objects.all()
   permission_classes = (IsAuthenticated, DjangoObjectPermissions)
 
   # GET
   def list(self, request):
-    serializer = RoleCategorySerializer(self.queryset, many=True)
+    serializer = RoleModelSerializer(self.queryset, many=True)
     return Response(serializer.data)
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = RoleCategorySerializer(club)
+    role_model = get_object_or_404(self.queryset, pk=pk)
+    serializer = RoleModelSerializer(role_model)
     return Response(serializer.data)
 
   # POST
   def create(self, request):
-    serializer = RoleCategorySerializer(data=request.data)
+    serializer = RoleModelSerializer(data=request.data)
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data)
     else:
       return Response(serializer.errors)
 
-class RoleTypeViewSet(viewsets.ViewSet):
-  queryset = RoleType.objects.all()
+class RolePermissionViewSet(viewsets.ViewSet):
+  queryset = RolePermission.objects.all()
   permission_classes = (IsAuthenticated, DjangoObjectPermissions)
 
   # GET
   def list(self, request):
-    serializer = RoleTypeSerializer(self.queryset, many=True)
+    serializer = RolePermissionSerializer(self.queryset, many=True)
     return Response(serializer.data)
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = RoleTypeSerializer(club)
+    role_permission = get_object_or_404(self.queryset, pk=pk)
+    serializer = RolePermissionSerializer(role_permission)
     return Response(serializer.data)
 
   # POST
   def create(self, request):
-    serializer = RoleTypeSerializer(data=request.data)
+    serializer = RolePermissionSerializer(data=request.data)
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data)
@@ -73,8 +73,8 @@ class RoleViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = RoleSerializer(club)
+    role = get_object_or_404(self.queryset, pk=pk)
+    serializer = RoleSerializer(role)
     return Response(serializer.data)
 
   # POST
@@ -97,8 +97,8 @@ class RoleInstanceViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = RoleInstanceSerializer(club)
+    role_instance = get_object_or_404(self.queryset, pk=pk)
+    serializer = RoleInstanceSerializer(role_instance)
     return Response(serializer.data)
 
   # POST
@@ -121,8 +121,8 @@ class RoleRecordViewSet(viewsets.ViewSet):
 
   # GET
   def retrieve(self, request, pk=None):
-    club = get_object_or_404(self.queryset, pk=pk)
-    serializer = RoleRecordSerializer(club)
+    role_record = get_object_or_404(self.queryset, pk=pk)
+    serializer = RoleRecordSerializer(role_record)
     return Response(serializer.data)
 
   # POST

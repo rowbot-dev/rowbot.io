@@ -9,17 +9,13 @@ from django.db import models
 from row.models.base import Model
 
 # Team
-class TeamCategory(Model):
-  # Properties
-  reference = models.CharField(max_length=255)
-  verbose_name = models.CharField(max_length=255)
-  verbose_name_plural = models.CharField(max_length=255)
-  description = models.TextField()
+class TeamModel(Model):
+  class Meta:
+    permissions = ()
 
-
-class TeamType(Model):
   # Connections
-  category = models.ForeignKey('row.TeamCategory', related_name='types')
+  club = models.ForeignKey('row.Club', related_name='team_models')
+  is_superset_of = models.ManyToManyField('self', symmetrical=False, related_name='is_subset_of')
 
   # Properties
   reference = models.CharField(max_length=255)
@@ -33,8 +29,8 @@ class Team(Model):
     permissions = ()
 
   # Connections
-  club = models.ForeignKey('row.Club', related_name='teams')
-  type = models.ForeignKey('row.TeamType', related_name='instances')
+  model = models.ForeignKey('row.TeamModel', related_name='teams')
+  is_superset_of = models.ManyToManyField('self', symmetrical=False, related_name='is_subset_of')
 
   # Properties
   name = models.CharField(max_length=255)

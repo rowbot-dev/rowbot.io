@@ -9,16 +9,13 @@ from django.db import models
 from row.models.base import Model
 
 # Event
-class EventCategory(Model):
-  # Properties
-  reference = models.CharField(max_length=255)
-  verbose_name = models.CharField(max_length=255)
-  verbose_name_plural = models.CharField(max_length=255)
+class EventModel(Model):
+  class Meta:
+    permissions = ()
 
-
-class EventType(Model):
   # Connections
-  category = models.ForeignKey('row.EventCategory', related_name='types')
+  club = models.ForeignKey('row.Club', related_name='event_models')
+  parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
   # Properties
   reference = models.CharField(max_length=255)
@@ -31,8 +28,8 @@ class Event(Model):
     permissions = ()
 
   # Connections
-  type = models.ForeignKey('row.EventType', related_name='events')
-  club = models.ForeignKey('row.Club', related_name='events')
+  model = models.ForeignKey('row.EventModel', related_name='events')
+  parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
   # Properties
   name = models.CharField(max_length=255)

@@ -9,23 +9,31 @@ from django.db import models
 from row.models.base import Model
 
 # Role
-class RoleCategory(Model):
-  # Properties
-  reference = models.CharField(max_length=255)
-  verbose_name = models.CharField(max_length=255)
-  verbose_name_plural = models.CharField(max_length=255)
-  description = models.TextField()
+class RoleModel(Model):
+  class Meta:
+    permissions = ()
 
-
-class RoleType(Model):
   # Connections
-  category = models.ForeignKey('row.RoleCategory', related_name='types')
+  club = models.ForeignKey('row.Club', related_name='role_models')
+  is_superior_to = models.ManyToManyField('self', symmetrical=False, related_name='is_subordinate_to')
 
   # Properties
   reference = models.CharField(max_length=255)
   verbose_name = models.CharField(max_length=255)
   verbose_name_plural = models.CharField(max_length=255)
   description = models.TextField()
+
+
+class RolePermission(Model):
+  class Meta:
+    permissions = ()
+
+  # Connections
+  roles = models.ManyToManyField('row.RoleModel', related_name='permissions')
+
+  # Properties
+  model_name = models.CharField(max_length=255)
+  name = models.CharField(max_length=255)
 
 
 class Role(Model):
@@ -33,10 +41,10 @@ class Role(Model):
     permissions = ()
 
   # Connections
-  club = models.ForeignKey('row.Club', related_name='roles')
-  team = models.ForeignKey('row.Team', related_name='roles')
-  type = models.ForeignKey('row.RoleType', related_name='instances')
+  team = models.ForeignKey('row.Team', related_name='roles', null=True)
+  model = models.ForeignKey('row.RoleModel', related_name='roles')
   member = models.ForeignKey('row.Member', related_name='roles')
+  is_superior_to = models.ManyToManyField('self', symmetrical=False, related_name='is_subordinate_to')
 
   # Properties
   nickname = models.CharField(max_length=255)

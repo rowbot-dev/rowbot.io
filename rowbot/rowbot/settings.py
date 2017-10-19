@@ -43,6 +43,8 @@ INSTALLED_APPS = [
   # util
   'rest_framework',
   'rest_framework.authtoken',
+  'guardian',
+  # https://django-grappelli.readthedocs.io/en/latest/quickstart.html#installation
 
   # local
   'row.apps.RowConfig',
@@ -55,6 +57,11 @@ REST_FRAMEWORK = {
     'rest_framework.authentication.TokenAuthentication',
   )
 }
+
+AUTHENTICATION_BACKENDS = (
+  'django.contrib.auth.backends.ModelBackend',
+  'guardian.backends.ObjectPermissionBackend',
+)
 
 MIDDLEWARE = [
   'django.middleware.security.SecurityMiddleware',
