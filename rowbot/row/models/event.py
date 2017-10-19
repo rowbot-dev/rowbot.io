@@ -47,4 +47,7 @@ class EventInstance(Model):
   event = models.ForeignKey('row.Event', related_name='instances')
 
   # Properties
+  start_time = models.DateTimeField(auto_now_add=False, null=True)
+  end_time = models.DateTimeField(auto_now_add=False, null=True)
+  location = models.CharField(max_length=255)
   description = models.TextField()
