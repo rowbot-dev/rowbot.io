@@ -44,7 +44,7 @@
         },
       },
       "tasks": {
-        "T0005": {
+        "X0005": {
           "title": "Configure django-guardian and permissions",
           "detail": "Give each model that needs it appropriate permissions for use with DRF.",
         },
@@ -55,6 +55,16 @@
         "T0007": {
           "title": "Create user view",
           "detail": "Standard user signup view.",
+        },
+      },
+    },
+    "E0003": {
+      "datetime": "2017-10-20:19-30",
+      "comment": "I've had a cup of tea, so I'm all fired up. The API seems solid, but the most daunting thing is the frontend. Basically, for each 'resource', as in Clubs, Members, etc, there has to be a basic CRUD interface will embellishments that make them a bit more unique. I'm not sure I can make a single interface component that will cover everything, but there are some widely applicable components, such as a new list, with scroll bar and pagination.",
+      "actions": {
+        "A0001": {
+          "title": "previous tasks",
+          "detail": "Get user signup interface working. Complete tasks T0001, T0002, T0003, T0004.",
         },
       },
     },

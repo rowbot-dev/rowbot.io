@@ -1,0 +1,45 @@
+{
+  "app": {
+    "club": {
+      "detail": {
+        "blurb"
+        "events"
+        "teams"
+        "assets"
+        "roles": {
+          "add"
+          "detail"
+        },
+      },
+      "add"
+      "list"
+    },
+    "member": {
+      "detail": {
+        "blurb"
+        "clubs"
+        "roles"
+        "teams"
+        "events"
+      },
+    },
+    "role": {
+      "detail": {
+        "blurb"
+        "records"
+      },
+      "add"
+    },
+    "team": {
+      "detail": {
+        "blurb"
+        "records"
+      },
+      "add"
+    },
+    "asset": {
+      "detail"
+      "add"
+    },
+  },
+}
