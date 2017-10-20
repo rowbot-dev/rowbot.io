@@ -12,7 +12,7 @@ def auth(request):
     logout(request)
 
     # return SPA
-    return render(request, 'row/auth.html')
+    return render(request, 'rowbot/auth.html')
 
   elif request.method == 'POST':
 
@@ -31,7 +31,7 @@ def auth(request):
 
 def app(request):
   if request.method == 'GET' and request.user.is_authenticated:
-    return render(request, 'row/account.html')
+    return render(request, 'rowbot/account.html')
   else:
     return redirect('/auth/')
 

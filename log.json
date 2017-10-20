@@ -63,8 +63,8 @@
       "comment": "I've had a cup of tea, so I'm all fired up. The API seems solid, but the most daunting thing is the frontend. Basically, for each 'resource', as in Clubs, Members, etc, there has to be a basic CRUD interface will embellishments that make them a bit more unique. I'm not sure I can make a single interface component that will cover everything, but there are some widely applicable components, such as a new list, with scroll bar and pagination.",
       "actions": {
         "A0001": {
-          "title": "previous tasks",
-          "detail": "Get user signup interface working. Complete tasks T0001, T0002, T0003, T0004.",
+          "title": "Adding assets",
+          "detail": "Need to decide what components we need and what we need to update.",
         },
       },
     },

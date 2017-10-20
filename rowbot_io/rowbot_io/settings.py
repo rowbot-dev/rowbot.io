@@ -16,6 +16,13 @@ from os.path import abspath, basename, dirname, join, normpath
 # Build paths inside the project like this: join(BASE_DIR, ...)
 BASE_DIR = dirname(dirname(abspath(__file__)))
 
+STATICFILES_DIRS = (
+  normpath(join(BASE_DIR, 'assets')),
+)
+STATICFILES_FINDERS = (
+  'django.contrib.staticfiles.finders.FileSystemFinder',
+  'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -91,7 +98,7 @@ TEMPLATES = [
   },
 ]
 
-WSGI_APPLICATION = 'rowbot.wsgi.application'
+WSGI_APPLICATION = 'rowbot_io.wsgi.application'
 
 
 # Database
