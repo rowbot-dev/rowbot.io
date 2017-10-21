@@ -11,9 +11,15 @@ var _ = {
 
   // promises
   p: function (arg) {
-    return new Promise(function (resolve, reject) {
-      resolve(_.is.f(arg) ? arg() : arg);
-    });
+    if (arg !== undefined && arg.then !== undefined) {
+      return arg.then(function (final) {
+        return final;
+      });
+    } else {
+      return new Promise(function (resolve, reject) {
+        resolve(_.is.f(arg) ? arg() : arg);
+      });
+    }
   },
   all: function (list) {
     return Promise.all((list || []));
@@ -24,6 +30,15 @@ var _ = {
       return fn(key, obj);
     }));
   },
+  ordered: function (fnList, input) {
+    fnList = (fnList || []);
+    return fnList.reduce(function (whole, part) {
+      return whole.then(function (value) {
+        return part(value);
+      });
+    }, _.p(input));
+  },
+
 
   // console
   l: console.log,
