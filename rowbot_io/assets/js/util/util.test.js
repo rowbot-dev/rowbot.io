@@ -24,13 +24,13 @@ var _ = {
   all: function (list) {
     return Promise.all((list || []));
   },
-  map: function (object, fn) {
+  pmap: function (object, fn) {
     return _.all(Object.keys(object).map(function (key) {
       let obj = object[key];
       return fn(key, obj);
     }));
   },
-  ordered: function (fnList, input) {
+  _all: function (fnList, input) {
     fnList = (fnList || []);
     return fnList.reduce(function (whole, part) {
       return whole.then(function (value) {
@@ -38,7 +38,39 @@ var _ = {
       });
     }, _.p(input));
   },
+  _pmap: function (object, fn) {
+    return _._all(Object.keys(object).map(function (key) {
+      return function () {
+        let obj = object[key];
+        return fn(key, obj);
+      }
+    }));
+  },
 
+  // objects
+  merge: function (...objects) {
+    return objects.reduce(function (whole, part) {
+      part = (part || {});
+      Object.keys(part).forEach(function (key) {
+        if (key in whole) {
+          if (_.is.object.all(whole[key]) && _.is.object.all(whole[key])) {
+            whole[key] = _.merge(whole[key], part[key]);
+          } else {
+            whole[key] = part[key];
+          }
+        } else {
+          whole[key] = part[key];
+        }
+      });
+      return whole;
+    }, {});
+  },
+  map: function (object, fn) {
+    return Object.keys(object).map(function (key) {
+      let obj = object[key];
+      return fn(key, obj);
+    });
+  },
 
   // console
   l: console.log,
@@ -48,6 +80,23 @@ var _ = {
     f: function (obj) {
       return !!(obj && obj.constructor && obj.call && obj.apply);
     },
+    object: {
+      empty: function (e) {
+        for (var t in e) {
+          return false;
+        }
+        return true;
+      },
+      all: function (obj) {
+        return obj !== null && typeof obj === 'object' && !_.is.array(obj);
+      },
+    },
+    array: function (obj) {
+      return Object.prototype.toString.call(obj) === '[object Array]';
+    },
+    number: function (n) {
+      return typeof n === 'number' && (n % 1) === 0;
+    },
   },
 
   // DOM
@@ -55,6 +104,72 @@ var _ = {
     get: function (_id) {
       return document.getElementById(_id);
     },
+  },
+  css: {
+    create: function (selector, style) {
+      if (!document.styleSheets) return;
+      if (document.getElementsByTagName('head').length == 0) return;
+
+      var styleSheet, mediaType;
+
+      if (document.styleSheets.length > 0) {
+        for (var i = 0, l = document.styleSheets.length; i < l; i++) {
+          if (document.styleSheets[i].disabled)
+          continue;
+          var media = document.styleSheets[i].media;
+          mediaType = typeof media;
+
+          if (mediaType === 'string') {
+            if (media === '' || (media.indexOf('screen') !== -1)) {
+              styleSheet = document.styleSheets[i];
+            }
+          }
+          else if (mediaType=='object') {
+            if (media.mediaText === '' || (media.mediaText.indexOf('screen') !== -1)) {
+              styleSheet = document.styleSheets[i];
+            }
+          }
+
+          if (typeof styleSheet !== 'undefined')
+          break;
+        }
+      }
+
+      if (typeof styleSheet === 'undefined') {
+        var styleSheetElement = document.createElement('style');
+        styleSheetElement.type = 'text/css';
+        document.getElementsByTagName('head')[0].appendChild(styleSheetElement);
+
+        for (i = 0; i < document.styleSheets.length; i++) {
+          if (document.styleSheets[i].disabled) {
+            continue;
+          }
+          styleSheet = document.styleSheets[i];
+        }
+
+        mediaType = typeof styleSheet.media;
+      }
+
+      if (mediaType === 'string') {
+        for (var i = 0, l = styleSheet.rules.length; i < l; i++) {
+          if(styleSheet.rules[i].selectorText && styleSheet.rules[i].selectorText.toLowerCase()==selector.toLowerCase()) {
+            styleSheet.rules[i].style.cssText = style;
+            return;
+          }
+        }
+        styleSheet.addRule(selector,style);
+      }
+      else if (mediaType === 'object') {
+        var styleSheetLength = (styleSheet.cssRules) ? styleSheet.cssRules.length : 0;
+        for (var i = 0; i < styleSheetLength; i++) {
+          if (styleSheet.cssRules[i].selectorText && styleSheet.cssRules[i].selectorText.toLowerCase() == selector.toLowerCase()) {
+            styleSheet.cssRules[i].style.cssText = style;
+            return;
+          }
+        }
+        styleSheet.insertRule(selector + '{' + style + '}', styleSheetLength);
+      }
+    }
   },
 
   // requests

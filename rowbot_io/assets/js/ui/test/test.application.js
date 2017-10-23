@@ -1,9 +1,54 @@
 var Test = (Test || {});
 Test.application = function (args) {
   return ui._component('test', {
+    after: undefined,
+    root: undefined,
     children: [
-      ui._component('1', {
+      ui._component('main', {
+        style: {
+          'height': '100px',
+          'width': '100px',
+          'border': '1px solid black',
+          'div': {
+            'height': '100%',
+          },
+        },
+        states: [
+          ui._state('main', {
+            children: [
+              ui._state('new', {
+                children: [
 
+                ],
+              }),
+            ],
+          }),
+        ],
+        children: [
+          ui._component('list', {
+            style: {
+              'height': '90%',
+            },
+            bindings: {
+              'mouseover': function (_this, event) {
+                _.l(_this.id, event);
+              },
+            },
+            children: [
+              ui._component('new', {
+                style: {
+                  'height': '80%',
+                },
+              }),
+            ],
+          }),
+          ui._component('3', {
+
+          }),
+          ui._component('4', {
+            before: '3',
+          }),
+        ],
       }),
       ui._component('2', {
 
@@ -13,36 +58,3 @@ Test.application = function (args) {
     return _test;
   });
 }
-//
-// var AuthApplication = function (args) {
-//   return UI.createComponent('auth', {
-//     name: 'auth',
-//     template: UI.template('div', 'ie'),
-//     appearance: {
-//       style: {
-//         'height': '100%',
-//       },
-//     },
-//     children: [
-//       // header
-//
-//
-//       // login form
-//       AuthInterfaces.login(),
-//
-//       // signup form
-//       AuthInterfaces.signup(),
-//
-//       // activation form
-//       AuthInterfaces.activation(),
-//     ],
-//   }).then(function (base) {
-//
-//     // complete promises
-//     return Promise.all([
-//
-//     ]).then(function () {
-//       return base;
-//     });
-//   });
-// }
