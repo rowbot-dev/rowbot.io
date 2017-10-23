@@ -15,8 +15,27 @@ Test.application = function (args) {
         },
         states: [
           ui._state('main', {
+            style: {
+              'left': '100px',
+            },
+            classes: ['main'],
+            fn: {
+              before: function (_this) {
+                _.l('0');
+              },
+            },
             children: [
               ui._state('new', {
+                style: {
+                  'left': '-100px',
+                  'top': '100px',
+                },
+                classes: ['new'],
+                fn: {
+                  before: function (_this) {
+                    _.l('1');
+                  },
+                },
                 children: [
 
                 ],
@@ -30,8 +49,8 @@ Test.application = function (args) {
               'height': '90%',
             },
             bindings: {
-              'mouseover': function (_this, event) {
-                _.l(_this.id, event);
+              'mousemove': function (_this, event) {
+                _.l(_this, event.target.id);
               },
             },
             children: [
@@ -55,6 +74,17 @@ Test.application = function (args) {
       }),
     ],
   }).then(function (_test) {
+    _test.get('main.list.new').setStates([
+      ui._state('main', {
+        children: [
+          ui._state('new', {
+            children: [
+
+            ],
+          }),
+        ],
+      }),
+    ]);
     return _test;
   });
 }

@@ -53,13 +53,15 @@ var _ = {
       part = (part || {});
       Object.keys(part).forEach(function (key) {
         if (key in whole) {
-          if (_.is.object.all(whole[key]) && _.is.object.all(whole[key])) {
-            whole[key] = _.merge(whole[key], part[key]);
+          if (_.is.object.all(whole[key]) && _.is.object.all(part[key])) {
+            whole[key] = _.merge(whole[key], part[key]); // objects go deeper again recursively
+          } else if (_.is.array(whole[key]) && _.is.array(part[key])) {
+            whole[key] = [...new Set([...whole[key], ...part[key]])]; // arrays union
           } else {
-            whole[key] = part[key];
+            whole[key] = part[key]; // strings and "other" replace
           }
         } else {
-          whole[key] = part[key];
+          whole[key] = part[key]; // add if it does not exist
         }
       });
       return whole;

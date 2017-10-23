@@ -59,14 +59,19 @@ var UI = function () {
         return _.pmap(_this._.style, function (key, _style) {
 
           // TODO: allow nested styles for active, etc.
-          key = `${key ? '' : _this._.tag}#${_this.id} ${key}`.trim();
+
 
           // This sets up a new css rule with a string reduced from the style object
-          return _.css.create(key, _.map(_style, function (_key, _value) {
-            return `${_key}: ${_value};`;
-          }).reduce(function (whole, part) {
-            return `${whole}\n${part}`;
-          }, '').trim());
+          if (key) {
+            key = `${_this._.tag}#${_this.id} ${key}`;
+            return _.css.create(key, _.map(_style, function (_key, _value) {
+              return `${_key}: ${_value};`;
+            }).reduce(function (whole, part) {
+              return `${whole}\n${part}`;
+            }, '').trim());
+          } else {
+            // animate with duration
+          }
         });
       }
     },
@@ -109,7 +114,7 @@ var UI = function () {
         var element = _this.element();
         return _.pmap(_this._.bindings, function (key, binding) {
           return _.p(function () {
-            document.addEventListener(key, function (event) {
+            element.addEventListener(key, function (event) {
               if (event.target.id == _this.id) {
                 return binding(_this, event);
               }
@@ -273,6 +278,7 @@ var UI = function () {
   this.State.prototype = {
     init: function (args) {
       let _this = this;
+      _this._.fn = args.fn;
       return _.all([
         _this.setStyle(args.style),
         _this.setClasses(args.classes),
@@ -348,7 +354,9 @@ var UI = function () {
       let _this = this;
       _this._.component = component;
       _this._.registered = true;
-      return _this.setChildren();
+      return ui.states.register(_this).then(function () {
+        return _this.setChildren();
+      });
     },
 
     // tree
@@ -370,6 +378,27 @@ var UI = function () {
       var child = this.child(name);
       return newPath && newPath.length && child !== undefined ? child.get(newPath) : child;
     },
+
+    // activate
+    ancestry: function () {
+      var _this = this;
+      var data = {
+        style: _this._.style,
+        classes: _this._.classes,
+        properties: _this._.properties,
+        fn: _this._.fn,
+      }
+      return _this._.parent !== undefined ? _.merge(_this._.parent.ancestry(), data) : data;
+    },
+    call: function () {
+      var _this = this;
+      return _.p(function () {
+        var data = _this.ancestry();
+
+        // concatenate styles and classes from parent chain
+        // execute before and after functions
+      });
+    },
   }
   this._state = function (name, args) {
     var _state = new this.State(name);
@@ -378,22 +407,58 @@ var UI = function () {
 
   // state buffer
   this.StateBuffer = function () {
+    this.active = undefined;
     this.buffer = {};
     this.get = function (path) {
-
+      var _this = this;
+      return _.p(function () {
+        var path_array = path.split('.');
+        sub = _this.buffer;
+        var i;
+        for (i=0; i<path_array.length; i++) {
+          if (path_array[i] in sub) {
+            sub = sub[path_array[i]];
+          } else {
+            break;
+          }
+        }
+        return sub['_'];
+      });
+    }
+    this.call = function (path) {
+      this.active = path;
+      return this.get(path).then(function (states) {
+        return _.all(states.map(function (state) {
+          return state.call();
+        }));
+      });
     }
     this.set = function (path, state) {
+      var _this = this;
+      return _.p(function () {
+        var path_array = path.split('.');
+        sub = _this.buffer;
+        var i;
+        for (i=0; i<path_array.length; i++) {
+          if (!(path_array[i] in sub)) {
+            sub[path_array[i]] = {_: []};
+          }
+          sub = sub[path_array[i]];
 
+          if (i+1 === path_array.length) {
+            sub['_'].push(state);
+          }
+        }
+      });
+    }
+    this.register = function (state) {
+      return this.set(state.path(), state);
     }
   }
   this.states = new this.StateBuffer(),
-  // TODO: actually call a state
   // TODO: have a state apply stuff
   // TODO: state maps
-  // TODO: call nested states? How to apply? Vary animation time?
   // TODO: Animation method, look up jQuery method
-
-  // keyboard bindings
 
   // actions
   this.Action = function () {

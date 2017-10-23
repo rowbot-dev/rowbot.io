@@ -11,7 +11,7 @@ Test.application({
   return _.all([
 
   ]).then(function () {
-    // return ui.state();
+    return ui.states.call('main.new');
   });
 }).catch(function (error) {
   console.log(error);
