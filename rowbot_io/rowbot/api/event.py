@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 
 # Local
+from rowbot.api.base import BaseModelViewSet
 from rowbot.models import EventModel, Event, EventInstance
 from rowbot.serializers import EventModelSerializer, EventSerializer, EventInstanceSerializer
 

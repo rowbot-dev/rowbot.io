@@ -12,38 +12,21 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 
 # Local
+from rowbot.api.base import BaseModelViewSet
 from rowbot.models import Member
 from rowbot.serializers import MemberSerializer
 
 # API
-class MemberViewSet(viewsets.ViewSet):
+class MemberViewSet(BaseModelViewSet):
   queryset = Member.objects.all()
   permission_classes = (IsAuthenticated,)
+  serializer = MemberSerializer
+  request_schema = {
+
+  }
 
   def get_queryset(self):
     if self.request.user.is_staff:
       return Member.objects.all()
     else:
       return Member.objects.filter(id=self.request.user.id)
-
-  # GET
-  def list(self, request):
-    queryset = self.get_queryset()
-    serializer = MemberSerializer(queryset, many=True)
-    return Response(serializer.data)
-
-  # GET
-  def retrieve(self, request, pk=None):
-    queryset = self.get_queryset()
-    member = get_object_or_404(queryset, pk=pk)
-    serializer = MemberSerializer(member)
-    return Response(serializer.data)
-
-  # POST
-  def create(self, request):
-    serializer = MemberSerializer(data=request.data)
-    if serializer.is_valid():
-      serializer.save()
-      return Response(serializer.data)
-    else:
-      return Response(serializer.errors)

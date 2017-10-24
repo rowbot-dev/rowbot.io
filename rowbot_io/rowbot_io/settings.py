@@ -16,6 +16,7 @@ from os.path import abspath, basename, dirname, join, normpath
 # Build paths inside the project like this: join(BASE_DIR, ...)
 BASE_DIR = dirname(dirname(abspath(__file__)))
 
+APPEND_SLASH = False
 STATICFILES_DIRS = (
   normpath(join(BASE_DIR, 'assets')),
 )
