@@ -40,9 +40,10 @@ var UI = function () {
     },
 
     // pre-render or post-render
-    setStyle: function (style) {
+    setStyle: function (style, duration) {
       var _this = this;
       style = (style || {});
+      duration = (duration || 0);
       style = _.merge(style, {'': {}}); // make buffer for self style
       _.map(style, function (key, value) {
         if (!_.is.object.all(value)) {
@@ -52,25 +53,31 @@ var UI = function () {
       });
 
       // update style dictionary
+      // var _original = _this._.style[''];
       _this._.style = _.merge(_this._.style, style);
 
       // add styles to DOM if rendered
       if (_this._.is.rendered) {
+        var element = _this.element();
         return _.pmap(_this._.style, function (key, _style) {
-
           // TODO: allow nested styles for active, etc.
-
-
           // This sets up a new css rule with a string reduced from the style object
           if (key) {
-            key = `${_this._.tag}#${_this.id} ${key}`;
-            return _.css.create(key, _.map(_style, function (_key, _value) {
+            return _.css.create(`${_this._.tag}#${_this.id} ${key}`, _.map(_style, function (_key, _value) {
               return `${_key}: ${_value};`;
             }).reduce(function (whole, part) {
               return `${whole}\n${part}`;
             }, '').trim());
           } else {
-            // animate with duration
+            if (duration) {
+              return $(element).animate(_this._.style[''], {duration: duration}).promise();
+            } else {
+              return _.pmap(_style, function (key, value) {
+                return _.p(function () {
+                  element.style[key] = value;
+                });
+              });
+            }
           }
         });
       }
@@ -279,6 +286,7 @@ var UI = function () {
     init: function (args) {
       let _this = this;
       _this._.fn = args.fn;
+      _this._.duration = args.duration;
       return _.all([
         _this.setStyle(args.style),
         _this.setClasses(args.classes),
@@ -387,16 +395,33 @@ var UI = function () {
         classes: _this._.classes,
         properties: _this._.properties,
         fn: _this._.fn,
+        duration: _this._.duration,
       }
       return _this._.parent !== undefined ? _.merge(_this._.parent.ancestry(), data) : data;
     },
-    call: function () {
+    call: function (durationOverride) {
       var _this = this;
       return _.p(function () {
-        var data = _this.ancestry();
+        var _data = _this.ancestry();
+        var _component = _this._.component;
+        var _before = ((_data.fn || {}).before || _.p);
+        var _after = ((_data.fn || {}).after || _.p);
+        var _style = (_data.style || {});
+        var _classes = (_data.classes || {});
+        var _properties = (_data.properties || {});
+        var _duration = durationOverride !== undefined ? durationOverride : (_data.duration || 300);
 
         // concatenate styles and classes from parent chain
         // execute before and after functions
+        return _before(_component).then(function (_result) {
+          return _.all([
+            _component.setStyle(_style, _duration),
+            _component.setClasses(_classes),
+            _component.setProperties(_properties),
+          ]);
+        }).then(function () {
+          return _after(_component);
+        });
       });
     },
   }
@@ -407,6 +432,7 @@ var UI = function () {
 
   // state buffer
   this.StateBuffer = function () {
+    // TODO: add state map maybe
     this.active = undefined;
     this.buffer = {};
     this.get = function (path) {
@@ -425,11 +451,11 @@ var UI = function () {
         return sub['_'];
       });
     }
-    this.call = function (path) {
+    this.call = function (path, durationOverride) {
       this.active = path;
       return this.get(path).then(function (states) {
         return _.all(states.map(function (state) {
-          return state.call();
+          return state.call(durationOverride);
         }));
       });
     }
@@ -456,9 +482,6 @@ var UI = function () {
     }
   }
   this.states = new this.StateBuffer(),
-  // TODO: have a state apply stuff
-  // TODO: state maps
-  // TODO: Animation method, look up jQuery method
 
   // actions
   this.Action = function () {
@@ -467,11 +490,17 @@ var UI = function () {
 
   // context
   this.Context = function () {
+    this.buffer = {};
+    this.active = {};
 
-  }
-  this.Context.prototype = {
+    this.Model = function () {
 
+    }
+    this.model = function (url) {
+
+    }
   }
+  this.context = new this.Context();
 }
 
 var ui = new UI();

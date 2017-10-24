@@ -1,17 +1,11 @@
-Test.application({
-  interface: {
-    size: 50,
-    margin: 10,
-    corner: 5,
-  },
-}).then (function (app) {
+Test.application().then (function (app) {
   // render
   return app.render('hook');
 }).then(function () {
   return _.all([
 
   ]).then(function () {
-    return ui.states.call('main.new');
+    // return ui.states.call('main.new');
   });
 }).catch(function (error) {
   console.log(error);

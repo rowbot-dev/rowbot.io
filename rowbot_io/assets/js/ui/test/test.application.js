@@ -1,11 +1,19 @@
 var Test = (Test || {});
 Test.application = function (args) {
   return ui._component('test', {
-    after: undefined,
-    root: undefined,
+    style: {
+      'div.main': {
+        'background-color': '#cc0',
+      },
+      'div.new': {
+        // 'background-color': '#cc8',
+      },
+    },
     children: [
       ui._component('main', {
         style: {
+          'position': 'relative',
+          'float': 'left',
           'height': '100px',
           'width': '100px',
           'border': '1px solid black',
@@ -22,18 +30,24 @@ Test.application = function (args) {
             fn: {
               before: function (_this) {
                 _.l('0');
+                return _.p();
               },
             },
             children: [
               ui._state('new', {
                 style: {
-                  'left': '-100px',
+                  'left': '100px',
                   'top': '100px',
                 },
                 classes: ['new'],
                 fn: {
-                  before: function (_this) {
-                    _.l('1');
+                  // before: function (_this) {
+                  //   _.l('1');
+                  //   return _.p();
+                  // },
+                  after: function (_this) {
+                    _.l('2');
+                    return _.p();
                   },
                 },
                 children: [
@@ -74,17 +88,6 @@ Test.application = function (args) {
       }),
     ],
   }).then(function (_test) {
-    _test.get('main.list.new').setStates([
-      ui._state('main', {
-        children: [
-          ui._state('new', {
-            children: [
-
-            ],
-          }),
-        ],
-      }),
-    ]);
     return _test;
   });
 }
