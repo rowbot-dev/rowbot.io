@@ -19,20 +19,19 @@ from rowbot.serializers import AssetModelSerializer, AssetSerializer, AssetInsta
 class AssetModelViewSet(BaseModelViewSet):
   queryset = AssetModel.objects.all()
   serializer = AssetModelSerializer
-  request_schema = {
 
-  }
+  @list_route(methods=['GET'])
+  def change_password(self, request):
+    return Response({})
+
+  @detail_route(methods=['GET'])
+  def hmm(self, request, pk=None):
+    return Response({})
 
 class AssetViewSet(BaseModelViewSet):
   queryset = Asset.objects.all()
   serializer = AssetSerializer
-  request_schema = {
 
-  }
-
-class AssetInstanceViewSet(viewsets.ViewSet):
+class AssetInstanceViewSet(BaseModelViewSet):
   queryset = AssetInstance.objects.all()
   serializer = AssetInstanceSerializer
-  request_schema = {
-
-  }

@@ -3,10 +3,10 @@
 from django.conf.urls import url
 
 # DRF
-from rest_framework import routers
 from rest_framework.authtoken import views
 
 # Local
+from rowbot.api.router import SchemaRouter
 from rowbot.api.member import MemberViewSet
 from rowbot.api.club import ClubViewSet
 from rowbot.api.event import EventModelViewSet, EventViewSet, EventInstanceViewSet
@@ -15,7 +15,7 @@ from rowbot.api.role import RoleModelViewSet, RolePermissionViewSet, RoleViewSet
 from rowbot.api.asset import AssetModelViewSet, AssetViewSet, AssetInstanceViewSet
 
 # Routes
-router = routers.SimpleRouter()
+router = SchemaRouter()
 
 # member
 router.register(r'members', MemberViewSet)

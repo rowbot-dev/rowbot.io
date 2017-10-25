@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
+from rest_framework.decorators import detail_route, list_route
 
 # Local
 from rowbot.api.base import BaseModelViewSet
@@ -21,9 +22,6 @@ class MemberViewSet(BaseModelViewSet):
   queryset = Member.objects.all()
   permission_classes = (IsAuthenticated,)
   serializer = MemberSerializer
-  request_schema = {
-
-  }
 
   def get_queryset(self):
     if self.request.user.is_staff:

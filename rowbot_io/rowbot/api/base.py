@@ -13,22 +13,13 @@ from rest_framework.decorators import detail_route, list_route
 # API
 class BaseModelViewSet(viewsets.ViewSet):
   permission_classes = (IsAuthenticated, DjangoObjectPermissions)
-  request_schema = {}
 
   def get_queryset(self):
     return self.queryset
 
   # GET
-  @list_route(methods=['get'])
-  def schema(self, request):
-    self.request_schema.update({
-      # defaults
-    })
-    return Response(self.request_schema)
-
-  # GET
   def list(self, request):
-    serializer = self.serializer(self.get_queryset(), many=True)
+    serializer = self.serializer(self.get_queryset().filter(**self.request.query_params.dict()), many=True)
     return Response(serializer.data)
 
   # GET
@@ -40,6 +31,24 @@ class BaseModelViewSet(viewsets.ViewSet):
   # POST
   def create(self, request):
     serializer = self.serializer(data=request.data)
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data)
+    else:
+      return Response(serializer.errors)
+
+  # PUT
+  def update(self, request, pk=None):
+    serializer = self.serializer(data=request.data)
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data)
+    else:
+      return Response(serializer.errors)
+
+  # PATCH
+  def partial_update(self, request, pk=None):
+    serializer = self.serializer(data=request.data, partial=True)
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data)

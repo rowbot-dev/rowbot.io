@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
+from rest_framework.decorators import detail_route, list_route
 
 # Local
 from rowbot.api.base import BaseModelViewSet
@@ -18,27 +19,15 @@ from rowbot.serializers import TeamModelSerializer, TeamSerializer, TeamInstance
 class TeamModelViewSet(BaseModelViewSet):
   queryset = TeamModel.objects.all()
   serializer = TeamModelSerializer
-  request_schema = {
-
-  }
 
 class TeamViewSet(BaseModelViewSet):
   queryset = Team.objects.all()
   serializer = TeamSerializer
-  request_schema = {
-
-  }
 
 class TeamInstanceViewSet(BaseModelViewSet):
   queryset = TeamInstance.objects.all()
   serializer = TeamInstanceSerializer
-  request_schema = {
-
-  }
 
 class TeamRecordViewSet(BaseModelViewSet):
   queryset = TeamRecord.objects.all()
   serializer = TeamRecordSerializer
-  request_schema = {
-
-  }

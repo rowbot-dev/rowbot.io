@@ -175,10 +175,16 @@ var _ = {
   },
 
   // requests
-  request: function (url, data) {
+  csrf: document.getElementsByName('csrfmiddlewaretoken')[0].getAttribute('value'),
+  request: function (url, type, data) {
+    type = (type || 'GET');
     return new Promise(function (resolve, reject) {
       var http = new XMLHttpRequest();
-      http.open('POST', url, true);
+      http.open(type, url, true);
+      if (_.token !== undefined) {
+        http.setRequestHeader('Authorization', `Token ${_.token}`);
+      }
+      http.setRequestHeader('X-CSRFToken', _.csrf);
       http.setRequestHeader('Content-Type', 'application/json');
       http.onreadystatechange = function () {
         if (http.readyState == 4 && http.status == 200) {

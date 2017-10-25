@@ -489,18 +489,115 @@ var UI = function () {
   }
 
   // context
-  this.Context = function () {
+  this.API = function () {
+    var _api = this;
     this.buffer = {};
     this.active = {};
 
-    this.Model = function () {
+    this.setup = function (args) {
+      args = (args || {});
+      this.urls = {
+        base: (args.base || '/api/'),
+        schema: (args.schema || 'schema/'),
+        token: (args.token || 'token/'),
+      }
 
+      return _.request(this.urls.base + this.urls.schema).then(function (schema) {
+        return _.pmap(schema, function (_name, _args) {
+          _args['name'] = _name;
+          let _model = _api.model(_args);
+        });
+      });
     }
-    this.model = function (url) {
+    this.getToken = function (username, password) {
+      return _.request(this.urls.base + this.urls.token, 'POST', {username: username, password: password}).then(function (result) {
+        return _.p(function () {
+          _.token = result.token;
+        });
+      });
+    }
 
+    this.Model = function (args) {
+      this.name = args.name;
+      this.prefix = args.prefix;
+      this.basename = args.basename;
+      this.fields = args.fields;
+      var _model = this;
+
+      // model instance
+      this.Instance = function (_args) {
+
+      }
+      this.Instance.prototype = {
+        save: function () {
+
+        },
+        get: function () {
+
+        },
+      }
+      this.instance = function (_args) {
+        return new this.Instance(_args);
+      }
+      this.objects = {
+        get: function (args) {
+
+        },
+        all: function (args) {
+          _api.buffer[_model.name] = (_api.buffer[_model.name] || {});
+          args = (args || {});
+          var force = (args.force || false);
+          if (force) {
+            return _.request(`${_api.urls.base}${_model.prefix}/`, 'GET').then(function (result) {
+              result.map(function (item) {
+                _api.buffer[_model.name][item._id] = item;
+                return item;
+              });
+            }).then(function () {
+              return _.p(_api.buffer[_model.name]);
+            });
+          } else {
+            return _.p(_api.buffer[_model.name]);
+          }
+        },
+        filter: function (args) {
+
+        },
+      }
+    }
+    this.models = {};
+    this.model = function (args) {
+      var _api = this;
+      var _model = new this.Model(args);
+
+      // Custom routes. Maybe do later if needed.
+      _.map(args.routes, function (_name, _route) {
+        _name = _name.replace(`${_model.basename}-`, '').split('-').join('_');
+        if (!['list', 'detail'].contains(_name)) {
+          // remove prefix from route
+          _route = _route.replace(`${_model.prefix}/`, '').replace('^', '').replace('$', '').split('/');
+          if (_route.length == 2) {
+            // list_route
+            let _url = _route[0];
+            _model.objects[_name] = function (data) {
+
+            }
+          } else if (_route.length == 4) {
+            // detail_route
+            let _url = _route[2];
+            _model.Instance.prototype[_name] = function (data) {
+
+            }
+          }
+
+        }
+      });
+
+      // Add to list of models
+      _api.models[args.name] = _model;
     }
   }
-  this.context = new this.Context();
+  this.api = new this.API();
 }
 
 var ui = new UI();

@@ -23,10 +23,11 @@ class AssetModelSerializer(serializers.ModelSerializer):
   club = serializers.PrimaryKeyRelatedField(read_only=True)
   parts = serializers.PrimaryKeyRelatedField(queryset=AssetModel.objects.all())
   is_part_of = serializers.PrimaryKeyRelatedField(queryset=AssetModel.objects.all())
+  assets = serializers.PrimaryKeyRelatedField(read_only=True)
 
   class Meta:
     model = AssetModel
-    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'parts', 'is_part_of')
+    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'parts', 'is_part_of', 'assets')
 
 class AssetInstanceSerializer(serializers.ModelSerializer):
   asset = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -53,10 +54,11 @@ class RoleModelSerializer(serializers.ModelSerializer):
   is_superior_to = serializers.PrimaryKeyRelatedField(queryset=RoleModel.objects.all())
   is_subordinate_to = serializers.PrimaryKeyRelatedField(queryset=RoleModel.objects.all())
   permissions = serializers.PrimaryKeyRelatedField(queryset=RolePermission.objects.all())
+  roles = serializers.PrimaryKeyRelatedField(read_only=True)
 
   class Meta:
     model = RoleModel
-    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superior_to', 'is_subordinate_to')
+    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superior_to', 'is_subordinate_to', 'permissions', 'roles')
 
 class RolePermissionSerializer(serializers.ModelSerializer):
   models = serializers.PrimaryKeyRelatedField(queryset=RoleModel.objects.all())
@@ -92,17 +94,18 @@ class RoleSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Role
-    fields = ('_id', 'date_created', 'nickname', 'club', 'team', 'type', 'member', 'is_superior_to', 'is_subordinate_to', 'instances', 'records')
+    fields = ('_id', 'date_created', 'nickname', 'team', 'model', 'member', 'is_superior_to', 'is_subordinate_to', 'instances', 'records')
 
 # Team
 class TeamModelSerializer(serializers.ModelSerializer):
   club = serializers.PrimaryKeyRelatedField(read_only=True)
   is_superset_of = serializers.PrimaryKeyRelatedField(queryset=TeamModel.objects.all())
   is_subset_of = serializers.PrimaryKeyRelatedField(queryset=TeamModel.objects.all())
+  teams = serializers.PrimaryKeyRelatedField(read_only=True)
 
   class Meta:
     model = TeamModel
-    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superset_of', 'is_subset_of')
+    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superset_of', 'is_subset_of', 'teams')
 
 class TeamInstanceSerializer(serializers.ModelSerializer):
   team = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -138,10 +141,11 @@ class EventModelSerializer(serializers.ModelSerializer):
   club = serializers.PrimaryKeyRelatedField(read_only=True)
   parts = serializers.PrimaryKeyRelatedField(queryset=EventModel.objects.all())
   is_part_of = serializers.PrimaryKeyRelatedField(queryset=EventModel.objects.all())
+  events = serializers.PrimaryKeyRelatedField(read_only=True)
 
   class Meta:
     model = EventModel
-    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'parts', 'is_part_of')
+    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'club', 'parts', 'is_part_of', 'events')
 
 class EventInstanceSerializer(serializers.ModelSerializer):
   event = serializers.PrimaryKeyRelatedField(read_only=True)
