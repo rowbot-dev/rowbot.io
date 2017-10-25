@@ -558,11 +558,25 @@ var UI = function () {
           return _model.objects.filter(args).then(function (results) {
             return results.filter(function (item) {
               return item._id === _id;
-            })[0];
+            });
+          }).then(function (results) {
+            return results.length ? results[0] : undefined;
           });
         },
         method: function (_method, type, data) {
           return _.request(`${_api.urls.base}${_model.prefix}/${(_method || '')}/`, type, data);
+        },
+        create: function (data) {
+          return _.request(`${_api.urls.base}${_model.prefix}/`, 'POST', data).then(function (item) {
+            return _.p(function () {
+              if (_id in item) {
+                _api.buffer[_model.name][item._id] = item;
+                return _model.instance(item);
+              } else {
+                return undefined;
+              }
+            });
+          });
         },
         all: function (force) {
           return _model.objects.filter({force: force});
