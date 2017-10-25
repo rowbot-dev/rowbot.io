@@ -37,15 +37,6 @@ class BaseModelViewSet(viewsets.ViewSet):
     else:
       return Response(serializer.errors)
 
-  # PUT
-  def update(self, request, pk=None):
-    serializer = self.serializer(data=request.data)
-    if serializer.is_valid():
-      serializer.save()
-      return Response(serializer.data)
-    else:
-      return Response(serializer.errors)
-
   # PATCH
   def partial_update(self, request, pk=None):
     serializer = self.serializer(data=request.data, partial=True)

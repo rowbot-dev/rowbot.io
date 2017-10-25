@@ -180,6 +180,7 @@ var _ = {
     type = (type || 'GET');
     return new Promise(function (resolve, reject) {
       var http = new XMLHttpRequest();
+      url = type === 'GET' ? `${url}?${_.params(data)}` : url;
       http.open(type, url, true);
       if (_.token !== undefined) {
         http.setRequestHeader('Authorization', `Token ${_.token}`);
@@ -193,5 +194,13 @@ var _ = {
       }
       http.send(JSON.stringify(data));
     });
+  },
+  params: function (obj) {
+    obj = (obj || {});
+    return _.map(obj, function (key, value) {
+      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+    }).reduce(function (whole, part) {
+      return whole ? `${whole}&${part}` : part;
+    }, '');
   },
 }

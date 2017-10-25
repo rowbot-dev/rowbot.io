@@ -28,3 +28,14 @@ class MemberViewSet(BaseModelViewSet):
       return Member.objects.all()
     else:
       return Member.objects.filter(id=self.request.user.id)
+
+  @detail_route(methods=['POST'])
+  def change_password(self, request, pk=None):
+    changed = False
+    if pk is not None and (request.user._id == pk or request.user.is_staff):
+      password = request.data['password']
+      user = get_object_or_404(self.get_queryset(), pk=pk)
+      user.set_password(password)
+      changed = True
+      user.save()
+    return Response({'changed': changed})

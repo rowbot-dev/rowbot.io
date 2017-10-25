@@ -526,42 +526,70 @@ var UI = function () {
 
       // model instance
       this.Instance = function (_args) {
-
+        var _instance = this;
+        _.map(_args, function (_key, _arg) {
+          if (_model.fields.contains(_key)) {
+            _instance[_key] = _arg;
+          }
+        });
       }
       this.Instance.prototype = {
         save: function () {
-
+          var _instance = this;
+          return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/`, 'PATCH', _instance);
         },
         get: function () {
-
+          var _instance = this;
+          return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/`, 'GET').then(function (item) {
+            _api.buffer[_model.name][item._id] = item;
+            return item;
+          });
         },
+        method: function (_method, type, data) {
+          var _instance = this;
+          return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/${(_method || '')}/`, type, data);
+        }
       }
       this.instance = function (_args) {
         return new this.Instance(_args);
       }
       this.objects = {
-        get: function (args) {
-
+        get: function (_id, args) {
+          return _model.objects.filter(args).then(function (results) {
+            return results.filter(function (item) {
+              return item._id === _id;
+            })[0];
+          });
         },
-        all: function (args) {
+        method: function (_method, type, data) {
+          return _.request(`${_api.urls.base}${_model.prefix}/${(_method || '')}/`, type, data);
+        },
+        all: function (force) {
+          return _model.objects.filter({force: force});
+        },
+        filter: function (args) {
           _api.buffer[_model.name] = (_api.buffer[_model.name] || {});
           args = (args || {});
           var force = (args.force || false);
-          if (force) {
-            return _.request(`${_api.urls.base}${_model.prefix}/`, 'GET').then(function (result) {
-              result.map(function (item) {
-                _api.buffer[_model.name][item._id] = item;
-                return item;
+          var data = (args.data || {});
+          return _.p().then(function () {
+            if (force) {
+              return _.request(`${_api.urls.base}${_model.prefix}/`, 'GET', data).then(function (result) {
+                result.map(function (item) {
+                  _api.buffer[_model.name][item._id] = item;
+                  return item;
+                });
               });
-            }).then(function () {
-              return _.p(_api.buffer[_model.name]);
-            });
-          } else {
-            return _.p(_api.buffer[_model.name]);
-          }
-        },
-        filter: function (args) {
+            }
+          }).then(function () {
+            // TODO: apply filters
 
+            return _.p(function () {
+              return _.map(_api.buffer[_model.name], function (index, item) {
+                return _model.instance(item);
+              });
+            });
+          });
         },
       }
     }
@@ -571,27 +599,27 @@ var UI = function () {
       var _model = new this.Model(args);
 
       // Custom routes. Maybe do later if needed.
-      _.map(args.routes, function (_name, _route) {
-        _name = _name.replace(`${_model.basename}-`, '').split('-').join('_');
-        if (!['list', 'detail'].contains(_name)) {
-          // remove prefix from route
-          _route = _route.replace(`${_model.prefix}/`, '').replace('^', '').replace('$', '').split('/');
-          if (_route.length == 2) {
-            // list_route
-            let _url = _route[0];
-            _model.objects[_name] = function (data) {
-
-            }
-          } else if (_route.length == 4) {
-            // detail_route
-            let _url = _route[2];
-            _model.Instance.prototype[_name] = function (data) {
-
-            }
-          }
-
-        }
-      });
+      // _.map(args.routes, function (_name, _route) {
+      //   _name = _name.replace(`${_model.basename}-`, '').split('-').join('_');
+      //   if (!['list', 'detail'].contains(_name)) {
+      //     // remove prefix from route
+      //     _route = _route.replace(`${_model.prefix}/`, '').replace('^', '').replace('$', '').split('/');
+      //     if (_route.length == 2) {
+      //       // list_route
+      //       let _url = _route[0];
+      //       _model.objects[_name] = function (data) {
+      //
+      //       }
+      //     } else if (_route.length == 4) {
+      //       // detail_route
+      //       let _url = _route[2];
+      //       _model.Instance.prototype[_name] = function (data) {
+      //
+      //       }
+      //     }
+      //
+      //   }
+      // });
 
       // Add to list of models
       _api.models[args.name] = _model;
