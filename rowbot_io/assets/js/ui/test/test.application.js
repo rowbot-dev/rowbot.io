@@ -6,9 +6,12 @@ Test.application = function (args) {
     },
     children: [
       Test.interfaces.centred({
+        style: {
+          
+        },
         children: [
-          Test.components.input('input', {
-            
+          Test.components.panel('panel', {
+
           }),
         ],
       }),
