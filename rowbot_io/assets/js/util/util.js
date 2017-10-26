@@ -1,133 +1,118 @@
-var l = console.log;
 
-var Util = {
+/*
 
-  // String formatting
-  format: {
-    style: function (style) {
-      if (style !== undefined) {
-        var strings = Object.keys(style).map(function (value) {
-          return '{key}: {value}; '.format({key: value, value: style[value]})
-        });
-        return strings.join('');
-      } else {
-        return '';
-      }
-    },
-    classes: function (classes) {
-      if (classes !== undefined) {
-        return classes.join(' ').trim();
-      } else {
-        return '';
-      }
-    },
-    properties: function (properties) {
-      if (properties !== undefined) {
-        var strings = Object.keys(properties).map(function (property) {
-          if (typeof(properties[property]) === 'boolean' && properties[property]) {
-            return '{property} '.format({property: property});
-          } else {
-            return '{property}="{value}" '.format({property: property, value: properties[property]});
-          }
-        });
-        return strings.join('');
-      } else {
-        return '';
-      }
-    },
-  },
+Util.js
 
+Contains commonly used shortcuts and utilities
 
+*/
 
-  // sort
-  sort: {
-    alpha: function (key) {
-      return function (a,b) {
-        if (key !== undefined) {
-          a = a[key];
-          b = b[key];
-        }
+var _ = {
 
-        if (a>b) {
-          return 1;
-        } else if (a<b) {
-          return -1;
-        } else {
-          return 0;
-        }
-      }
-    },
-  },
-
-  // arrays
-  arrays: {
-    linearInterpolate: function (before, after, atPoint) {
-      return before + (after - before) * atPoint;
-    },
-    interpolateArray: function (data, fitCount) {
-      var newData = new Array();
-      var springFactor = new Number((data.length - 1) / (fitCount - 1));
-      newData[0] = data[0]; // for new allocation
-      for ( var i = 1; i < fitCount - 1; i++) {
-        var tmp = i * springFactor;
-        var before = new Number(Math.floor(tmp)).toFixed();
-        var after = new Number(Math.ceil(tmp)).toFixed();
-        var atPoint = tmp - before;
-        newData[i] = Util.arrays.linearInterpolate(data[before], data[after], atPoint);
-      }
-      newData[fitCount - 1] = data[data.length - 1]; // for new allocation
-      return newData;
-    },
-    getMaxOfArray: function (numArray) {
-      return Math.max.apply(null, numArray);
-    },
-    getAbsNormalised: function (array, max) {
-      // abs
-      var abs = array.map(function (value) {
-        return Math.abs(value);
+  // promises
+  p: function (arg) {
+    if (arg !== undefined && arg.then !== undefined) {
+      return arg.then(function (final) {
+        return final;
       });
-
-      var arrayMax = Util.arrays.getMaxOfArray(abs);
-
-      var normalised = abs.map(function (value) {
-        return max * Math.sqrt(value / arrayMax);
-        // return max * value / arrayMax;
+    } else {
+      return new Promise(function (resolve, reject) {
+        resolve(_.is.f(arg) ? arg() : arg);
       });
-
-      return normalised;
-    },
+    }
   },
-
-  // empty promise
-  ep: function (input) {
-    return new Promise(function(resolve, reject) {
-      resolve(input);
-    });
+  all: function (list) {
+    return Promise.all((list || []));
+  },
+  pmap: function (object, fn) {
+    return _.all(Object.keys(object).map(function (key) {
+      let obj = object[key];
+      return fn(key, obj);
+    }));
+  },
+  _all: function (fnList, input) {
+    fnList = (fnList || []);
+    return fnList.reduce(function (whole, part) {
+      return whole.then(function (value) {
+        return part(value);
+      });
+    }, _.p(input));
+  },
+  _pmap: function (object, fn) {
+    return _._all(Object.keys(object).map(function (key) {
+      return function () {
+        let obj = object[key];
+        return fn(key, obj);
+      }
+    }));
   },
 
   // objects
-  isObject: function (e) {
-    for (var t in e) {
-      return typeof e == 'object';
-    }
-    return Util.isEmptyObject(e);
+  merge: function (...objects) {
+    return objects.reduce(function (whole, part) {
+      part = (part || {});
+      Object.keys(part).forEach(function (key) {
+        if (key in whole) {
+          if (_.is.object.all(whole[key]) && _.is.object.all(part[key])) {
+            whole[key] = _.merge(whole[key], part[key]); // objects go deeper again recursively
+          } else if (_.is.array(whole[key]) && _.is.array(part[key])) {
+            whole[key] = [...new Set([...whole[key], ...part[key]])]; // arrays union
+          } else {
+            whole[key] = part[key]; // strings and "other" replace
+          }
+        } else {
+          whole[key] = part[key]; // add if it does not exist
+        }
+      });
+      return whole;
+    }, {});
   },
-  isEmptyObject: function (e) {
-    for (var t in e) {
-      return false;
-    }
-    return true;
+  map: function (object, fn) {
+    return Object.keys(object).map(function (key) {
+      let obj = object[key];
+      return fn(key, obj);
+    });
   },
 
-  css: {
-    check: function (selector) {
+  // console
+  l: console.log,
 
+  // tests
+  is: {
+    f: function (obj) {
+      return !!(obj && obj.constructor && obj.call && obj.apply);
     },
+    object: {
+      empty: function (e) {
+        for (var t in e) {
+          return false;
+        }
+        return true;
+      },
+      all: function (obj) {
+        return obj !== null && typeof obj === 'object' && !_.is.array(obj);
+      },
+    },
+    array: function (obj) {
+      return Object.prototype.toString.call(obj) === '[object Array]';
+    },
+    number: function (n) {
+      return typeof n === 'number' && (n % 1) === 0;
+    },
+  },
+
+  // DOM
+  dom: {
+    get: function (_id) {
+      return document.getElementById(_id);
+    },
+  },
+  css: {
     create: function (selector, style) {
       if (!document.styleSheets) return;
       if (document.getElementsByTagName('head').length == 0) return;
 
-      var styleSheet,mediaType;
+      var styleSheet, mediaType;
 
       if (document.styleSheets.length > 0) {
         for (var i = 0, l = document.styleSheets.length; i < l; i++) {
@@ -187,5 +172,35 @@ var Util = {
         styleSheet.insertRule(selector + '{' + style + '}', styleSheetLength);
       }
     }
+  },
+
+  // requests
+  csrf: document.getElementsByName('csrfmiddlewaretoken')[0].getAttribute('value'),
+  request: function (url, type, data) {
+    type = (type || 'GET');
+    return new Promise(function (resolve, reject) {
+      var http = new XMLHttpRequest();
+      url = type === 'GET' ? `${url}?${_.params(data)}` : url;
+      http.open(type, url, true);
+      if (_.token !== undefined) {
+        http.setRequestHeader('Authorization', `Token ${_.token}`);
+      }
+      http.setRequestHeader('X-CSRFToken', _.csrf);
+      http.setRequestHeader('Content-Type', 'application/json');
+      http.onreadystatechange = function () {
+        if (http.readyState == 4 && http.status == 200) {
+          resolve(JSON.parse(http.responseText));
+        }
+      }
+      http.send(JSON.stringify(data));
+    });
+  },
+  params: function (obj) {
+    obj = (obj || {});
+    return _.map(obj, function (key, value) {
+      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+    }).reduce(function (whole, part) {
+      return whole ? `${whole}&${part}` : part;
+    }, '');
   },
 }

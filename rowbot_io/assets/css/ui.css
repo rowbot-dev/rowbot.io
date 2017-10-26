@@ -1,7 +1,6 @@
 /*
 
-This file should contain all styling related to interface elements, but no specific #elements.
-#elements that are common to every page should be specified in elements.css.
+
 
 */
 
@@ -9,19 +8,27 @@ html {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
+  font-family: monospace;
+  font-style: normal;
+  font-variant: normal;
 }
 *, *:before, *:after {
   -webkit-box-sizing: inherit;
   -moz-box-sizing: inherit;
   box-sizing: inherit;
 }
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0px;
+}
+input {
+  font-family: monospace;
+  font-style: normal;
+  font-variant: normal;
+}
 
-/*
-
-Common interface elements
-
- */
- /* interface element */
+/* Remove */
 .ie {
   position: relative;
   background-color: transparent;
@@ -97,36 +104,6 @@ Common interface elements
 
 /*
 
-2. Sidebars
-
-*/
-/* Sidebar */
-.ie.sidebar {
-  display: block;
-  width: 200px;
-  height: 70%;
-}
-
-/* Mini sidebar */
-.ie.sidebar.mini {
-  width: 50px;
-}
-
-.ie.loading-icon {
-  height: 25px;
-  width: 25px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.ie.loading-icon img {
-  height: 25px;
-  width: 25px;
-}
-
-/*
-
 3. Panels
 
 */
@@ -159,35 +136,6 @@ Common interface elements
   color: #888;
   cursor: pointer;
   display: block;
-}
-
-.ie.button:hover {
-  border-color: #aaa;
-  background-color: transparent;
-}
-
-.ie.button:active {
-  border-color: #fff;
-}
-
-.ie.sidebar .ie.button {
-  width: 180px;
-}
-
-.ie.sidebar.mini .ie.button {
-  width: 50px;
-}
-
-.ie.sidebar .ie.button.start-button {
-  height: 80px;
-  padding-top: 25px;
-  font-size: 20px;
-}
-
-.ie.sidebar-button {
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
 }
 
 /*
@@ -242,33 +190,4 @@ Common interface elements
   opacity: 0.5;
   pointer-events: none;
   padding-left: 1px;
-}
-
-/*
-
-6. Breadcrumbs
-
-*/
-.breadcrumbs {
-
-}
-
-/*
-
-Misc
-
-*/
-
-.glyphicon-hidden {
-  display: none;
-}
-
-/*
-
-Mouseover
-
-*/
-
-.ie.mouseover {
-
 }

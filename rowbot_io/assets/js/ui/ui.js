@@ -1,988 +1,661 @@
-// UI: This is the UI definition. It is ignorant of the data passing through the app.
-var UI = {
-  // GLOBAL STATE
-  // store current global state
-  // This is a path like 'client.reload' -> later, James.
-  globalState: undefined,
-  previousState: undefined,
+var UI = function () {
 
-  // changeState
-  changeState: function (stateName, trigger) {
-    UI.previousState = UI.globalState;
-    UI.globalState = stateName;
-    return Promise.all(UI.states.filter(function (state) {
-      return stateName.indexOf(state.name) === 0;
-    }).map(function (state) {
-      return state.change();
-    }));
-  },
-
-  // COMPONENT
-  // components
-  components: {},
-
-  // getComponent
-  getComponent: function (id) {
-    return new Promise(function(resolve, reject) {
-      resolve(UI.components[id]);
-    });
-  },
-
-  // component
-  component: function (id) {
-    // identity
-    this.setId = function (id) {
-      var currentId = this.id;
-      id = id !== undefined ? id : currentId;
-
-      if (id !== currentId) {
-        var _this = this;
-        // 1. remove the component while keeping a solid var present
-        // 2. change the id of the var and change the model attr.
-        // 3. Add the var.
-
-        return UI.remove(_this).then(function (component) {
-          return new Promise(function(resolve, reject) {
-            if (component.isRendered) {
-              component.model().attr('id', id);
-            }
-            component.id = id;
-            resolve(component);
-          });
-        }).then(UI.add);
-      } else {
-        return this.id;
-      }
-    }
-    this.setName = function (name) {
-      var currentName = this.name;
-      name = (name || currentName);
-
-      if (name !== currentName) {
-        var _this = this;
-        _this.name = name;
-        return _this.parent().then(function (parent) {
-          if (parent) {
-            parent.components[_this.name] = _this;
-            delete parent.components[currentName];
-          }
-          return Util.ep();
-        });
-      }
-    }
-    this.setAfter = function (after) {
-      var currentAfter = this.after;
-      after = after !== undefined ? after : currentAfter;
-
-      if (after !== currentAfter) {
-        var _this = this;
-        _this.after = after;
-        // 1. Parent stays the same.
-        // 2. Or does it...
-        // 3. No other element has to change.
-
-        if (_this.isRendered) {
-          return (after !== '' ? function () {
-            return UI.getComponent(_this.after).then(function (before) {
-              return _this.setRoot(before.root).then(function (child) {
-                return new Promise(function(resolve, reject) {
-                  _this.model().insertAfter(before.model());
-                  resolve();
-                });
-              });
-            });
-          } : function () {
-            return _this.parent().then(function (parent) {
-              return new Promise(function(resolve, reject) {
-                _this.model().insertBefore(parent.model().children().first());
-                resolve();
-              });
-            });
-          })().then(function () {
-            return _this.parent().then(function (parent) {
-              return parent.setChildIndexes();
-            })
-          });
-        } else {
-          return Util.ep(_this.after);
-        }
-      } else {
-        return Util.ep(this.after);
-      }
-    }
-    this.setRoot = function (root) {
-      var _this = this;
-      var currentRoot = (_this.root || 'hook');
-      newRoot = (root || currentRoot);
-
-      if (newRoot !== currentRoot) {
-        _this.root = newRoot;
-        // 1. get the current parent.
-        // 2.  remove the child from the current parent.
-        // 3. append to new parent model.
-        // 4. change the root value.
-        // 5. get the new parent.
-        // 6. add the child to new parent.
-        if (_this.isAddedToParent) {
-          return _this.parent().then(function (parent) {
-            return parent.removeChild(_this.id);
-          }).then(function () {
-            return new Promise(function(resolve, reject) {
-              _this.root = newRoot;
-              if (_this.isRendered) {
-                _this.model().appendTo('#{id}'.format({id: newRoot}));
-              }
-              resolve(newRoot);
-            });
-          }).then(UI.getComponent).then(function (newParent) {
-            return newParent.addChild(_this);
-          });
-        } else {
-          return Util.ep();
-        }
-      } else {
-        _this.root = newRoot;
-        return new Promise(function(resolve, reject) {
-          resolve(_this.root);
-        });
-      }
-    }
-    this.setTemplate = function (template) {
-      var currentTemplate = this.template !== undefined ? this.template : UI.templates.div;
-      this.template = template !== undefined ? template : currentTemplate;
-
-      if (this.template !== currentTemplate) {
-        var _this = this;
-        // 1. render empty template element to the DOM.
-        // 2. Append all children to the new empty element
-        // 3. Remove the old element.
-
-        return _this.renderTemplate().then(function (renderedTemplate) {
-          return new Promise(function(resolve, reject) {
-            if (_this.isRendered) {
-              var model = _this.model();
-              model.after(renderedTemplate);
-              model.attr('id', 'REMOVE-{id}'.format({id: _this.id}));
-            }
-            resolve();
-          });
-        }).then(function () {
-          if (_this.isRendered) {
-            return Promise.all(_this.children.map(function (child) {
-              return new Promise(function(resolve, reject) {
-                child.model().appendTo('#{id}'.format({id: _this.id}));
-                resolve();
-              });
-            }));
-          }
-        }).then(function () {
-          if (_this.isRendered) {
-            return new Promise(function(resolve, reject) {
-              $('#REMOVE-{id}'.format({id: _this.id})).remove();
-              resolve();
-            });
-          }
-        });
-      } else {
-        return this.template;
-      }
-    }
-    this.renderTemplate = function () {
-      var _this = this;
-      return new Promise(function(resolve, reject) {
-        var classes = _this.classes !== undefined ? _this.classes : [];
-        var style = _this.style !== undefined ? _this.style : {};
-        var properties = _this.properties != undefined ? _this.properties : {};
-        var html = _this.html !== undefined ? _this.html : '';
-        var renderedTemplate = _this.template.format({
-          id: _this.id,
-          classes: Util.format.classes(classes),
-          style: Util.format.style(style),
-          properties: Util.format.properties(properties),
-          html: html,
-        });
-        resolve(renderedTemplate);
-      });
-    }
-    this.setAppearance = function (appearance) {
-      var currentClasses = (this.classes || []);
-
-      if (appearance !== undefined) {
-        this.properties = (appearance.properties || this.properties);
-        this.html = appearance.html !== undefined ? appearance.html : this.html;
-
-        // classes need to be a combination of ones removed and ones added. If "add" and "remove" are not present, defaults to using whole object.
-        this.classes = currentClasses;
-        var _classes = (appearance.classes || {});
-
-        // _classes can be:
-        // 1. 'class' -> implied add
-        // 2. {add: 'class'}
-        // 3. {remove: 'class'}
-        // 4. {add: 'class', remove: 'class'}
-        // 5. all of the above but with arrays instead of strings.
-
-        // make defaults arrays
-        // {add: undefined, remove: ""}
-        _classes.add = _classes.add ? _classes.add : (_classes.remove ? [] : ($.isArray(_classes) ? _classes : []));
-        _classes.remove = _classes.remove ? _classes.remove : [];
-
-        // force arrays
-        var addClasses = $.isArray(_classes.add) ? _classes.add : [_classes.add];
-        var removeClasses = $.isArray(_classes.remove) ? _classes.remove : [_classes.remove];
-        var _this = this;
-
-        if (addClasses) {
-          _this.classes = _this.classes.concat(addClasses.filter(function (cls) {
-            return _this.classes.indexOf(cls) === -1;
-          }));
-        }
-
-        _this.classes = _this.classes.filter(function (cls) {
-          return removeClasses.indexOf(cls) === -1;
-        });
-
-        _this.style = (_this.style || {});
-        appearance.style = (appearance.style || {});
-        var animateable = {};
-        var unAnimateable = {};
-        var exclude = ['color', 'background-color', 'border-color', 'display', 'border', 'border-top', 'border-bottom', 'border-left', 'border-right'];
-        Object.keys(appearance.style).forEach(function (styleKey) {
-          let newStyle = appearance.style[styleKey];
-          let currentStyle = _this.style[styleKey];
-
-          if (newStyle !== currentStyle) {
-            _this.style[styleKey] = newStyle;
-            if (exclude.contains(styleKey)) {
-              unAnimateable[styleKey] = newStyle;
-            } else {
-              animateable[styleKey] = newStyle;
-            }
-          }
-        });
-
-        if (_this.isRendered) {
-
-          // model
-          var model = _this.model();
-          return Promise.all([
-            new Promise(function(resolve, reject) {
-              // html - this will erase children of the current model
-              if (_this.html !== undefined) {
-                model.html(_this.html);
-              }
-              resolve();
-            }),
-            new Promise(function(resolve, reject) {
-              // properties
-              if (appearance.properties) {
-                Object.keys(_this.properties).forEach(function (property) {
-                  model.attr(property, _this.properties[property]);
-                });
-              }
-              resolve();
-            }),
-            model.animate(animateable, 0).promise().then(function () {
-              return model.css(unAnimateable).promise().then(function () {
-                return Promise.all([
-                  Promise.all((removeClasses || []).map(function (cls) {
-                    return new Promise(function(resolve, reject) {
-                      model.removeClass(cls);
-                      resolve();
-                    });
-                  })),
-                  Promise.all((addClasses || []).map(function (cls) {
-                    return new Promise(function(resolve, reject) {
-                      model.addClass(cls);
-                      resolve();
-                    });
-                  })),
-                ])
-              });
-            }),
-          ]).then(function () {
-            return appearance;
-          });
-        } else {
-          return Util.ep(appearance);
-        }
-      } else {
-        return Util.ep();
-      }
-    }
-
-    // state
-    this.setState = function (state) {
-      if (state !== undefined) {
-        var currentDefaultState = this.defaultState !== undefined ? this.defaultState : {};
-        this.defaultState = state.defaultState !== undefined ? state.defaultState : currentDefaultState;
-        var _this = this;
-
-        return Promise.all([
-          _this.addStates(state.states),
-          _this.addStateMap(state.stateMap),
-        ]);
-      }
-    }
-    this.addStates = function (states) {
-      if (states !== undefined) {
-        var _this = this;
-        return Promise.all(Object.keys(states).map(function (stateName) {
-          return _this.addState(stateName, states[stateName]);
-        }));
-      }
-    }
-    this.addState = function (stateName, state) {
-      // add as new state
-      return UI.createState(this, stateName, state);
-    }
-    this.addStateMap = function (stateMap) {
-      var _this = this;
-      return new Promise(function(resolve, reject) {
-        _this.stateMap = _this.stateMap !== undefined ? _this.stateMap : '';
-        _this.stateMap = stateMap !== undefined ? stateMap : _this.stateMap;
-        resolve();
-      });
-    }
-    this.mapState = function (stateName) {
-      if (typeof this.stateMap === 'string') {
-        return this.stateMap;
-      } else {
-        return this.stateMap[stateName] !== undefined ? this.stateMap[stateName] : '';
-      }
-    }
-    this.triggerState = function () {
-      this.state = this.mapState(this.state || UI.globalState);
-      return UI.changeState(this.state, this.id);
-    }
-
-    // DOM
-    this.setBindings = function (bindings) {
-      // TODO: later change to accept single value as single function, with the need for 'fn' key.
-      var _this = this;
-      return new Promise(function(resolve, reject) {
-        _this.bindings = _this.bindings !== undefined ? _this.bindings : {};
-        if (bindings !== undefined) {
-          Object.keys(bindings).forEach(function (name) {
-            var binding = bindings[name];
-            // if rendered, add to model
-            if (_this.isRendered) {
-              _this.model().off(name);
-              _this.model().on(name, function (event) {
-                binding(_this, event);
-              });
-            } else {
-              _this.bindings[name] = binding;
-            }
-          }, this);
-        }
-        resolve();
-      });
-    }
-    this.addChild = function (child) {
-      var _this = this;
-      var index = child.index;
-      child.index = (child.index !== undefined ? child.index : _this.children.length);
-      if (child.name) {
-        _this.cc = _this.cc || {};
-        _this.cc[child.name] = child;
-      }
-      child.isAddedToParent = true;
-      _this.children.splice(child.index, 0, child);
-      return Util.ep(child);
-    }
-    this.removeChild = function (id) {
-      var _this = this;
-      return UI.getComponent(id).then(function (child) {
-        _this.children.splice(child.index, 1);
-        if (_this.cc && id in _this.cc) {
-          delete _this.cc[id];
-        }
-        return Util.ep(id);
-      }).then(UI.removeComponent).then(function () {
-        // renumber children
-        return _this.setChildIndexes();
-      });
-    }
-    this.removeChildren = function () {
-      var _this = this;
-      return Promise.ordered(_this.children.map(function (child) {
-        return function () {
-          return _this.removeChild(child.id);
-        }
-      }));
-    }
-    this.setChildren = function (children) {
-      var _this = this;
-      _this.children = (_this.children || []);
-      _this.components = (_this.components || {});
-      if (children !== undefined) {
-        return Promise.ordered(children.map(function (child) {
-          return function () {
-            if (child.then !== undefined) { // is an unevaluated promise
-              return child.then(function (component) {
-                return component.childIndexFromAfter();
-              }).then(function (component) {
-                return _this.addChild(component);
-              }).then(function (final) {
-                if (_this.isRendered) {
-                  final.root = _this.id;
-                  return final.render();
-                } else {
-                  return final;
-                }
-              });
-            } else {
-              return child.childIndexFromAfter().then(function (component) {
-                return _this.addChild(component);
-              }).then(function (final) {
-                if (_this.isRendered) {
-                  final.root = _this.id;
-                  return final.render();
-                }
-              });
-            }
-          }
-        })).then(function () {
-          return _this.setChildIndexes();
-        });
-      } else {
-        return _this.children;
-      }
-    }
-    this.setChildIndexes = function () {
-      // set index from position in children array
-      var _this = this;
-      return Promise.all(_this.children.map(function (child, index) {
-        return new Promise(function(resolve, reject) {
-          child.index = index;
-          resolve();
-        });
-      }));
-    }
-    this.childIndexFromAfter = function (placementIndex) {
-      // find index from after key
-      var _this = this;
-      if (_this.after) {
-        return UI.getComponent(_this.after).then(function (component) {
-          return new Promise(function(resolve, reject) {
-            _this.index = component !== undefined ? component.index + 1 : 0;
-            resolve(_this);
-          });
-        });
-      } else {
-        return new Promise(function(resolve, reject) {
-          _this.index = (placementIndex || (_this.after === '' ? 0 : undefined));
-          resolve(_this);
-        });
-      }
-    }
-    this.update = function (args) {
-      args = args || {};
-      var _this = this;
-      return Promise.all([
-        // id, root, after, template
-        _this.setId(args.id),
-        _this.setName(args.name),
-        _this.setRoot(args.root),
-        _this.setAfter(args.after),
-        _this.setTemplate(args.template),
-        _this.setAppearance(args.appearance),
-
-        // state
-        _this.setState(args.state),
-
-        // bindings
-        _this.setBindings(args.bindings),
-      ]).then(function (results) {
-        return _this.setChildren(args.children);
-      }).then(function (children) {
-        return _this;
-      });
-    }
-    this.removeModel = function () {
-      var _this = this;
-      _this.model().remove();
-      return Util.ep();
-    }
-    this.model = function (single) {
-      if (single) {
-        return $(`#${this.id}`)[0];
-      } else {
-        return $(`#${this.id}`);
-      }
-    }
-    this.element = function () {
-      return document.getElementById(this.id);
-    }
-    this.render = function () {
-      var _this = this;
-      var root = $('#{id}'.format({id: _this.root}));
-      return _this.renderTemplate().then(function (renderedTemplate) {
-        return new Promise(function(resolve, reject) {
-          if (root.children().length !== 0) {
-            if (_this.after !== undefined) {
-              if (_this.after) {
-                root.children('#{id}'.format({id: _this.after})).after(renderedTemplate); // add as child after 'after'.
-              } else {
-                root.children().first().before(renderedTemplate); // add as child before first child.
-              }
-            } else {
-              root.children().last().after(renderedTemplate); // add as child after last child.
-            }
-          } else {
-            root.html(renderedTemplate);
-          }
-          _this.isRendered = true;
-          resolve();
-        });
-      }).then(function () {
-        return _this.setBindings(_this.bindings);
-      }).then(function () {
-        return Promise.ordered(_this.children.sort(function (first, second) {
-          return first.index - second.index;
-        }).map(function (child) {
-          return function () {
-            child.root = _this.id;
-            return child.render();
-          }
-        }));
-      }).then(function () {
-        return _this;
-      });
-    }
-    this.parent = function () {
-      return UI.getComponent(this.root);
-    }
-    this.changeState = function (state) {
-      var _this = this;
-      _this.state = state.name;
-
-      // run fn
-      setTimeout(function () {
-        (state.fn || Util.ep)(_this);
-      }, 0);
-
-      // 1. Run preFn
-      return (state.preFn || Util.ep)(_this).then(function () {
-        // 2. Run appearance
-        return _this.setAppearance({
-          classes: state.classes,
-          style: state.style,
-          html: state.html,
-        });
-      });
-    }
-    this.ccTree = function () {
-      var _this = this;
-      var tree = {cc_name: _this.name};
-      if (_this.cc) {
-        Object.keys(_this.cc).forEach(function (key) {
-          tree[_this.cc[key].id] = _this.cc[key].cc ? _this.cc[key].ccTree() : _this.cc[key].id;
-        });
-      }
-      return tree;
-    }
-
-    // initialise
-    this.id = id;
-    this.isRendered = false; // establish whether or not the component has been rendered to the DOM.
-    this.state = undefined;
-  },
-
-  // createComponent
-  add: function (component) {
-    return new Promise(function(resolve, reject) {
-      UI.components[component.id] = component;
-      resolve(component);
-    });
-  },
-
-  createComponent: function (id, args) {
-    return new Promise(function(resolve, reject) {
-      resolve(new UI.component(id));
-    }).then(UI.add).then(function (component) {
-      return component.update(args);
-    });
-  },
-
-  // removeComponent
-  remove: function (component) {
-    return new Promise(function(resolve, reject) {
-      delete UI.components[component.id];
-      resolve(component);
-    });
-  },
-
-  removeComponent: function (id) {
-    return UI.getComponent(id).then(function (component) {
-      return component.removeChildren().then(function () {
-        return component.removeModel();
-      }).then(function () {
-        return UI.remove(component);
-      });
-    });
-  },
-
-  // app
-  app: function (root, children) {
-    var id = 'app';
-    var args = {
-      name: 'app',
-      root: root,
-      template: UI.template('div'),
-      appearance: {
-        style: {
-          'position': 'absolute',
-          'top': '0px',
-          'left': '0px',
-          'width': '100%',
-          'height': '100%',
-        },
-      },
-      children: children,
-    };
-
-    return UI.createComponent(id, args);
-  },
-
-  // STATES
-  states: [],
-
-  // Basic state definition
-  state: function (component, name, args) {
-    this.component = component;
+  // component object
+  this.Component = function (name) {
     this.name = name;
+    this._ = {
+      children: {
+        buffer: [],
+        rendered: [],
+        index: {},
+      },
+      states: [],
+      before: undefined,
+      root: undefined,
+      is: {
+        rendered: false,
+      },
+      style: {},
+      properties: {},
+      classes: [],
+      html: undefined,
+    };
+  }
+  this.Component.prototype = {
+    hook: document.getElementById('hook'),
+    init: function (args) {
+      args = (args || {});
+      let _this = this;
+      _this._.before = args.before;
+      _this._.root = args.root;
+      _this._.tag = (args.tag || 'div');
+      return _.all([
+        _this.setStyle(args.style),
+        _this.setClasses(args.classes),
+        _this.setProperties(args.properties),
+        _this.setStates(args.states),
+        _this.setBindings(args.bindings),
+        _this.setChildren(args.children),
+        _this.setHTML(args.html),
+      ]).then(function () {
+        return _this;
+      });
+    },
 
-    // args
-    this.preFn = args.preFn;
-    this.classes = args.classes;
-    this.style = args.style;
-    this.html = args.html;
-    this.fn = args.fn;
-
-    // change
-    this.change = function () {
-      return this.component.changeState(this);
-    }
-  },
-
-  // state factory
-  createState: function (component, name, args) {
-    var _this = this;
-    return new Promise(function(resolve, reject) {
-      args = args === 'default' ? undefined : args;
-      var state = new _this.state(component, name, (args || component.defaultState));
-      state.index = _this.states.length - 1; // able to find state again
-      _this.states.push(state);
-      resolve(state);
-    });
-  },
-
-  // TEMPLATES
-  templates: {
-    div: `
-      <div id='{id}' class='{classes}' style='{style}' {properties}>
-        {html}
-      </div>
-    `,
-    loadingIcon: `
-      <div id='{id}' class='ie loading-icon {classes}' style='{style}'>
-        <img src='/static/img/loading-icon.gif' />
-      </div>
-    `,
-  },
-
-  template: function (type, initialClass) {
-    return `<{type} id='{id}' class='{initialClass}{classes}' style='{style}' {properties}>{html}</{type}>`.format({
-      type: type,
-      id: '{id}',
-      initialClass: initialClass !== undefined ? (initialClass + ' ') : '',
-      classes: '{classes}',
-      style: '{style}',
-      properties: '{properties}',
-      html: '{html}',
-    });
-  },
-
-  // FUNCTIONS
-  functions: {
-    show: function (style) {
+    // pre-render or post-render
+    setStyle: function (style, duration) {
+      var _this = this;
       style = (style || {});
-      style['opacity'] = '1.0';
-      return function (_this) {
-        return _this.setAppearance({classes: {remove: ['hidden']}}).then(function () {
-          return _this.setAppearance({style: style});
+      duration = (duration || 0);
+      style = _.merge(style, {'': {}}); // make buffer for self style
+      _.map(style, function (key, value) {
+        if (!_.is.object.all(value)) {
+          delete style[key];
+          style[''][key] = value;
+        }
+      });
+
+      // update style dictionary
+      // var _original = _this._.style[''];
+      _this._.style = _.merge(_this._.style, style);
+
+      // add styles to DOM if rendered
+      if (_this._.is.rendered) {
+        var element = _this.element();
+        return _.pmap(_this._.style, function (key, _style) {
+          // TODO: allow nested styles for active, etc.
+          // This sets up a new css rule with a string reduced from the style object
+          if (key) {
+            return _.css.create(`${_this._.tag}#${_this.id} ${key}`, _.map(_style, function (_key, _value) {
+              return `${_key}: ${_value};`;
+            }).reduce(function (whole, part) {
+              return `${whole}\n${part}`;
+            }, '').trim());
+          } else {
+            if (duration) {
+              // JQUERY
+              return $(element).animate(_this._.style[''], {duration: duration}).promise();
+            } else {
+              return _.pmap(_style, function (key, value) {
+                return _.p(function () {
+                  element.style[key] = value;
+                });
+              });
+            }
+          }
         });
       }
     },
-    hide: function (style) {
-      style = (style || {});
-      style['opacity'] = '0.0';
-      return function (_this) {
-        return _this.setAppearance({style: style}).then(function () {
-          return _this.setAppearance({classes: {add: ['hidden']}});
-        });
-      }
-    }
-  },
-}
-
-// CONTEXT
-// The Context stores a sample of data from the server. It can be accessed using a path. The same path can access the same data on the server.
-var Context = {
-  token: undefined,
-  // STORE
-  // This object stores the entire context and can be set and reset by the Context methods.
-  // This contains only data from the server. Any locally created content such as temporary objects
-  // is stored in Active.
-  context: {},
-  progress: {},
-
-  getToken: function () {
-    if (Context.token === undefined) {
-      return Request('/token/').then(function (result) {
-        Context.token = result.token;
-        return Context.token;
+    setClasses: function (classes) {
+      var _this = this;
+      classes = (classes || []);
+      _this._.classes = _.map(_.merge(_this._.classes, classes), function (index, value) {
+        return value;
       });
-    } else {
-      return Util.ep(Context.token);
-    }
-  },
 
-  getUser: function () {
-    return Context.getToken().then(function (token) {
-      return Context.get('user', {options: {data: {kwargs: {'access_tokens__id': token}}}});
-    }).then(function (users) {
-      if (users.then !== undefined) {
-        return users.then(function (users) {
-          return Object.keys(users).filter(function (key) {
-            return users[key] !== undefined && users[key].is_self;
-          }).map(function (key) {
-            var user = users[key];
-            user.id = key;
-            return user;
-          })[0];
-        });
-      } else {
-        return Object.keys(users).filter(function (key) {
-          return users[key] !== undefined && users[key].is_self;
-        }).map(function (key) {
-          var user = users[key];
-          user.id = key;
-          return user;
-        })[0];
-      }
-    });
-  },
-
-  permit: function (data) {
-    return Context.getToken().then(function (token) {
-      data['token'] = token;
-      return data;
-    });
-  },
-
-  // GET
-  // This will get from the current store. If it does not exist, a request will be made for it.
-  get: function (path, args) {
-    // force load from the server?
-    var force = ((args || {}).force || false);
-    // l(force, (((args || {}).options || {}).data || {}).kwargs);
-    var options = ((args || {}).options || {});
-    var overwrite = ((args || {}).overwrite || false);
-    if (path !== null) {
-      return (typeof path !== 'string' ? path : Util.ep)(path).then(function (calculatedPath) {
-        calculatedPath = (calculatedPath || '');
-        return new Promise(function(resolve, reject) {
-          // proceed to get from context object
-          context_path = calculatedPath.split('.');
-          sub = Context.context;
-          if (context_path[0] !== '') {
-            for (i=0; i<context_path.length; i++) {
-              sub = sub[context_path[i]];
-              if (sub === undefined) {
-                break;
-              }
-            }
-          } else {
-            sub = Object.keys(sub).length !== 0 ? sub : undefined; // empty context
-          }
-          resolve(sub);
-        });
-      }).then(function (data) {
-        if (data === undefined || force) {
-          return Context.load(path, options.data).then(function (data) {
-            return Context.set(path, data, overwrite);
+      if (_this._.is.rendered) {
+        var element = _this.element();
+        return _.all(_this._.classes.map(function (className) {
+          return _.p(function () {
+            element.classList.add(className);
           });
-        } else {
-          return data;
-        }
-      });
-    } else {
-      return Util.ep({});
-    }
-  },
-
-  // Count
-  // submits a count request using a similar path to get
-  // Does not update context object
-  count: function (path, args) {
-    // force load from the server?
-    var force = ((args || {}).force || false);
-    var options = ((args || {}).options || {});
-    var overwrite = ((args || {}).overwrite || false);
-    return (typeof path !== 'string' ? path : Util.ep)(path).then(function (calculatedPath) {
-      calculatedPath = (calculatedPath || '');
-      return new Promise(function(resolve, reject) {
-        // proceed to get from context object
-        context_path = calculatedPath.split('.');
-        sub = Context.context;
-        if (context_path[0] !== '') {
-          for (i=0; i<context_path.length; i++) {
-            sub = sub[context_path[i]];
-            if (sub === undefined) {
-              break;
-            }
-          }
-        } else {
-          sub = Object.keys(sub).length !== 0 ? sub : undefined; // empty context
-        }
-        resolve(sub !== undefined ? Object.keys(sub).length : 0);
-      });
-    }).then(function (count) {
-      if (count === 0 || force) {
-        options.data = (options.data || {});
-        options.data.count = true;
-        return Context.load(path, options.data).then(function (result) {
-          return result.count;
-        });
-      } else {
-        return count;
+        }));
       }
-    });
-  },
+    },
+    setProperties: function (properties) {
+      var _this = this;
+      properties = (properties || {});
+      _this._.properties = _.merge(_this._.properties, properties);
 
-  report: function (path, args) {
-    // force load from the server?
-    var options = ((args || {}).options || {});
-    options.data = (options.data || {});
-    options.data.report = true;
-    return Context.load(path, options.data).then(function (result) {
-      return result.report;
-    });
-  },
-
-  remove: function (path, args) {
-    return Context.set(path, undefined, true).then(function () {
-      return Context.load(path, {delete: true});
-    });
-  },
-
-  // The load method gets the requested path from the server if it does not exist locally.
-  // This operation can be forced from the get method.
-  load: function (path, data) {
-    data = (data || {});
-    return Context.permit({
-      path: path,
-      kwargs: (data.kwargs || {}),
-      report_kwargs: (data.report_kwargs || {}),
-      query: data.query,
-      methods: (data.methods || {}),
-      limit: data.limit,
-      count: (data.count || false),
-      report: (data.report || false),
-      create: (data.create || {}),
-      delete: (data.delete || false),
-    }).then(function (request) {
-      if (typeof path !== 'string') {
-        return path().then(function (calculatedPath) {
-          request.path = calculatedPath;
-          return Request('/a/', request);
+      if (_this._.is.rendered) {
+        var element = _this.element();
+        return _.pmap(_this._.properties, function (key, property) {
+          return _.p(function () {
+            element.setAttribute(key, property);
+          });
         });
-      } else {
-        return Request('/a/', request);
       }
-    });
-  },
+    },
+    setBindings: function (bindings) {
+      var _this = this;
+      bindings = (bindings || {});
+      _this._.bindings = _.merge(_this._.bindings, bindings);
 
-  // SET
-  // Sets the value of a path in the store. If the value changes, a request is sent to change this piece of data.
-  set: function (path, value, overwrite, remove) {
-    overwrite = (overwrite || false);
-    remove = (remove || false);
-    return (typeof path !== 'string' ? path : Util.ep)(path).then(function (calculatedPath) {
-      return new Promise(function (resolve, reject) {
-        calculatedPath = (calculatedPath || '');
-        context_path = calculatedPath.split('.');
-        sub = Context.context;
-        if (context_path[0] !== '') {
-          for (i=0; i<context_path.length; i++) {
-            if (value !== undefined && context_path[i] in value) {
-              // Follow single path down through object
-              value = value[context_path[i]]
-            }
-            if (i+1 === context_path.length) {
-              if (sub[context_path[i]] !== undefined && !overwrite) {
-                $.extend(sub[context_path[i]], value);
-              } else {
-                sub[context_path[i]] = value;
+      if (_this._.is.rendered) {
+        var element = _this.element();
+        return _.pmap(_this._.bindings, function (key, binding) {
+          return _.p(function () {
+            element.addEventListener(key, function (event) {
+              if (event.target.id == _this.id) {
+                return binding(_this, event);
               }
+            });
+          });
+        });
+      }
+    },
+    setStates: function (states) {
+      let _this = this;
+      states = (states || []);
+      return _.all(states.map(function (unresolved) {
+        return _.p(unresolved).then(function (state) {
+          _this._.states.push(state);
+          return state.register(_this);
+        });
+      }));
+    },
+    setChildren: function (children) {
+      let _this = this;
+      children = (children || _this._.children.buffer);
+      return _._all(children.map(function (unresolved) {
+        return function () {
+          return _.p(unresolved).then(function (child) {
+            if (_this._.is.rendered) {
+              return _this.renderChild(child);
             } else {
-              if (sub[context_path[i]] === undefined) {
-                sub[context_path[i]] = {};
-              }
+              return _this.bufferChild(child);
             }
-            sub = sub[context_path[i]];
-          }
-          resolve(sub);
-        } else {
-          Context.context = value;
-          resolve(Context.context);
+          });
+        }
+      }));
+    },
+    setHTML: function (html) {
+      var _this = this;
+      _this._.html = html !== undefined ? html : _this._.html;
+      return _.p(function () {
+        if (_this._.html !== undefined && _this._.is.rendered) {
+          _this.element().innerHTML = _this._.html;
         }
       });
-    });
-  },
-}
+    },
+    renderChild: function (child) {
+      // root, before, indices
+      var _this = this;
+      return child.render().then(function () {
+        // remove recently rendered child from buffer
+        return _.p(function () {
+          _this._.children.buffer.shift();
+        });
+      }).then(function () {
+        // insert the child into the correct place in the rendered array
+        // 1. in order to know index, I need to know the index of the thing before it.
+        // 2. if the array is currently empty, its index is 0.
+        return _.p(function () {
+          var index = child._.before === undefined ? _this._.children.rendered.length : _this._.children.index[child._.before];
+          _this._.children.rendered.splice(index, 0, child);
+          _this._.children.rendered.forEach(function (rendered, index) {
+            _this._.children.index[rendered.name] = index;
+          });
+        });
+      }).then(function () {
+        return child;
+      });
+    },
+    bufferChild: function (child) {
+      var _this = this;
+      return _.p(function () {
+        child._.parent = _this;
+        _this._.children.buffer.push(child);
+      });
+    },
 
-// ACTIVE
-// Active stores temporary variables that need to be synthesized using a series of temporally disconnected events, such as upload.
-var Active = {
-  active: {},
+    // post-render
+    removeClass: function (classes) {
 
-  // get
-  get: function (path) {
-    return new Promise(function(resolve, reject) {
-      context_path = path.split('.');
-      sub = Active.active;
-      for (i=0; i<context_path.length; i++) {
-        sub = sub[context_path[i]];
-        if (sub === undefined) {
-          break;
-        }
+    },
+    removeProperty: function (properties) {
+
+    },
+
+    // element
+    element: function () {
+      var _this = this;
+      if (!_this._.is.rendered) {
+        var element = document.createElement(_this._.tag);
+        element.id = _this.id;
+        return element;
+      } else {
+        return document.getElementById(_this.id);
       }
+    },
 
-      resolve(sub);
-    });
-  },
-
-  // set
-  set: function (path, value) {
-    return new Promise(function(resolve, reject) {
-      context_path = path.split('.');
-      sub = Active.active;
-      for (i=0; i<context_path.length; i++) {
-        if (i+1 === context_path.length) {
-          sub[context_path[i]] = value;
-          break;
+    // render
+    setID: function () {
+      var _this = this;
+      return _.p(function () {
+        var parentID = (_this._.parent || {}).id;
+        _this.id = `${(parentID || '')}${(parentID ? '-' : '')}${_this.name}`;
+        return _this.id;
+      });
+    },
+    render: function (root) {
+      var _this = this;
+      return _this.setID().then(function () {
+        // 1. actually render to DOM
+        var element = _this.element();
+        var root = _this._.parent !== undefined ? _this._.parent.element() : _this.hook;
+        var before = _this._.before !== undefined ? _this._.parent.child(_this._.before) : undefined;
+        if (before !== undefined) {
+          var beforeElement = before.element();
+          root.insertBefore(element, beforeElement);
         } else {
-          if (sub[context_path[i]] === undefined) {
-            sub[context_path[i]] = {};
+          root.appendChild(element);
+        }
+
+        // 2. write styles to DOM
+        _this._.is.rendered = true;
+        return _.all([
+          _this.setStyle(),
+          _this.setClasses(),
+          _this.setProperties(),
+          _this.setBindings(),
+          _this.setHTML(),
+        ]).then(function () {
+          // 3. go down through children
+          return _this.setChildren();
+        });
+      }).then(function () {
+        return _this;
+      });
+    },
+
+    // tree
+    child: function (name) {
+      // supports indices
+      var _this = this;
+      var _buffer = _this._.is.rendered ? _this._.children.rendered : _this._.children.buffer;
+      return _buffer.filter(function (child, index) {
+        return _.is.number(name) ? index === name : child.name === name;
+      })[0];
+    },
+    get: function (path) {
+      // flawless
+      // supports: dot sep string, string array, integer array
+      // with the caveat that, until rendering, the index will refer to the order in the definition.
+      var names = _.is.array(path) ? path : path.split('.');
+      var name = names.shift();
+      var newPath = _.is.array(path) ? names : names.join('.');
+      var child = this.child(name);
+      return newPath && newPath.length && child !== undefined ? child.get(newPath) : child;
+    },
+  }
+  this._component = function (name, args) {
+    let _component = new this.Component(name);
+    return _component.init(args);
+  }
+
+  // state object
+  this.State = function (name) {
+    this.name = name;
+    this._ = {
+      children: {
+        buffer: {},
+        registered: {},
+      },
+      style: {},
+      properties: {},
+      classes: [],
+      registered: false,
+    }
+  }
+  this.State.prototype = {
+    init: function (args) {
+      let _this = this;
+      _this._.fn = args.fn;
+      _this._.duration = args.duration;
+      return _.all([
+        _this.setStyle(args.style),
+        _this.setClasses(args.classes),
+        _this.setProperties(args.properties),
+        _this.setChildren(args.children),
+      ]).then(function () {
+        return _this;
+      });
+    },
+
+    setStyle: function (style) {
+      var _this = this;
+      style = (style || {});
+      style = _.merge(style, {'': {}}); // make buffer for self style
+      _.map(style, function (key, value) {
+        if (!_.is.object.all(value)) {
+          delete style[key];
+          style[''][key] = value;
+        }
+      });
+
+      // update style dictionary
+      _this._.style = _.merge(_this._.style, style);
+    },
+    setClasses: function (classes) {
+      var _this = this;
+      classes = (classes || []);
+      _this._.classes = _.map(_.merge(_this._.classes, classes), function (index, value) {
+        return value;
+      });
+    },
+    setProperties: function (properties) {
+      var _this = this;
+      properties = (properties || {});
+      _this._.properties = _.merge(_this._.properties, properties);
+    },
+    setChildren: function (children) {
+      let _this = this;
+      children = (children || _.map(_this._.children.buffer, function (key, child) {
+        return child;
+      }));
+      return _.all(children.map(function (unresolved) {
+        return _.p(unresolved).then(function (child) {
+          if (_this._.registered) {
+            return _this.registerChild(child);
+          } else {
+            return _this.bufferChild(child);
+          }
+        });
+      }));
+    },
+    bufferChild: function (child) {
+      var _this = this;
+      return _.p(function () {
+        child._.parent = _this;
+        _this._.children.buffer[child.name] = child;
+      });
+    },
+    registerChild: function (child) {
+      var _this = this;
+      return child.register(_this._.component).then(function () {
+        return _.p(function () {
+          delete _this._.children.buffer[child.name];
+          _this._.children.registered[child.name] = child;
+        });
+      }).then(function () {
+        return child;
+      });
+    },
+
+    // register
+    register: function (component) {
+      let _this = this;
+      _this._.component = component;
+      _this._.registered = true;
+      return ui.states.register(_this).then(function () {
+        return _this.setChildren();
+      });
+    },
+
+    // tree
+    path: function () {
+      var _this = this;
+      return _this._.parent !== undefined ? `${_this._.parent.path()}.${_this.name}` : _this.name;
+    },
+    child: function (name) {
+      // supports indices
+      return this.children[name];
+    },
+    get: function (path) {
+      // flawless
+      // supports: dot sep string, string array, integer array
+      // with the caveat that, until rendering, the index will refer to the order in the definition.
+      var names = _.is.array(path) ? path : path.split('.');
+      var name = names.shift();
+      var newPath = _.is.array(path) ? names : names.join('.');
+      var child = this.child(name);
+      return newPath && newPath.length && child !== undefined ? child.get(newPath) : child;
+    },
+
+    // activate
+    ancestry: function () {
+      var _this = this;
+      var data = {
+        style: _this._.style,
+        classes: _this._.classes,
+        properties: _this._.properties,
+        fn: _this._.fn,
+        duration: _this._.duration,
+      }
+      return _this._.parent !== undefined ? _.merge(_this._.parent.ancestry(), data) : data;
+    },
+    call: function (durationOverride) {
+      var _this = this;
+      return _.p(function () {
+        var _data = _this.ancestry();
+        var _component = _this._.component;
+        var _before = ((_data.fn || {}).before || _.p);
+        var _after = ((_data.fn || {}).after || _.p);
+        var _style = (_data.style || {});
+        var _classes = (_data.classes || {});
+        var _properties = (_data.properties || {});
+        var _duration = durationOverride !== undefined ? durationOverride : (_data.duration || 300);
+
+        // concatenate styles and classes from parent chain
+        // execute before and after functions
+        return _before(_component).then(function (_result) {
+          return _.all([
+            _component.setStyle(_style, _duration),
+            _component.setClasses(_classes),
+            _component.setProperties(_properties),
+          ]);
+        }).then(function () {
+          return _after(_component);
+        });
+      });
+    },
+  }
+  this._state = function (name, args) {
+    var _state = new this.State(name);
+    return _state.init(args);
+  }
+
+  // state buffer
+  this.StateBuffer = function () {
+    // TODO: add state map maybe
+    this.active = undefined;
+    this.buffer = {};
+    this.get = function (path) {
+      var _this = this;
+      return _.p(function () {
+        var path_array = path.split('.');
+        sub = _this.buffer;
+        var i;
+        for (i=0; i<path_array.length; i++) {
+          if (path_array[i] in sub) {
+            sub = sub[path_array[i]];
+          } else {
+            break;
           }
         }
-        sub = sub[context_path[i]];
+        return sub['_'] || [];
+      });
+    }
+    this.call = function (path, durationOverride) {
+      this.active = path;
+      return this.get(path).then(function (states) {
+        return _.all(states.map(function (state) {
+          return state.call(durationOverride);
+        }));
+      });
+    }
+    this.set = function (path, state) {
+      var _this = this;
+      return _.p(function () {
+        var path_array = path.split('.');
+        sub = _this.buffer;
+        var i;
+        for (i=0; i<path_array.length; i++) {
+          if (!(path_array[i] in sub)) {
+            sub[path_array[i]] = {_: []};
+          }
+          sub = sub[path_array[i]];
+
+          if (i+1 === path_array.length) {
+            sub['_'].push(state);
+          }
+        }
+      });
+    }
+    this.register = function (state) {
+      return this.set(state.path(), state);
+    }
+  }
+  this.states = new this.StateBuffer(),
+
+  // actions
+  this.Action = function () {
+
+  }
+
+  // context
+  this.API = function () {
+    var _api = this;
+    this.buffer = {};
+    this.active = {};
+
+    this.setup = function (args) {
+      args = (args || {});
+      this.urls = {
+        base: (args.base || '/api/'),
+        schema: (args.schema || 'schema/'),
+        token: (args.token || 'token/'),
       }
-      resolve(sub);
-    });
-  },
+
+      return _.request(this.urls.base + this.urls.schema).then(function (schema) {
+        return _.pmap(schema, function (_name, _args) {
+          _args['name'] = _name;
+          let _model = _api.model(_args);
+        });
+      });
+    }
+    this.getToken = function (username, password) {
+      return _.request(this.urls.base + this.urls.token, 'POST', {username: username, password: password}).then(function (result) {
+        return _.p(function () {
+          _.token = result.token;
+        });
+      });
+    }
+
+    this.Model = function (args) {
+      this.name = args.name;
+      this.prefix = args.prefix;
+      this.basename = args.basename;
+      this.fields = args.fields;
+      var _model = this;
+
+      // model instance
+      this.Instance = function (_args) {
+        var _instance = this;
+        _.map(_args, function (_key, _arg) {
+          if (_model.fields.contains(_key)) {
+            _instance[_key] = _arg;
+          }
+        });
+      }
+      this.Instance.prototype = {
+        save: function () {
+          var _instance = this;
+          return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/`, 'PATCH', _instance);
+        },
+        get: function () {
+          var _instance = this;
+          return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/`, 'GET').then(function (item) {
+            _api.buffer[_model.name][item._id] = item;
+            return item;
+          });
+        },
+        method: function (_method, type, data) {
+          var _instance = this;
+          return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/${(_method || '')}/`, type, data);
+        }
+      }
+      this.instance = function (_args) {
+        return new this.Instance(_args);
+      }
+      this.objects = {
+        get: function (_id, args) {
+          return _model.objects.filter(args).then(function (results) {
+            return results.filter(function (item) {
+              return item._id === _id;
+            });
+          }).then(function (results) {
+            return results.length ? results[0] : undefined;
+          });
+        },
+        method: function (_method, type, data) {
+          return _.request(`${_api.urls.base}${_model.prefix}/${(_method || '')}/`, type, data);
+        },
+        create: function (data) {
+          return _.request(`${_api.urls.base}${_model.prefix}/`, 'POST', data).then(function (item) {
+            return _.p(function () {
+              if (_id in item) {
+                _api.buffer[_model.name][item._id] = item;
+                return _model.instance(item);
+              } else {
+                return undefined;
+              }
+            });
+          });
+        },
+        all: function (force) {
+          return _model.objects.filter({force: force});
+        },
+        filter: function (args) {
+          _api.buffer[_model.name] = (_api.buffer[_model.name] || {});
+          args = (args || {});
+          var force = (args.force || false);
+          var data = (args.data || {});
+          return _.p().then(function () {
+            if (force) {
+              return _.request(`${_api.urls.base}${_model.prefix}/`, 'GET', data).then(function (result) {
+                result.map(function (item) {
+                  _api.buffer[_model.name][item._id] = item;
+                  return item;
+                });
+              });
+            }
+          }).then(function () {
+            // TODO: apply filters
+
+            return _.p(function () {
+              return _.map(_api.buffer[_model.name], function (index, item) {
+                return _model.instance(item);
+              });
+            });
+          });
+        },
+      }
+    }
+    this.models = {};
+    this.model = function (args) {
+      var _api = this;
+      var _model = new this.Model(args);
+
+      // Custom routes. Maybe do later if needed.
+      // _.map(args.routes, function (_name, _route) {
+      //   _name = _name.replace(`${_model.basename}-`, '').split('-').join('_');
+      //   if (!['list', 'detail'].contains(_name)) {
+      //     // remove prefix from route
+      //     _route = _route.replace(`${_model.prefix}/`, '').replace('^', '').replace('$', '').split('/');
+      //     if (_route.length == 2) {
+      //       // list_route
+      //       let _url = _route[0];
+      //       _model.objects[_name] = function (data) {
+      //
+      //       }
+      //     } else if (_route.length == 4) {
+      //       // detail_route
+      //       let _url = _route[2];
+      //       _model.Instance.prototype[_name] = function (data) {
+      //
+      //       }
+      //     }
+      //
+      //   }
+      // });
+
+      // Add to list of models
+      _api.models[args.name] = _model;
+    }
+  }
+  this.api = new this.API();
 }
+
+var ui = new UI();

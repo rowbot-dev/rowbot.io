@@ -1,12 +1,15 @@
 Test.application().then (function (app) {
   // render
   return app.render('hook');
-}).then(function () {
+}).then(function (app) {
   return _.all([
-    ui.api.setup().then(function () {
-      return ui.api.getToken('npiano', 'mach1');
-    }),
+    
   ]).then(function () {
+
+    // TODO: use beforeunload for actions
+    // window.addEventListener("beforeunload", function (e) {
+    //   ui.api.setup();
+    // });
 
   });
 }).catch(function (error) {
