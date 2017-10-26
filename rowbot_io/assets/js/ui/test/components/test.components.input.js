@@ -28,9 +28,9 @@ Test.components.input = function (name, args) {
           'border': '0px',
         },
       }),
-      ui._component('suggestion', {
-
-      }),
+      // ui._component('suggestion', {
+      //
+      // }),
       ui._component('message', {
 
       }),
@@ -40,22 +40,13 @@ Test.components.input = function (name, args) {
     // set and get content
     // set and get position, blur, and focus
     // set and remove message and errors
-    _input.map = function (value) {
-      return value;
+    _input.input = function (value, event) {
+
     }
 
     _input.get('input').setBindings({
-      'keypress': function (_this, event) {
-        var _element = _this.element();
-        if (event.which && ![8, 13, 16, 17, 18, 32, 37, 38, 39, 40, 91, 93].contains(event.which)) {
-          var start = _element.selectionStart, end = _element.selectionEnd;
-          _element.value = _element.value.slice(0, start) + _input.map(event.key) + _element.value.slice(end);
-
-          // Move the caret
-          _element.setSelectionRange(start + 1, start + 1);
-
-          event.preventDefault();
-        }
+      'input': function (_this, event) {
+        return _input.input(_this.element().value, event);
       },
     });
 
