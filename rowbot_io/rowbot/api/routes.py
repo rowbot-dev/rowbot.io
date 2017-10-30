@@ -4,6 +4,8 @@ from django.conf.urls import url
 
 # DRF
 from rest_framework.authtoken import views
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
 
 # Local
 from rowbot.api.router import SchemaRouter
@@ -50,6 +52,16 @@ router.register(r'assets/instances', AssetInstanceViewSet)
 urlpatterns = router.urls
 
 # api token
+class AuthTokenView(views.ObtainAuthToken):
+  def post(self, request, *args, **kwargs):
+    if request.user.is_authenticated:
+      user = request.user
+    else:
+      serializer = self.serializer_class(data=request.data, context={'request': request})
+      user = serializer.validated_data['user']
+    token, created = Token.objects.get_or_create(user=user)
+    return Response({'token': token.key})
+
 urlpatterns += [
-  url(r'^token/', views.obtain_auth_token)
+  url(r'^token/', AuthTokenView.as_view())
 ]

@@ -10,6 +10,12 @@ from rowbot.models.member import Member
 from rowbot.models.role import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
 from rowbot.models.team import TeamModel, Team, TeamInstance, TeamRecord
 
+class UUIDRelatedField(serializers.PrimaryKeyRelatedField):
+  def to_representation(self, value):
+    if self.pk_field is not None:
+      return self.pk_field.to_representation(value.pk.hex)
+    return value.pk.hex
+
 # Heirarchy:
 # Asset
 # Role
@@ -20,113 +26,124 @@ from rowbot.models.team import TeamModel, Team, TeamInstance, TeamRecord
 
 # Asset
 class AssetModelSerializer(serializers.ModelSerializer):
-  club = serializers.PrimaryKeyRelatedField(read_only=True)
-  parts = serializers.PrimaryKeyRelatedField(queryset=AssetModel.objects.all())
-  is_part_of = serializers.PrimaryKeyRelatedField(queryset=AssetModel.objects.all())
-  assets = serializers.PrimaryKeyRelatedField(read_only=True)
+  club = UUIDRelatedField(read_only=True)
+  parts = UUIDRelatedField(queryset=AssetModel.objects.all(), many=True)
+  is_part_of = UUIDRelatedField(queryset=AssetModel.objects.all(), many=True)
+  assets = UUIDRelatedField(read_only=True)
 
   class Meta:
     model = AssetModel
     fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'parts', 'is_part_of', 'assets')
+    depth = 1
 
 class AssetInstanceSerializer(serializers.ModelSerializer):
-  asset = serializers.PrimaryKeyRelatedField(read_only=True)
-  team = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all())
-  in_possession_of = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all())
+  asset = UUIDRelatedField(read_only=True)
+  team = UUIDRelatedField(queryset=Team.objects.all(), many=True)
+  in_possession_of = UUIDRelatedField(queryset=Team.objects.all(), many=True)
 
   class Meta:
     model = AssetInstance
     fields = ('_id', 'date_created', 'metadata', 'asset', 'team', 'in_possession_of')
+    depth = 1
 
 class AssetSerializer(serializers.ModelSerializer):
-  model = serializers.PrimaryKeyRelatedField(read_only=True)
-  parts = serializers.PrimaryKeyRelatedField(queryset=Asset.objects.all())
-  is_part_of = serializers.PrimaryKeyRelatedField(queryset=Asset.objects.all())
+  model = UUIDRelatedField(read_only=True)
+  parts = UUIDRelatedField(queryset=Asset.objects.all(), many=True)
+  is_part_of = UUIDRelatedField(queryset=Asset.objects.all(), many=True)
   instances = AssetInstanceSerializer(many=True)
 
   class Meta:
     model = Asset
     fields = ('_id', 'date_created', 'name', 'location', 'description', 'model', 'parts', 'is_part_of', 'instances')
+    depth = 1
 
 # Role
 class RoleModelSerializer(serializers.ModelSerializer):
-  club = serializers.PrimaryKeyRelatedField(queryset=Club.objects.all())
-  is_superior_to = serializers.PrimaryKeyRelatedField(queryset=RoleModel.objects.all())
-  is_subordinate_to = serializers.PrimaryKeyRelatedField(queryset=RoleModel.objects.all())
-  permissions = serializers.PrimaryKeyRelatedField(queryset=RolePermission.objects.all())
-  roles = serializers.PrimaryKeyRelatedField(read_only=True)
+  club = UUIDRelatedField(queryset=Club.objects.all())
+  is_superior_to = UUIDRelatedField(queryset=RoleModel.objects.all(), many=True)
+  is_subordinate_to = UUIDRelatedField(queryset=RoleModel.objects.all(), many=True)
+  permissions = UUIDRelatedField(queryset=RolePermission.objects.all(), many=True)
+  roles = UUIDRelatedField(read_only=True, many=True)
 
   class Meta:
     model = RoleModel
     fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superior_to', 'is_subordinate_to', 'permissions', 'roles')
+    depth = 1
 
 class RolePermissionSerializer(serializers.ModelSerializer):
-  models = serializers.PrimaryKeyRelatedField(queryset=RoleModel.objects.all())
+  models = UUIDRelatedField(queryset=RoleModel.objects.all(), many=True)
 
   class Meta:
     model = RolePermission
     fields = ('_id', 'date_created', 'model_name', 'name', 'models')
+    depth = 1
 
 class RoleInstanceSerializer(serializers.ModelSerializer):
-  role = serializers.PrimaryKeyRelatedField(read_only=True)
-  event = serializers.PrimaryKeyRelatedField(read_only=True)
+  role = UUIDRelatedField(read_only=True)
+  event = UUIDRelatedField(read_only=True)
 
   class Meta:
     model = RoleInstance
     fields = ('_id', 'date_created', 'role', 'event')
+    depth = 1
 
 class RoleRecordSerializer(serializers.ModelSerializer):
-  role = serializers.PrimaryKeyRelatedField(read_only=True)
-  event = serializers.PrimaryKeyRelatedField(read_only=True)
+  role = UUIDRelatedField(read_only=True)
+  event = UUIDRelatedField(read_only=True)
 
   class Meta:
     model = RoleRecord
     fields = ('_id', 'date_created', 'role', 'event')
+    depth = 1
 
 class RoleSerializer(serializers.ModelSerializer):
-  team = serializers.PrimaryKeyRelatedField(read_only=True)
-  model = serializers.PrimaryKeyRelatedField(read_only=True)
-  member = serializers.PrimaryKeyRelatedField(read_only=True)
-  is_superior_to = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all())
-  is_subordinate_to = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all())
+  team = UUIDRelatedField(read_only=True)
+  model = UUIDRelatedField(read_only=True)
+  member = UUIDRelatedField(read_only=True)
+  is_superior_to = UUIDRelatedField(queryset=Role.objects.all(), many=True)
+  is_subordinate_to = UUIDRelatedField(queryset=Role.objects.all(), many=True)
   instances = RoleInstanceSerializer(many=True)
   records = RoleRecordSerializer(many=True)
 
   class Meta:
     model = Role
     fields = ('_id', 'date_created', 'nickname', 'team', 'model', 'member', 'is_superior_to', 'is_subordinate_to', 'instances', 'records')
+    depth = 1
 
 # Team
 class TeamModelSerializer(serializers.ModelSerializer):
-  club = serializers.PrimaryKeyRelatedField(read_only=True)
-  is_superset_of = serializers.PrimaryKeyRelatedField(queryset=TeamModel.objects.all())
-  is_subset_of = serializers.PrimaryKeyRelatedField(queryset=TeamModel.objects.all())
-  teams = serializers.PrimaryKeyRelatedField(read_only=True)
+  club = UUIDRelatedField(read_only=True)
+  is_superset_of = UUIDRelatedField(queryset=TeamModel.objects.all(), many=True)
+  is_subset_of = UUIDRelatedField(queryset=TeamModel.objects.all(), many=True)
+  teams = UUIDRelatedField(read_only=True)
 
   class Meta:
     model = TeamModel
     fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superset_of', 'is_subset_of', 'teams')
+    depth = 1
 
 class TeamInstanceSerializer(serializers.ModelSerializer):
-  team = serializers.PrimaryKeyRelatedField(read_only=True)
-  event = serializers.PrimaryKeyRelatedField(read_only=True)
+  team = UUIDRelatedField(read_only=True)
+  event = UUIDRelatedField(read_only=True)
 
   class Meta:
     model = TeamInstance
     fields = ('_id', 'date_created', 'team', 'event')
+    depth = 1
 
 class TeamRecordSerializer(serializers.ModelSerializer):
-  team = serializers.PrimaryKeyRelatedField(read_only=True)
-  event = serializers.PrimaryKeyRelatedField(read_only=True)
+  team = UUIDRelatedField(read_only=True)
+  event = UUIDRelatedField(read_only=True)
 
   class Meta:
     model = TeamRecord
     fields = ('_id', 'date_created', 'team', 'event')
+    depth = 1
 
 class TeamSerializer(serializers.ModelSerializer):
-  model = serializers.PrimaryKeyRelatedField(read_only=True)
-  is_superset_of = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all())
-  is_subset_of = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all())
+  model = UUIDRelatedField(read_only=True)
+  is_superset_of = UUIDRelatedField(queryset=Team.objects.all(), many=True)
+  is_subset_of = UUIDRelatedField(queryset=Team.objects.all(), many=True)
   instances = TeamInstanceSerializer(many=True)
   records = TeamRecordSerializer(many=True)
   assets = AssetInstanceSerializer(many=True)
@@ -135,36 +152,40 @@ class TeamSerializer(serializers.ModelSerializer):
   class Meta:
     model = Team
     fields = ('_id', 'date_created', 'name', 'club', 'model', 'is_superset_of', 'is_subset_of', 'instances', 'records', 'assets', 'roles')
+    depth = 1
 
 # Event
 class EventModelSerializer(serializers.ModelSerializer):
-  club = serializers.PrimaryKeyRelatedField(read_only=True)
-  parts = serializers.PrimaryKeyRelatedField(queryset=EventModel.objects.all())
-  is_part_of = serializers.PrimaryKeyRelatedField(queryset=EventModel.objects.all())
-  events = serializers.PrimaryKeyRelatedField(read_only=True)
+  club = UUIDRelatedField(read_only=True)
+  parts = UUIDRelatedField(queryset=EventModel.objects.all(), many=True)
+  is_part_of = UUIDRelatedField(queryset=EventModel.objects.all(), many=True)
+  events = UUIDRelatedField(read_only=True)
 
   class Meta:
     model = EventModel
     fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'club', 'parts', 'is_part_of', 'events')
+    depth = 1
 
 class EventInstanceSerializer(serializers.ModelSerializer):
-  event = serializers.PrimaryKeyRelatedField(read_only=True)
+  event = UUIDRelatedField(read_only=True)
   teams = TeamInstanceSerializer(many=True)
 
   class Meta:
     model = EventInstance
     fields = ('_id', 'date_created', 'description', 'event', 'teams')
+    depth = 1
 
 class EventSerializer(serializers.ModelSerializer):
 
-  model = serializers.PrimaryKeyRelatedField(read_only=True)
-  parts = serializers.PrimaryKeyRelatedField(queryset=Event.objects.all())
-  is_part_of = serializers.PrimaryKeyRelatedField(queryset=Event.objects.all())
+  model = UUIDRelatedField(read_only=True)
+  parts = UUIDRelatedField(queryset=Event.objects.all(), many=True)
+  is_part_of = UUIDRelatedField(queryset=Event.objects.all(), many=True)
   instances = EventInstanceSerializer(many=True)
 
   class Meta:
     model = Event
     fields = ('_id', 'date_created', 'name', 'description', 'model', 'parts', 'is_part_of', 'instances')
+    depth = 1
 
 # Club
 class ClubSerializer(serializers.ModelSerializer):
@@ -176,6 +197,7 @@ class ClubSerializer(serializers.ModelSerializer):
   class Meta:
     model = Club
     fields = ('name', 'asset_models', 'role_models', 'team_models', 'event_models')
+    depth = 1
 
 # Member
 class MemberSerializer(serializers.ModelSerializer):
@@ -184,3 +206,4 @@ class MemberSerializer(serializers.ModelSerializer):
   class Meta:
     model = Member
     fields = ('_id', 'date_created', 'username', 'email', 'first_name', 'last_name', 'is_activated', 'is_enabled', 'is_staff', 'roles')
+    depth = 1

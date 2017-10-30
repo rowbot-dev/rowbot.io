@@ -1,6 +1,7 @@
-var Auth = (Auth || {});
-Auth.application = function () {
-  return ui._component('auth', {
+
+var App = (App || {});
+App.application = function () {
+  return ui._component('app', {
     style: {
       'height': '100%',
       'width': '100%',
@@ -15,10 +16,12 @@ Auth.application = function () {
       },
     },
     children: [
-      Auth.interfaces.activation(),
-      Auth.interfaces.login(),
-      Auth.interfaces.referral(),
-      Auth.interfaces.signup(),
+      App.interfaces.main(),
+      // App.interfaces.club(),
+      // App.interfaces.event(),
+      // App.interfaces.team(),
+      // App.interfaces.role(),
+      // App.interfaces.asset(),
     ],
   });
 }

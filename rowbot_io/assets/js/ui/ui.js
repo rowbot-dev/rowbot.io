@@ -198,13 +198,45 @@ var UI = function () {
         _this._.children.buffer.push(child);
       });
     },
+    children: function () {
+      let _this = this;
+      if (_this._.is.rendered) {
+        return _this._.children.rendered;
+      } else {
+        return _this._.children.buffer;
+      }
+    },
 
     // post-render
-    removeClass: function (classes) {
+    removeClass: function (_class) {
+      var _this = this;
+      if (_class !== undefined) {
+        _this._.classes = _this._.classes.filter(function (_cls) {
+          return _cls !== _class; // remove from list
+        });
 
+        if (_this._.is.rendered) {
+          var element = _this.element();
+          return _.p(function () {
+            element.classList.remove(_class);
+          });
+        }
+      }
     },
     removeProperty: function (properties) {
 
+    },
+    removeBinding: function (key) {
+      var _this = this;
+      var _binding = _this._.bindings[key];
+      delete _this._.bindings[key];
+
+      if (_this._.is.rendered) {
+        var element = _this.element();
+        return _.p(function () {
+          element.removeEventListener(key, _binding);
+        });
+      }
     },
 
     // element
@@ -564,13 +596,21 @@ var UI = function () {
         method: function (_method, type, data) {
           var _instance = this;
           return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/${(_method || '')}/`, type, data);
-        }
+        },
+        remove: function () {
+
+        },
+        bind: function () {
+
+        },
       }
       this.instance = function (_args) {
         return new this.Instance(_args);
       }
       this.objects = {
         get: function (_id, args) {
+          args = (args || {});
+          args.id = _id;
           return _model.objects.filter(args).then(function (results) {
             return results.filter(function (item) {
               return item._id === _id;
@@ -602,9 +642,11 @@ var UI = function () {
           args = (args || {});
           var force = (args.force || false);
           var data = (args.data || {});
+          var _id = args.id ? `${args.id}/` : '';
           return _.p().then(function () {
             if (force) {
-              return _.request(`${_api.urls.base}${_model.prefix}/`, 'GET', data).then(function (result) {
+              return _.request(`${_api.urls.base}${_model.prefix}/${_id}`, 'GET', data).then(function (result) {
+                result = _.is.array(result) ? result : [result];
                 result.map(function (item) {
                   _api.buffer[_model.name][item._id] = item;
                   return item;
