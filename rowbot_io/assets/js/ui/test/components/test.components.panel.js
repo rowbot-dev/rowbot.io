@@ -41,7 +41,7 @@ Test.components.panel = function (name, args) {
           ui._component('bar', {
             style: {
               'position': 'relative',
-              'height': '100px',
+              'height': '10%',
               'width': '100%',
               'border': '1px solid black',
               'top': '0%',
@@ -54,36 +54,43 @@ Test.components.panel = function (name, args) {
 
     var raf = window.requestAnimationFrame || window.setImmediate || function(c) { return setTimeout(c, 0); };
     var _container = _panel.get('container');
+    var _content = _container.get('content');
     var _scroll = _panel.get('scroll');
     var _bar = _scroll.get('bar');
 
     _panel.move = function (event) {
       var _containerElement = _container.element();
-      _container.scrollRatio = _containerElement.clientHeight / _containerElement.scrollHeight;
+      var _contentElement = _content.element();
+      _container.scrollRatio = _containerElement.clientHeight / _contentElement.clientHeight;
 
       raf(function () {
         // Hide scrollbar if no scrolling is possible
         if (_container.scrollRatio >= 1) {
           return _container.setClasses(['hidden']);
         } else {
+          var height = Math.max(_container.scrollRatio * 100, 10);
+          var top = (_containerElement.scrollTop / (_contentElement.clientHeight - _containerElement.clientHeight)) * (100 - height);
+
           return _.all([
             _container.removeClass('hidden'),
             _bar.setStyle({
-              'height': `${Math.max(_container.scrollRatio * 100, 10)}%`,
-              'top': `${(_containerElement.scrollTop / _containerElement.clientHeight) * 50}%`,
+              'height': `${height}%`,
+              'top': `${top}%`,
             }),
           ]);
         }
       });
     }
     _panel.drag = function (event) {
-      _barElement = _bar.element();
+      var _containerElement = _container.element();
+      var _barElement = _bar.element();
       var delta = event.pageY - _bar.pageY;
       _bar.pageY = event.pageY;
 
       raf(function() {
-        _container.scrollTop += delta / _container.scrollRatio;
+        _containerElement.scrollTop += delta / _container.scrollRatio;
       });
+      event.preventDefault();
     }
     _panel.stop = function () {
       return _.all([
