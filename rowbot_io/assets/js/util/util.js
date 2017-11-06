@@ -34,7 +34,7 @@ var _ = {
     fnList = (fnList || []);
     return fnList.reduce(function (whole, part) {
       return whole.then(function (value) {
-        return part(value);
+        return _.is.f(part) ? part(value) : value;
       });
     }, _.p(input));
   },

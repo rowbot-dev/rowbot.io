@@ -11,10 +11,11 @@ from rowbot.models.role import RoleModel, RolePermission, Role, RoleInstance, Ro
 from rowbot.models.team import TeamModel, Team, TeamInstance, TeamRecord
 
 class UUIDRelatedField(serializers.PrimaryKeyRelatedField):
+  def use_pk_only_optimization(self):
+      return False
+
   def to_representation(self, value):
-    if self.pk_field is not None:
-      return self.pk_field.to_representation(value.pk.hex)
-    return value.pk.hex
+    return value._ref
 
 # Heirarchy:
 # Asset
@@ -33,7 +34,7 @@ class AssetModelSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = AssetModel
-    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'parts', 'is_part_of', 'assets')
+    fields = ('_id', '_ref', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'parts', 'is_part_of', 'assets')
     depth = 1
 
 class AssetInstanceSerializer(serializers.ModelSerializer):
@@ -43,7 +44,7 @@ class AssetInstanceSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = AssetInstance
-    fields = ('_id', 'date_created', 'metadata', 'asset', 'team', 'in_possession_of')
+    fields = ('_id', '_ref', 'date_created', 'metadata', 'asset', 'team', 'in_possession_of')
     depth = 1
 
 class AssetSerializer(serializers.ModelSerializer):
@@ -54,7 +55,7 @@ class AssetSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Asset
-    fields = ('_id', 'date_created', 'name', 'location', 'description', 'model', 'parts', 'is_part_of', 'instances')
+    fields = ('_id', '_ref', 'date_created', 'name', 'location', 'description', 'model', 'parts', 'is_part_of', 'instances')
     depth = 1
 
 # Role
@@ -67,7 +68,7 @@ class RoleModelSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = RoleModel
-    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superior_to', 'is_subordinate_to', 'permissions', 'roles')
+    fields = ('_id', '_ref', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superior_to', 'is_subordinate_to', 'permissions', 'roles')
     depth = 1
 
 class RolePermissionSerializer(serializers.ModelSerializer):
@@ -75,7 +76,7 @@ class RolePermissionSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = RolePermission
-    fields = ('_id', 'date_created', 'model_name', 'name', 'models')
+    fields = ('_id', '_ref', 'date_created', 'model_name', 'name', 'models')
     depth = 1
 
 class RoleInstanceSerializer(serializers.ModelSerializer):
@@ -84,7 +85,7 @@ class RoleInstanceSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = RoleInstance
-    fields = ('_id', 'date_created', 'role', 'event')
+    fields = ('_id', '_ref', 'date_created', 'role', 'event')
     depth = 1
 
 class RoleRecordSerializer(serializers.ModelSerializer):
@@ -93,7 +94,7 @@ class RoleRecordSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = RoleRecord
-    fields = ('_id', 'date_created', 'role', 'event')
+    fields = ('_id', '_ref', 'date_created', 'role', 'event')
     depth = 1
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -107,7 +108,7 @@ class RoleSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Role
-    fields = ('_id', 'date_created', 'nickname', 'team', 'model', 'member', 'is_superior_to', 'is_subordinate_to', 'instances', 'records')
+    fields = ('_id', '_ref', 'date_created', 'nickname', 'team', 'model', 'member', 'is_superior_to', 'is_subordinate_to', 'instances', 'records')
     depth = 1
 
 # Team
@@ -119,7 +120,7 @@ class TeamModelSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = TeamModel
-    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superset_of', 'is_subset_of', 'teams')
+    fields = ('_id', '_ref', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'description', 'club', 'is_superset_of', 'is_subset_of', 'teams')
     depth = 1
 
 class TeamInstanceSerializer(serializers.ModelSerializer):
@@ -128,7 +129,7 @@ class TeamInstanceSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = TeamInstance
-    fields = ('_id', 'date_created', 'team', 'event')
+    fields = ('_id', '_ref', 'date_created', 'team', 'event')
     depth = 1
 
 class TeamRecordSerializer(serializers.ModelSerializer):
@@ -137,7 +138,7 @@ class TeamRecordSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = TeamRecord
-    fields = ('_id', 'date_created', 'team', 'event')
+    fields = ('_id', '_ref', 'date_created', 'team', 'event')
     depth = 1
 
 class TeamSerializer(serializers.ModelSerializer):
@@ -151,7 +152,7 @@ class TeamSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Team
-    fields = ('_id', 'date_created', 'name', 'club', 'model', 'is_superset_of', 'is_subset_of', 'instances', 'records', 'assets', 'roles')
+    fields = ('_id', '_ref', 'date_created', 'name', 'club', 'model', 'is_superset_of', 'is_subset_of', 'instances', 'records', 'assets', 'roles')
     depth = 1
 
 # Event
@@ -163,7 +164,7 @@ class EventModelSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = EventModel
-    fields = ('_id', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'club', 'parts', 'is_part_of', 'events')
+    fields = ('_id', '_ref', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'club', 'parts', 'is_part_of', 'events')
     depth = 1
 
 class EventInstanceSerializer(serializers.ModelSerializer):
@@ -172,7 +173,7 @@ class EventInstanceSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = EventInstance
-    fields = ('_id', 'date_created', 'description', 'event', 'teams')
+    fields = ('_id', '_ref', 'date_created', 'description', 'event', 'teams')
     depth = 1
 
 class EventSerializer(serializers.ModelSerializer):
@@ -184,7 +185,7 @@ class EventSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Event
-    fields = ('_id', 'date_created', 'name', 'description', 'model', 'parts', 'is_part_of', 'instances')
+    fields = ('_id', '_ref', 'date_created', 'name', 'description', 'model', 'parts', 'is_part_of', 'instances')
     depth = 1
 
 # Club
@@ -205,5 +206,5 @@ class MemberSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Member
-    fields = ('_id', 'date_created', 'username', 'email', 'first_name', 'last_name', 'is_activated', 'is_enabled', 'is_staff', 'roles')
+    fields = ('_id', '_ref', 'date_created', 'username', 'email', 'first_name', 'last_name', 'is_activated', 'is_enabled', 'is_staff', 'roles')
     depth = 1

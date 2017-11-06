@@ -51,3 +51,7 @@ class Model(models.Model):
   @property
   def _id(self):
     return self.id.hex
+
+  @property
+  def _ref(self):
+    return '{}.{}'.format(self.__class__.__name__, self._id)

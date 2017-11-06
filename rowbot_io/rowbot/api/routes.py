@@ -54,13 +54,19 @@ urlpatterns = router.urls
 # api token
 class AuthTokenView(views.ObtainAuthToken):
   def post(self, request, *args, **kwargs):
+    user = None
     if request.user.is_authenticated:
       user = request.user
     else:
       serializer = self.serializer_class(data=request.data, context={'request': request})
-      user = serializer.validated_data['user']
-    token, created = Token.objects.get_or_create(user=user)
-    return Response({'token': token.key})
+      if serializer.is_valid():
+        user = serializer.validated_data['user']
+
+    if user is not None:
+      token, created = Token.objects.get_or_create(user=user)
+      return Response({'token': token.key})
+    else:
+      return Response({})
 
 urlpatterns += [
   url(r'^token/', AuthTokenView.as_view())

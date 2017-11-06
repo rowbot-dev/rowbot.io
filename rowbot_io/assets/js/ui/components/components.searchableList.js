@@ -83,24 +83,24 @@ Components.searchableList = function (id, args) {
     base.search = base.cc.searchFilterBar.cc.search;
     base.data = {
       // variables
-      limit: undefined,
-      previousQuery: '',
-      query: '',
-      filter: '',
-      lock: false,
-      reset: false,
+      limit: undefined, // limit number of items displayed but not loaded
+      previousQuery: '', // no use that I can see
+      query: '', // stores current search query
+      filter: '', // stores current category
+      lock: false, // prevent double rendering, should be solvable
+      reset: false, // clear all buffers and process everything again
 
       // actual datasets
       storage: {
-        dataset: {},
-        subset: {},
+        dataset: {}, // set of all processed data that can be displayed
+        subset: {}, // set of all data that passes filters applied
         virtual: {
-          list: [],
-          rendered: [],
+          list: [], // list version of subset
+          rendered: [], // unit components rendered inside the wrapper
         },
-        queries: [],
-        filters: {},
-        defaultfilters: [],
+        queries: [], // history of queries submitted
+        filters: {}, // set of all filters that can be applied and their metadata
+        defaultfilters: [], // set of filters to apply by default when first displaying the data
       },
 
       // methods

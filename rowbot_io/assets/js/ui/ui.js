@@ -568,15 +568,22 @@ var UI = function () {
       var _model = this;
 
       // model instance
-      this.Instance = function (_args) {
+      _model.Instance = function (_args) {
         var _instance = this;
         _.map(_args, function (_key, _arg) {
           if (_model.fields.contains(_key)) {
-            _instance[_key] = _arg;
+            if (_.is.array(_arg) && _arg.length) {
+              var relatedModel = _arg[0]._ref.split('.')[0];
+              _instance[_key] = _arg.map(function (_item) {
+                return _api.models[relatedModel].instance(_item);
+              });
+            } else {
+              _instance[_key] = _arg;
+            }
           }
         });
       }
-      this.Instance.prototype = {
+      _model.Instance.prototype = {
         save: function () {
           var _instance = this;
           return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/`, 'PATCH', _instance);
@@ -592,6 +599,13 @@ var UI = function () {
           var _instance = this;
           return _.request(`${_api.urls.base}${_model.prefix}/${_instance._id}/${(_method || '')}/`, type, data);
         },
+        relation: function (property, force) {
+          var _instance = this;
+          if (_model.fields.contains(property)) {
+            var [model, id] = _instance[property].split('.');
+            return _api.get(model, id, force);
+          }
+        },
         remove: function () {
 
         },
@@ -599,10 +613,10 @@ var UI = function () {
 
         },
       }
-      this.instance = function (_args) {
+      _model.instance = function (_args) {
         return new this.Instance(_args);
       }
-      this.objects = {
+      _model.objects = {
         get: function (_id, args) {
           args = (args || {});
           args.id = _id;
@@ -638,23 +652,36 @@ var UI = function () {
           var force = (args.force || false);
           var data = (args.data || {});
           var _id = args.id ? `${args.id}/` : '';
-          return _.p().then(function () {
-            if (force) {
+          return _model.objects.local().then(function (_models) {
+            if (force || !_models.length) {
               return _.request(`${_api.urls.base}${_model.prefix}/${_id}`, 'GET', data).then(function (result) {
                 result = _.is.array(result) ? result : [result];
                 result.map(function (item) {
-                  _api.buffer[_model.name][item._id] = item;
-                  return item;
+                  var instance = _model.instance(item)
+                  _api.buffer[_model.name][item._id] = instance;
+                  return instance;
                 });
               });
             }
           }).then(function () {
-            // TODO: apply filters
-
-            return _.p(function () {
-              return _.map(_api.buffer[_model.name], function (index, item) {
-                return _model.instance(item);
-              });
+            return _model.objects.local();
+          }).then(function (data) {
+            if (args.id) {
+              return data.filter(function (item) {
+                return item._id === args.id;
+              })[0];
+            } else {
+              return data;
+            }
+          });
+        },
+        get: function (id, force) {
+          return _model.objects.filter({id: id, force: force});
+        },
+        local: function () {
+          return _.p(function () {
+            return _.map(_api.buffer[_model.name], function (index, item) {
+              return item;
             });
           });
         },
@@ -690,6 +717,15 @@ var UI = function () {
 
       // Add to list of models
       _api.models[args.name] = _model;
+    }
+
+    this.get = function (model, id, force) {
+      var _this = this;
+      return _.p(function () {
+        if (model in _this.models) {
+          return _this.models[model].objects.get(id, force);
+        }
+      });
     }
   }
   this.api = new this.API();

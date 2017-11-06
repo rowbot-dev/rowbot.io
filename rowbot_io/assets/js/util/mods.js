@@ -13,8 +13,57 @@ if(!String.prototype.trim) {
   }
 }
 
-String.prototype.contains = function (object) {
-  return this.indexOf(object) !== -1;
+String.prototype.contains = function (string) {
+  return this.indexOf(string) !== -1;
+}
+
+String.prototype.score = function (query) {
+  var string = this;
+  if (string === query) {
+    return 1;
+  }
+
+  var totalCharacterScore = 0;
+  var queryLength = query.length;
+  var stringLength = string.length;
+
+  var indexInQuery = 0;
+  var indexInString = 0;
+
+  while (indexInQuery < queryLength) {
+    let character = query[indexInQuery++];
+    let lowerCaseIndex = string.indexOf(character.toLowerCase());
+    let upperCaseIndex = string.indexOf(character.toUpperCase());
+    let minIndex = Math.min(lowerCaseIndex, upperCaseIndex);
+    if (minIndex === -1) {
+      minIndex = Math.max(lowerCaseIndex, upperCaseIndex);
+    }
+    indexInString = minIndex;
+
+    if (indexInString === -1) {
+      return 0; // not found
+    }
+
+    // initial score
+    let characterScore = 0.1;
+
+    // same case bonus
+    if (string[indexInString] === character) {
+      characterScore += 0.1;
+    }
+
+    // start of string bonus
+    if (indexInString === 0) {
+      characterScore += 0.8;
+    }
+
+    string = string.substring(indexInString + 1, stringLength)
+
+    totalCharacterScore += characterScore
+  }
+
+  var queryScore = totalCharacterScore / queryLength
+  return ((queryScore * (queryLength / stringLength)) + queryScore) / 2
 }
 
 // Arrays
@@ -27,6 +76,22 @@ Array.prototype.sum = function (object) {
     return f+s;
   });
 }
+
+Array.prototype.mean = function () {
+  return this.sum() / this.length;
+}
+
+Array.prototype.index = function (property) {
+  return this.reduce(function (whole, part) {
+    whole[part[property]] = part;
+    return whole;
+  }, {});
+}
+
+Array.prototype.extend = function (array) {
+  Array.prototype.push.apply(this, array);
+}
+
 
 Array.range = function (start, stop, step) {
   if (typeof stop == 'undefined') {

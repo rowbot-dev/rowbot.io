@@ -27,12 +27,12 @@ Components.input = function (name, args) {
           'border': '0px',
         },
       }),
-      // ui._component('suggestion', {
-      //
-      // }),
-      // ui._component('message', {
-      //
-      // }),
+      Components.button('message', {
+
+      }),
+      Components.button('clear', {
+
+      }),
     ],
   }, args)).then(function (_input) {
 

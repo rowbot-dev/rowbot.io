@@ -3,8 +3,11 @@ Test.application().then (function (app) {
   return app.render('hook');
 }).then(function (app) {
   return _.all([
-    
+    ui.api.setup().then(function () {
+      ui.api.getToken();
+    }),
   ]).then(function () {
+    return ui.states.call('main');
 
     // TODO: use beforeunload for actions
     // window.addEventListener("beforeunload", function (e) {
