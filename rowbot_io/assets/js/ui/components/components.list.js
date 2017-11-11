@@ -10,9 +10,8 @@ List component
 
 */
 
-var Test = (Test || {});
-Test.components = (Test.components || {});
-Test.components.list = function (name, args) {
+var Components = (Components || {});
+Components.list = function (name, args) {
   return ui._component(name, {
     children: [
       ui._component('search', {
@@ -48,6 +47,12 @@ Test.components.list = function (name, args) {
         ],
       }),
       Components.panel('list', {
+        style: {
+          'height': '300px',
+          'div.hidden': {
+            'display': 'none',
+          },
+        },
         children: [
 
           // contains list items
@@ -74,7 +79,20 @@ Test.components.list = function (name, args) {
   }).then(function (_list) {
 
     // component variables
+    var _input = _list.get('search.input');
     var _wrapper = _list.get('list.container.content.wrapper');
+
+    /*
+
+    Input bindings
+
+    */
+    _input.input = function (value, event) {
+      return _.p(function () {
+        _list.metadata.query.buffer.main = value;
+        return _list.data.load();
+      });
+    }
 
     /*
 
@@ -89,17 +107,18 @@ Test.components.list = function (name, args) {
         score: function (_datum) {
           // normalised is an object with categories as keys and corresponding values.
           // for each category, check against query.buffer
-          var query = _list.metadata.query;
+          var _query = this;
           var _target = _datum.target;
           var _normalised = _datum.normalised;
           return _.p(function () {
-            return _.map(_normalised, function (key, value) {
-              var results = {};
-              if (key in query.buffer) {
-                let _query = query.buffer[key];
-                results[key] = value.score(_query);
+            return _.map(_normalised, function (_key, _value) {
+              let results = {};
+              let exclusive = (_list.metadata.exclusive || _target.exclusive);
+              if (_key in _query.buffer) {
+                let _partial = _query.buffer[_key];
+                results[_key] = _value.score(_partial, exclusive);
               } else {
-                results[key] = (_list.metadata.exclusive || _target.exclusive) ? 0 : 1;
+                results[_key] = exclusive ? 0 : 1;
               }
               return results;
             }).reduce(function (whole, part) {
@@ -139,13 +158,13 @@ Test.components.list = function (name, args) {
         // from here, each individual item makes its way down into the display function, accruing
         // modifications as it goes. It will eventually have a normalised version,
         return _target.source().then(function (_data) {
-          return _._all(_data.map(function (_unit) {
-            return _list.data.display.main({target: _target, item: _unit, normalised: _target.normalise(_unit)});
+          return _._all(_data.map(function (_item) {
+            return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
           }));
         }).then(function () {
           return _target.force().then(function (_data) {
-            return _._all(_data.map(function (_unit) {
-              return _list.data.display.main({target: _target, item: _unit, normalised: _target.normalise(_unit)});
+            return _._all(_data.map(function (_item) {
+              return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
             }));
           });
         });
@@ -165,8 +184,8 @@ Test.components.list = function (name, args) {
       }
 
       // normalised objects should contain a list of properties to be compared with the queries
-      _target.normalise = function (_unit) {
-        return _unit;
+      _target.normalise = function (_item) {
+        return _item;
       }
       _target.unit = function (name, args) {
         return ui._component(name, {
@@ -193,13 +212,14 @@ Test.components.list = function (name, args) {
 
     */
     _list.block = function (name, args) {
-      return ui._component(`block-${name}`, {
+      return ui._component(`${name}`, {
         style: {
           'width': '100%',
           'height': 'auto',
         },
       }).then(function (_block) {
 
+        _block.isReleased = false;
         _block.types = {};
         _block.unit = function (_datum) {
           // get or create unit
@@ -227,6 +247,13 @@ Test.components.list = function (name, args) {
             });
           });
         }
+        _block.release = function () {
+          // hide all units except the active one
+          _block.isReleased = true;
+          return _.all(_block._.children.rendered.map(function (_unit) {
+            return _unit.hide();
+          }));
+        }
 
         return _block;
       });
@@ -249,10 +276,10 @@ Test.components.list = function (name, args) {
           _storage.buffer[_datum.item._id] = _datum;
 
           // run sorting
+          var direction, previous;
+          var searchLength = Math.floor(_storage.sorted.length / 2); // halving distance moved each time from centre
+          var index = searchLength; // start index at centre
           if (!_storage.sorted.contains(_datum.item._id)) {
-            var direction, previous;
-            var searchLength = Math.floor(_storage.sorted.length / 2); // halving distance moved each time from centre
-            var index = searchLength; // start index at centre
             while (true) {
 
               // most likely, the array length is zero, but could be placed at end.
@@ -283,12 +310,18 @@ Test.components.list = function (name, args) {
             // add to sorted
             _storage.sorted.splice(index, 0, _datum.item._id);
             _datum.index = index;
-          } else {
-            _datum.accepted = false;
+            _datum.sorted = true;
           }
         },
         remove: function (_datum) {
-
+          var _storage = this;
+          return _.p(function () {
+            var index = _storage.sorted.indexOf(_datum.item._id);
+            if (index !== -1) {
+              _storage.sorted.splice(index, 1);
+              return index;
+            }
+          });
         },
         compare: function (_d1, _d2) { // override
           if (_d1.scores.name > _d2.scores.name) {
@@ -314,9 +347,9 @@ Test.components.list = function (name, args) {
           // run datum through filter
           _datum.accepted = false;
           return _display.filter.main(_datum).then(function () {
-            if (_datum.accepted) {
+            if (_datum.sorted && _datum.accepted) {
               return _display.render.main(_datum);
-            } else {
+            } else if (!_datum.sorted && !_datum.accepted) {
               return _display.remove(_datum);
             }
           });
@@ -342,14 +375,14 @@ Test.components.list = function (name, args) {
           // fuzzy sorting
           score: function (_datum) {
             return _list.metadata.query.score(_datum).then(function (_scores) {
-              return _.p(function () {
-                _datum.scores = _scores;
-              });
+              _datum.scores = _scores;
             });
           },
           condition: function (_datum) { // override
             return _.p(function () {
-              _datum.accepted = true;
+              if (_datum.scores.main > 0) {
+                _datum.accepted = true;
+              }
             });
           },
           sort: function (_datum) { // override
@@ -369,16 +402,21 @@ Test.components.list = function (name, args) {
             // 1. does a unit exist with this index?
             // 2. is the unit at this index hidden?
             // 3. (create and update) or (update and show)
-            return _render.block(_datum).then(function (_block) {
-              return _block.unit(_datum);
+            return _.p(function () {
+              if (_datum.sorted) {
+                return _render.block(_datum).then(function (_block) {
+                  return _block.unit(_datum);
+                });
+              }
             });
           },
           block: function (_datum) {
             var _render = this;
             // get or create unit
             var _current = _wrapper.get(_render.buffer[_datum.index]);
-            if (_current && !_current.isHidden) {
-              return _current;
+            if (_current && _current.isReleased) {
+              _current.isReleased = false;
+              return _.p(_current);
             }
 
             var _blockName = _.id();
@@ -388,8 +426,13 @@ Test.components.list = function (name, args) {
             });
           },
         },
-        remove: function (_unit) {
-          return _.p();
+        remove: function (_datum) {
+          return _list.data.storage.remove(_datum).then(function (index) {
+            if (index !== undefined) {
+              var _release = _wrapper.get(_list.data.display.render.buffer[index]);
+              return _release.release();
+            }
+          });
         },
       },
     }

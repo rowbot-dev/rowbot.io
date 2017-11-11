@@ -84,6 +84,7 @@ var UI = function () {
     setClasses: function (classes) {
       var _this = this;
       classes = (classes || []);
+      classes = _.is.array(classes) ? classes : [classes];
       _this._.classes = _.map(_.merge(_this._.classes, classes), function (index, value) {
         return value;
       });

@@ -13,7 +13,7 @@ Test.application = function (args) {
 
         },
         children: [
-          Test.components.list('list', {
+          Components.list('list', {
 
           }),
         ],
@@ -26,14 +26,19 @@ Test.application = function (args) {
 
     _list.setTargets([
       _list._target('members', {
+        exclusive: false,
         source: function (force) {
           var _target = this;
           return ui.api.models.Member.objects.all().then(function (items) {
             return items;
           });
         },
+        normalise: function (_item) {
+          _item.main = _item.username;
+          return _item;
+        },
         unit: function (name, args) {
-          return ui._component(`unit-${name}`, {
+          return ui._component(`${name}`, {
             style: {
               'width': '100%',
               'height': 'auto',
@@ -56,11 +61,11 @@ Test.application = function (args) {
             }
             _unit.hide = function () {
               _unit.isHidden = true;
-              return _unit;
+              return _unit.setClasses('hidden');
             }
             _unit.show = function () {
               _unit.isHidden = false;
-              return _unit;
+              return _unit.removeClass('hidden');
             }
 
             return _unit;

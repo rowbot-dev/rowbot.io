@@ -10,15 +10,15 @@ var Components = (Components || {});
 Components.panel = function (name, args) {
   return ui._component(name, {
     style: _.merge({
-      'height': '100%',
       'width': '100%',
       'overflow-y': 'hidden',
+      'position': 'relative',
     }, args.style),
     children: [
       ui._component('container', {
         style: {
           'width': 'calc(100% + 20px)',
-          'height': '100%',
+          'height': 'auto',
           'overflow-y': 'scroll',
         },
         children: [

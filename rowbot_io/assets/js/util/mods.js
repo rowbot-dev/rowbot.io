@@ -17,10 +17,14 @@ String.prototype.contains = function (string) {
   return this.indexOf(string) !== -1;
 }
 
-String.prototype.score = function (query) {
+String.prototype.score = function (query, exclusive) {
   var string = this;
   if (string === query) {
     return 1;
+  }
+
+  if (!query) {
+    return exclusive ? 0 : 1;
   }
 
   var totalCharacterScore = 0;
