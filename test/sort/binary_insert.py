@@ -1,67 +1,61 @@
 
 import math
-import random
-import time
 
-d = 10000
-array = [i for i in range(d)]
+series = [4,5,6,7,1,2,3]
+destination = []
 
-item = random.randint(0, d)
+# [4] 0
+# [4,5] 1
+# [4,5,6] 2
+# [4,5,6,7] 3
+# [1,4,5,6,7] 0
+# [1,2,4,5,6,7] 1
+# [1,2,3,4,5,6,7] 2
 
 def binary_insert(array, item):
-  previous = None
-  search_length = math.floor(len(array) / 2)
-  index = search_length
+  search_length = math.floor(len(array) / 2) # the size of the next jump (halves each time)
+  index = search_length # start index at centre
+  previousDirection = None # whether movement is up or down last step
+  direction = None # current movement
 
-  while previous != index:
-    # print(item, index, array[index])
+  while True:
+
+    # if the array length is zero, or the index is equal, place at end, creating new slot
     if index == len(array):
       break
 
-    previous = index
+    previousDirection = direction
+    direction = get_direction(item, array[index])
+
+    # minimum search length is 1
+    # update index and search length
     search_length = max(math.floor(search_length / 2), 1)
-    down = item < array[index]
+    index += direction * search_length
 
-    if down:
-      index = index - search_length
-    elif item == array[index]:
-      return index
-    else:
-      index = index + search_length
+    # will keep flip-flopping between two elements if its value is between them, e.g. 4 going between 3 and 5
+    # there is no index for it to land on, so the index it should choose is the higher one
+    # [3,5] -> a value of 4 should displace 5 -> [3,4,5]
+    # so, if the direction was previously down, but the current is up, stay there.
+    # print(index, direction, previousDirection) # uncomment and remove statement below to see result
+    if direction == 1 and previousDirection == -1:
+      break
 
-    # boundary conditions
-    index = max(index, 0)
-    index = min(index, len(array))
+    # if the value is lower than the first element, the direction will be -1, but we want that to mean insert as first element.
+    if index == -1:
+      index = 0
+      break
 
   return index
 
-def linear_insert(array, item):
-  for i in range(len(array)):
-    if item < array[i]:
-      return i-1
+def get_direction(i1, i2):
+  if i1 > i2:
+    return 1
+  elif i1 == i2:
+    return 0
+  else:
+    return -1
 
-def bilinear_insert(array, item):
-  l = len(array)
-  for i in range(l):
-    if item < array[i]:
-      return i-1
-    elif item > array[l - i - 1]:
-      return l - i
-
-binary_start = time.time()
-binary_index = binary_insert(array, item)
-binary_time = time.time() - binary_start
-
-print(binary_index, binary_time)
-
-linear_start = time.time()
-linear_index = linear_insert(array, item)
-linear_time = time.time() - linear_start
-
-print(linear_index, linear_time)
-
-bilinear_start = time.time()
-bilinear_index = bilinear_insert(array, item)
-bilinear_time = time.time() - bilinear_start
-
-print(bilinear_index, bilinear_time)
+for i in series:
+  index = binary_insert(destination, i)
+  destination[index:index] = [i]
+  print(destination)

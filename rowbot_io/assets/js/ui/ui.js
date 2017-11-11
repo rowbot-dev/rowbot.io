@@ -142,9 +142,11 @@ var UI = function () {
     setChildren: function (children) {
       let _this = this;
       children = (children || _this._.children.buffer);
+      children = _.is.array(children) ? children : [children];
       return _._all(children.map(function (unresolved) {
         return function () {
           return _.p(unresolved).then(function (child) {
+            child._.parent = _this;
             if (_this._.is.rendered) {
               return _this.renderChild(child);
             } else {
@@ -189,7 +191,6 @@ var UI = function () {
     bufferChild: function (child) {
       var _this = this;
       return _.p(function () {
-        child._.parent = _this;
         _this._.children.buffer.push(child);
       });
     },
@@ -299,7 +300,7 @@ var UI = function () {
       // flawless
       // supports: dot sep string, string array, integer array
       // with the caveat that, until rendering, the index will refer to the order in the definition.
-      var names = _.is.array(path) ? path : path.split('.');
+      var names = _.is.array(path) ? path : (path || '').split('.');
       var name = names.shift();
       var newPath = _.is.array(path) ? names : names.join('.');
       var child = this.child(name);

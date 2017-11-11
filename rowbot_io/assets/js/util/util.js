@@ -203,4 +203,10 @@ var _ = {
       return whole ? `${whole}&${part}` : part;
     }, '');
   },
+
+  // id
+  id: function (length) {
+    length = (length || 10);
+    return Math.random().toString(36).substring(2, length+2);
+  },
 }

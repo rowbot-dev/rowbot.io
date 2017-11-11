@@ -28,24 +28,30 @@ Test.application = function (args) {
       _list._target('members', {
         source: function (force) {
           var _target = this;
-          return ui.api.models.Member.objects.all(force);
-          // return _.p([
-          //   {
-          //     _id: '1',
-          //     name: 'Harry',
-          //   },
-          //   {
-          //     _id: '2',
-          //     name: 'Harrys',
-          //   },
-          //   {
-          //     _id: '3',
-          //     name: 'Har',
-          //   },
-          // ]);
+          return ui.api.models.Member.objects.all().then(function (items) {
+            return items;
+          });
         },
-        unit: function () {
+        unit: function (name, args) {
+          return ui._component(`unit-${name}`, {
 
+          }).then(function (_unit) {
+
+            _unit.isHidden = false;
+            _unit.update = function (_datum) {
+              return _unit;
+            }
+            _unit.hide = function () {
+              _unit.isHidden = true;
+              return _unit;
+            }
+            _unit.show = function () {
+              _unit.isHidden = false;
+              return _unit;
+            }
+
+            return _unit;
+          });
         },
       }),
     ]);
