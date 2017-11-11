@@ -18,7 +18,7 @@ Components.panel = function (name, args) {
       ui._component('container', {
         style: {
           'width': 'calc(100% + 20px)',
-          'height': 'auto',
+          'height': '100%',
           'overflow-y': 'scroll',
         },
         children: [
