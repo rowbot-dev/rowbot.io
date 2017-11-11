@@ -24,9 +24,8 @@ Components.panel = function (name, args) {
         children: [
           ui._component('content', {
             style: _.merge({
-              'width': `calc(100% - ${args.tramline ? 35 : 0}px)`,
+              'width': `calc(100% - ${args.tramline ? 35 : 20}px)`,
               'height': 'auto',
-              'padding': '10px',
             }, args.contentStyle),
             children: args.children,
           }),

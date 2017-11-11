@@ -62,6 +62,10 @@ Test.components.list = function (name, args) {
         ],
       }),
       Components.panel('filter', {
+        style: {
+          'top': '0px',
+          'position': 'absolute',
+        },
         children: [
 
         ],
@@ -190,12 +194,15 @@ Test.components.list = function (name, args) {
     */
     _list.block = function (name, args) {
       return ui._component(`block-${name}`, {
-
+        style: {
+          'width': '100%',
+          'height': 'auto',
+        },
       }).then(function (_block) {
 
         _block.types = {};
-        _block.item = function (_datum) {
-          // get or create item
+        _block.unit = function (_datum) {
+          // get or create unit
           var _unit = _block.get(_block.types[_datum.target.name]);
           return _.p(function () {
             if (_unit) {
@@ -363,7 +370,7 @@ Test.components.list = function (name, args) {
             // 2. is the unit at this index hidden?
             // 3. (create and update) or (update and show)
             return _render.block(_datum).then(function (_block) {
-              return _block.item(_datum);
+              return _block.unit(_datum);
             });
           },
           block: function (_datum) {

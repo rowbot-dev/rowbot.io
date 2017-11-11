@@ -34,12 +34,25 @@ Test.application = function (args) {
         },
         unit: function (name, args) {
           return ui._component(`unit-${name}`, {
-
+            style: {
+              'width': '100%',
+              'height': 'auto',
+              'border': '1px solid black',
+              'padding': '10px',
+            },
+            children: [
+              Components.text('text'),
+            ],
           }).then(function (_unit) {
 
             _unit.isHidden = false;
             _unit.update = function (_datum) {
-              return _unit;
+              return _unit.get('text').update({
+                title: _datum.item.username,
+                value: _datum.item.email,
+              }).then(function () {
+                return _unit;
+              });
             }
             _unit.hide = function () {
               _unit.isHidden = true;
