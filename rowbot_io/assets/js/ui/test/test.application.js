@@ -14,6 +14,7 @@ Test.application = function (args) {
         },
         children: [
           Components.list('list', {
+            tramline: true,
 
           }),
         ],
@@ -25,16 +26,14 @@ Test.application = function (args) {
     var _list = _container.get('list');
 
     _list.setTargets([
-      _list._target('members', {
+      _list._target('clubs', {
         exclusive: false,
         source: function (force) {
           var _target = this;
-          return ui.api.models.Member.objects.all().then(function (items) {
-            return items;
-          });
+          return ui.api.models.Club.objects.all();
         },
         normalise: function (_item) {
-          _item.main = _item.username;
+          _item.main = _item.name;
           return _item;
         },
         unit: function (name, args) {
@@ -52,9 +51,9 @@ Test.application = function (args) {
 
             _unit.isHidden = false;
             _unit.update = function (_datum) {
+              _unit.datum = _datum;
               return _unit.get('text').update({
-                title: _datum.item.username,
-                value: _datum.item.email,
+                title: _datum.item.name,
               }).then(function () {
                 return _unit;
               });

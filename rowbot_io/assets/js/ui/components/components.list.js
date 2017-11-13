@@ -47,6 +47,7 @@ Components.list = function (name, args) {
         ],
       }),
       Components.panel('list', {
+        tramline: args.tramline,
         style: {
           'height': '300px',
           'div.hidden': {
@@ -158,13 +159,17 @@ Components.list = function (name, args) {
         // from here, each individual item makes its way down into the display function, accruing
         // modifications as it goes. It will eventually have a normalised version,
         return _target.source().then(function (_data) {
-          return _._all(_data.map(function (_item) {
-            return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
+          return _._all(_data.map(function (_item, i) {
+            return function () {
+              return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
+            }
           }));
         }).then(function () {
           return _target.force().then(function (_data) {
-            return _._all(_data.map(function (_item) {
-              return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
+            return _._all(_data.map(function (_item, i) {
+              return function () {
+                return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
+              }
             }));
           });
         });
@@ -212,17 +217,19 @@ Components.list = function (name, args) {
 
     */
     _list.block = function (name, args) {
-      return ui._component(`${name}`, {
+      return ui._component(`${name}`, _.merge({
         style: {
           'width': '100%',
           'height': 'auto',
         },
-      }).then(function (_block) {
+      }, args)).then(function (_block) {
 
-        _block.isReleased = false;
+        _block.isReleased = true;
         _block.types = {};
         _block.unit = function (_datum) {
           // get or create unit
+          _block.datum = _datum;
+          _block.isReleased = false;
           var _unit = _block.get(_block.types[_datum.target.name]);
           return _.p(function () {
             if (_unit) {
@@ -238,19 +245,24 @@ Components.list = function (name, args) {
             }
           }).then(function (_unit) {
             // hide all units except the active one
-            return _.all(_block._.children.rendered.map(function (_rest) {
+            return _.all(_block.children().map(function (_rest) {
               if (_rest.name !== _unit.name) {
                 return _rest.hide();
               }
             })).then(function () {
-              return _unit.show();
+              if (!_block.isReleased) {
+                return _unit.show();
+              } else {
+                return _unit;
+              }
             });
           });
         }
         _block.release = function () {
           // hide all units except the active one
           _block.isReleased = true;
-          return _.all(_block._.children.rendered.map(function (_unit) {
+          // _.l(9, 'block.release', _block.name);
+          return _.all(_block.children().map(function (_unit) {
             return _unit.hide();
           }));
         }
@@ -266,78 +278,95 @@ Components.list = function (name, args) {
     */
     window._list = _list;
     _list.data = {
+      load: function () {
+        // for each target
+        // _list.data.storage.sorted = [];
+        return _list.data.storage.garbage().then(function () {
+          // _.l(0, _list.data.storage.sorted);
+          return _._all(_list.targets.map(function (_target) {
+            return _target.load;
+          }));
+        });
+      },
       storage: {
         buffer: {}, // needed as an intermediate for sorting
         sorted: [], // a list of ids present in the storage object, sorted by the current method
         add: function (_datum) { // basic implementation of a binary search function
           var _storage = this;
-
-          // add to buffer
-          _storage.buffer[_datum.item._id] = _datum;
-
-          // run sorting
-          var direction, previous;
-          var searchLength = Math.floor(_storage.sorted.length / 2); // halving distance moved each time from centre
-          var index = searchLength; // start index at centre
-          if (!_storage.sorted.contains(_datum.item._id)) {
-            while (true) {
-
-              // most likely, the array length is zero, but could be placed at end.
-              if (index === _storage.sorted.length) {
-                break;
-              }
-
-              // calculate new direction
-              previous = direction;
-              direction = _storage.compare(_datum, _storage.buffer[_storage.sorted[index]]);
-
-              // calculate new search length and get new index
-              searchLength = Math.max(Math.floor(searchLength / 2), 1); // halve
-              index += direction * searchLength; // move up or down
-
-              // if flip-flop, leave high because of how indexes work
-              if (direction === 1 && previous === -1) {
-                break;
-              }
-
-              // must go around if zero to compare with zero element
-              if (index === -1) {
-                index = 0;
-                break;
-              }
-            }
-
-            // add to sorted
-            _storage.sorted.splice(index, 0, _datum.item._id);
-            _datum.index = index;
-            _datum.sorted = true;
-          }
-        },
-        remove: function (_datum) {
-          var _storage = this;
           return _.p(function () {
-            var index = _storage.sorted.indexOf(_datum.item._id);
-            if (index !== -1) {
-              _storage.sorted.splice(index, 1);
-              return index;
+            // add to buffer
+            _datum.sorted = false;
+            _storage.buffer[_datum.item._id] = _datum;
+
+            // run sorting
+            var direction, previous;
+            var searchLength = Math.floor(_storage.sorted.length / 2); // halving distance moved each time from centre
+            var index = searchLength; // start index at centre
+            if (!_storage.sorted.contains(_datum.item._id)) {
+              while (true) {
+
+                // most likely, the array length is zero, but could be placed at end.
+                if (index === _storage.sorted.length) {
+                  break;
+                }
+
+                // calculate new direction
+                previous = direction;
+                direction = _storage.compare(_datum, _storage.buffer[_storage.sorted[index]]);
+
+                // calculate new search length and get new index
+                searchLength = Math.max(Math.floor(searchLength / 2), 1); // halve
+                index += direction * searchLength; // move up or down
+
+                // if flip-flop, leave high because of how indexes work
+                if (direction === 1 && previous === -1 || direction === 0) {
+                  break;
+                }
+
+                // must go around if zero to compare with zero element
+                if (index === -1) {
+                  index = 0;
+                  break;
+                }
+              }
+
+              // add to sorted
+              _storage.sorted.splice(index, 0, _datum.item._id);
+              _datum.index = index;
+              _datum.sorted = true;
             }
+            // _.l(6, 'storage.add', _datum.item.name, _datum.index);
           });
         },
         compare: function (_d1, _d2) { // override
-          if (_d1.scores.name > _d2.scores.name) {
+          if (_d1.scores.main > _d2.scores.main) {
             return -1;
-          } else if (_d1.scores.name === _d2.scores.name) {
-            return 0;
+          } else if (_d1.scores.main === _d2.scores.main) {
+            if (_d1.item.main < _d2.item.main) {
+              return -1;
+            } else if (_d1.item.main === _d2.item.main) {
+              return 0;
+            } else {
+              return 1;
+            }
           } else {
             return 1;
           }
         },
-      },
-      load: function () {
-        // for each target
-        return _._all(_list.targets.map(function (_target) {
-          return _target.load;
-        }));
+        garbage: function () {
+          var _storage = this;
+          return _._all(_wrapper.children().map(function (_child, i) {
+            // for each child, if released, remove from storage list
+            return function () {
+              return _.p(function () {
+                if (_child.isReleased) {
+                  let index = _storage.sorted.indexOf(_child.datum.item._id);
+                  _storage.sorted.splice(index, 1);
+                }
+              });
+            }
+          }));
+        },
       },
       display: {
         main: function (_datum) {
@@ -346,7 +375,9 @@ Components.list = function (name, args) {
 
           // run datum through filter
           _datum.accepted = false;
+          // _.l(2, 'display.main', _datum.item._id);
           return _display.filter.main(_datum).then(function () {
+            // _.l(7, 'display.main', _datum.item._id, _datum.sorted, _datum.accepted);
             if (_datum.sorted && _datum.accepted) {
               return _display.render.main(_datum);
             } else if (!_datum.sorted && !_datum.accepted) {
@@ -360,6 +391,7 @@ Components.list = function (name, args) {
             var _filter = _list.data.display.filter;
 
             // get query score
+            // _.l(3, 'filter.main', _datum.item._id);
             return _filter.score(_datum).then(function () {
               return _filter.condition(_datum);
             }).then(function () {
@@ -375,20 +407,20 @@ Components.list = function (name, args) {
           // fuzzy sorting
           score: function (_datum) {
             return _list.metadata.query.score(_datum).then(function (_scores) {
+              // _.l(4, 'filter.score', _datum.item._id, _scores);
               _datum.scores = _scores;
             });
           },
           condition: function (_datum) { // override
             return _.p(function () {
-              if (_datum.scores.main > 0) {
-                _datum.accepted = true;
-              }
+              _datum.accepted = _datum.scores.main > 0;
+              // _.l(4, 'filter.condition', _datum.item._id, _datum.accepted);
             });
           },
           sort: function (_datum) { // override
             return _.p(function () {
               // modify scores here based on current sorting order or other condition
-
+              // _.l(5, 'filter.sort', _datum.item._id, _datum.accepted);
               if (_datum.accepted) {
                 return _list.data.storage.add(_datum);
               }
@@ -402,6 +434,7 @@ Components.list = function (name, args) {
             // 1. does a unit exist with this index?
             // 2. is the unit at this index hidden?
             // 3. (create and update) or (update and show)
+            // _.l(8, 'render.main', _datum.item._id);
             return _.p(function () {
               if (_datum.sorted) {
                 return _render.block(_datum).then(function (_block) {
@@ -415,21 +448,24 @@ Components.list = function (name, args) {
             // get or create unit
             var _current = _wrapper.get(_render.buffer[_datum.index]);
             if (_current && _current.isReleased) {
-              _current.isReleased = false;
               return _.p(_current);
             }
 
+            var _before = _wrapper.get(_render.buffer[_datum.index+1]);
+
             var _blockName = _.id();
             _render.buffer.splice(_datum.index, 0, _blockName);
-            return _list.block(_blockName).then(function (_block) {
+            return _list.block(_blockName, {before: (_before || {}).name}).then(function (_block) {
               return _wrapper.setChildren(_block);
             });
           },
         },
         remove: function (_datum) {
-          return _list.data.storage.remove(_datum).then(function (index) {
-            if (index !== undefined) {
+          return _.p(function () {
+            var index = _list.data.storage.sorted.indexOf(_datum.item._id);
+            if (index !== -1) {
               var _release = _wrapper.get(_list.data.display.render.buffer[index]);
+              // _.l(8, 'remove', _datum.item._id, _list.data.storage.sorted.length, index, _release.name);
               return _release.release();
             }
           });

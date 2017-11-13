@@ -574,7 +574,7 @@ var UI = function () {
         var _instance = this;
         _.map(_args, function (_key, _arg) {
           if (_model.fields.contains(_key)) {
-            if (_.is.array(_arg) && _arg.length) {
+            if (_.is.array(_arg) && _arg.length && _.is.object.all(_arg[0])) {
               var relatedModel = _arg[0]._ref.split('.')[0];
               _instance[_key] = _arg.map(function (_item) {
                 return _api.models[relatedModel].instance(_item);

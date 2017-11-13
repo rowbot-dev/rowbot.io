@@ -197,7 +197,7 @@ class ClubSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Club
-    fields = ('name', 'asset_models', 'role_models', 'team_models', 'event_models')
+    fields = ('_id', '_ref', 'date_created', 'name', 'asset_models', 'role_models', 'team_models', 'event_models')
     depth = 1
 
 # Member
