@@ -1,0 +1,15 @@
+
+Start here: https://redis.io/topics/quickstart
+
+wget http://download.redis.io/redis-stable.tar.gz
+tar xvzf redis-stable.tar.gz
+cd redis-stable
+make
+make test
+
+Success
+
+This redis server will be used to set up events that will call out when complete. These can be used to trigger websocket calls and phone app notifications.
+
+make start.sh
+sudo chmod +x start.sh
