@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %} Authentication {% endblock %}
+{% block js %}
+<!-- specific UI -->
+<script src="{% static 'rowbot/js/auth/interfaces/auth.interfaces.referral.js' %}"></script>
+<script src="{% static 'rowbot/js/auth/interfaces/auth.interfaces.activation.js' %}"></script>
+<script src="{% static 'rowbot/js/auth/interfaces/auth.interfaces.login.js' %}"></script>
+<script src="{% static 'rowbot/js/auth/interfaces/auth.interfaces.signup.js' %}"></script>
+<script src="{% static 'rowbot/js/auth/auth.application.js' %}"></script>
+<script src="{% static 'rowbot/js/auth/auth.js' %}"></script>
+{% endblock %}

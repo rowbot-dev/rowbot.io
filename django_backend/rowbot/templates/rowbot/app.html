@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %} Account {% endblock %}
+{% block js %}
+<!-- specific UI -->
+<script src="{% static 'rowbot/js/app/interfaces/app.interfaces.asset.js' %}"></script>
+<script src="{% static 'rowbot/js/app/interfaces/app.interfaces.club.js' %}"></script>
+<script src="{% static 'rowbot/js/app/interfaces/app.interfaces.event.js' %}"></script>
+<script src="{% static 'rowbot/js/app/interfaces/app.interfaces.main.js' %}"></script>
+<script src="{% static 'rowbot/js/app/interfaces/app.interfaces.role.js' %}"></script>
+<script src="{% static 'rowbot/js/app/interfaces/app.interfaces.team.js' %}"></script>
+<script src="{% static 'rowbot/js/app/app.application.js' %}"></script>
+<script src="{% static 'rowbot/js/app/app.js' %}"></script>
+{% endblock %}
