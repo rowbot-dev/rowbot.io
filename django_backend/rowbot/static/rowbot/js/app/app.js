@@ -5,9 +5,7 @@ App.application().then(function (app) {
   return _.all([
 
   ]).then(function () {
-    return ui.api.setup().then(function () {
-      return ui.api.getToken();
-    });
+    return api.setup();
   });
 }).catch(function (error) {
   console.log(error);

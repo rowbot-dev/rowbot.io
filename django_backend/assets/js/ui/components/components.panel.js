@@ -11,7 +11,7 @@ Components.panel = function (name, args) {
   return ui._component(name, {
     style: _.merge({
       'width': '100%',
-      'overflow-y': 'hidden',
+      'overflow': 'hidden',
       'position': 'relative',
     }, args.style),
     children: [

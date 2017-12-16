@@ -1,6 +1,7 @@
 
 # Django
 from django.conf.urls import url
+from django.conf import settings
 
 # DRF
 from rest_framework.authtoken import views
@@ -70,4 +71,25 @@ class AuthTokenView(views.ObtainAuthToken):
 
 urlpatterns += [
   url(r'^token/', AuthTokenView.as_view())
+]
+
+# web socket token
+class SocketTokenView(views.APIView):
+  def post(self, request, *args, **kwargs):
+    user = None
+    if request.user.is_authenticated:
+      user = request.user
+    else:
+      serializer = self.serializer_class(data=request.data, context={'request': request})
+      if serializer.is_valid():
+        user = serializer.validated_data['user']
+
+    if user is not None:
+      socket = request.user.new_socket_token()
+      return Response({'socket': socket._id, 'host': settings.WEBSOCKET['host'], 'port': settings.WEBSOCKET['socket']})
+    else:
+      return Response({})
+
+urlpatterns += [
+  url(r'^socket/', SocketTokenView.as_view())
 ]

@@ -175,26 +175,6 @@ var _ = {
   },
 
   // requests
-  csrf: document.getElementsByName('csrfmiddlewaretoken')[0].getAttribute('value'),
-  request: function (url, type, data) {
-    type = (type || 'GET');
-    return new Promise(function (resolve, reject) {
-      var http = new XMLHttpRequest();
-      url = type === 'GET' ? `${url}?${_.params(data)}` : url;
-      http.open(type, url, true);
-      if (_.token !== undefined) {
-        http.setRequestHeader('Authorization', `Token ${_.token}`);
-      }
-      http.setRequestHeader('X-CSRFToken', _.csrf);
-      http.setRequestHeader('Content-Type', 'application/json');
-      http.onreadystatechange = function () {
-        if (http.readyState == 4 && http.status == 200) {
-          resolve(JSON.parse(http.responseText));
-        }
-      }
-      http.send(JSON.stringify(data));
-    });
-  },
   params: function (obj) {
     obj = (obj || {});
     return _.map(obj, function (key, value) {

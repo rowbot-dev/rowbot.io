@@ -45,3 +45,9 @@ class BaseModelViewSet(viewsets.ViewSet):
       return Response(serializer.data)
     else:
       return Response(serializer.errors)
+
+  # DELETE
+  def destroy(self, request, pk=None):
+    model = get_object_or_404(self.get_queryset(), pk=pk)
+    model.delete()
+    return Response({'deleted': True})
