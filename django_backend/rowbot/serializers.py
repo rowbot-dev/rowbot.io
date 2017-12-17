@@ -114,7 +114,7 @@ class RoleModelSerializer(serializers.ModelSerializer):
 
 # Team
 class TeamInstanceSerializer(serializers.ModelSerializer):
-  team = UUIDRelatedField(read_only=True)
+  team = UUIDRelatedField(read_only=True) # TODO
   event = UUIDRelatedField(read_only=True)
 
   class Meta:
@@ -123,8 +123,8 @@ class TeamInstanceSerializer(serializers.ModelSerializer):
     depth = 1
 
 class TeamRecordSerializer(serializers.ModelSerializer):
-  team = UUIDRelatedField(read_only=True)
-  event = UUIDRelatedField(read_only=True)
+  team = UUIDRelatedField(queryset=TeamInstance.objects.all())
+  event = UUIDRelatedField(queryset=EventInstance.objects.all())
 
   class Meta:
     model = TeamRecord
@@ -132,7 +132,7 @@ class TeamRecordSerializer(serializers.ModelSerializer):
     depth = 1
 
 class TeamSerializer(serializers.ModelSerializer):
-  model = UUIDRelatedField(read_only=True)
+  model = UUIDRelatedField(queryset=TeamModel.objects.all())
   is_superset_of = UUIDRelatedField(queryset=Team.objects.all(), many=True)
   is_subset_of = UUIDRelatedField(queryset=Team.objects.all(), many=True)
   instances = TeamInstanceSerializer(many=True)
@@ -146,7 +146,7 @@ class TeamSerializer(serializers.ModelSerializer):
     depth = 1
 
 class TeamModelSerializer(serializers.ModelSerializer):
-  club = UUIDRelatedField(read_only=True)
+  club = UUIDRelatedField(queryset=Club.objects.all())
   is_superset_of = UUIDRelatedField(queryset=TeamModel.objects.all(), many=True)
   is_subset_of = UUIDRelatedField(queryset=TeamModel.objects.all(), many=True)
   teams = TeamSerializer(many=True)
@@ -162,16 +162,17 @@ class EventNotificationSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = EventNotification
-    fields = ('_id', '_ref', 'date_created', 'event', 'schedule_id', 'timestamp', 'is_active')
+    fields = ('_id', '_ref', 'date_created', 'event', 'name', 'schedule_id', 'timestamp', 'is_active')
     depth = 1
 
 class EventInstanceSerializer(serializers.ModelSerializer):
-  event = UUIDRelatedField(read_only=True)
-  teams = TeamInstanceSerializer(many=True)
+  event = UUIDRelatedField(queryset=Event.objects.all())
+  teams = TeamInstanceSerializer(many=True, required=False)
+  roles = RoleInstanceSerializer(many=True, required=False)
 
   class Meta:
     model = EventInstance
-    fields = ('_id', '_ref', 'date_created', 'description', 'event', 'teams', 'is_active')
+    fields = ('_id', '_ref', 'date_created', 'start_time', 'end_time', 'location', 'description', 'is_active', 'event', 'teams', 'roles')
     depth = 1
 
   # override save method
@@ -182,28 +183,28 @@ class EventInstanceSerializer(serializers.ModelSerializer):
     self.instance.schedule()
 
 class EventSerializer(serializers.ModelSerializer):
-  model = UUIDRelatedField(read_only=True)
+  model = UUIDRelatedField(queryset=EventModel.objects.all())
   parts = UUIDRelatedField(queryset=Event.objects.all(), many=True)
   is_part_of = UUIDRelatedField(queryset=Event.objects.all(), many=True)
   instances = EventInstanceSerializer(many=True)
 
   class Meta:
     model = Event
-    fields = ('_id', '_ref', 'date_created', 'name', 'description', 'model', 'parts', 'is_part_of', 'instances')
+    fields = ('_id', '_ref', 'date_created', 'name', 'description', 'model', 'parts', 'is_part_of', 'instances', 'is_active')
     depth = 1
 
 class EventRepeatSerializer(serializers.Serializer):
   interval = serializers.DurationField()
 
 class EventModelSerializer(serializers.ModelSerializer):
-  club = UUIDRelatedField(read_only=True)
+  club = UUIDRelatedField(queryset=Club.objects.all())
   parts = UUIDRelatedField(queryset=EventModel.objects.all(), many=True)
   is_part_of = UUIDRelatedField(queryset=EventModel.objects.all(), many=True)
   events = EventSerializer(many=True)
 
   class Meta:
     model = EventModel
-    fields = ('_id', '_ref', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'club', 'parts', 'is_part_of', 'events', 'is_active')
+    fields = ('_id', '_ref', 'date_created', 'reference', 'verbose_name', 'verbose_name_plural', 'club', 'parts', 'is_part_of', 'events')
     depth = 1
 
 # Club

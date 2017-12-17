@@ -6,7 +6,7 @@ from settings.common import *
 from pytz import utc
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.memory import MemoryJobStore
-# from apscheduler.jobstores.redis import RedisJobStore
+from apscheduler.jobstores.redis import RedisJobStore
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 
 ##################################################################################################
@@ -32,8 +32,8 @@ WEBSOCKET = {
 
 ########## REDIS CONFIGURATION
 jobstores = {
-  'default': MemoryJobStore(),
-  # 'default': RedisJobStore(jobs_key='ap_scheduler.jobs', run_times_key='ap_scheduler.run_times', host='localhost', port=6379)
+  # 'default': MemoryJobStore(),
+  'default': RedisJobStore(jobs_key='ap_scheduler.jobs', run_times_key='ap_scheduler.run_times', host='localhost', port=6379)
 }
 executors = {
   'default': ThreadPoolExecutor(20),

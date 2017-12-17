@@ -53,6 +53,6 @@ class EventInstanceViewSet(BaseModelViewSet):
       return Response(event_instance.cancel())
     return Response({})
 
-class EventInstanceViewSet(BaseModelViewSet):
+class EventNotificationViewSet(BaseModelViewSet):
   queryset = EventNotification.objects.all()
   serializer = EventNotificationSerializer

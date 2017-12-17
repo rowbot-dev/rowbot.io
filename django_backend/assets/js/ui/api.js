@@ -129,12 +129,12 @@ var API = function () {
     _model.objects = {
       get: function (_id, args) {
         args = (args || {});
-        args.id = _id;
+        if (_.is.object.all(_id)) { // substitute args for _id
+          args = _id;
+        } else {
+          args.id = _id;
+        }
         return _model.objects.filter(args).then(function (results) {
-          return results.filter(function (item) {
-            return item._id === _id;
-          });
-        }).then(function (results) {
           return results.length ? results[0] : undefined;
         });
       },
@@ -144,7 +144,8 @@ var API = function () {
       create: function (data) {
         return _api.request(`${_api.urls.base}${_model.prefix}/`, 'POST', data).then(function (item) {
           return _.p(function () {
-            if (_id in item) {
+            if ('_id' in item) {
+              _api.buffer[_model.name] = (_api.buffer[_model.name] || {});
               _api.buffer[_model.name][item._id] = item;
               return _model.instance(item);
             } else {
@@ -177,17 +178,12 @@ var API = function () {
         }).then(function () {
           return _model.objects.local();
         }).then(function (data) {
-          if (args.id) {
-            return data.filter(function (item) {
-              return item._id === args.id;
-            })[0];
-          } else {
-            return data;
-          }
+          return data.filter(function (item) {
+            return Object.keys(args).reduce(function (whole, part) {
+              return whole && args[part] === item[part];
+            }, true);
+          });
         });
-      },
-      get: function (id, force) {
-        return _model.objects.filter({id: id, force: force});
       },
       local: function () {
         return _.p(function () {

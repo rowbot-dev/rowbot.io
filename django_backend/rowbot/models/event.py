@@ -92,15 +92,23 @@ class EventInstance(Model):
 
   def schedule(self):
     # create a set of several notifications
-    # 1. First one
-    first = self.notifications.create(name='first', timestamp=self.end_time - timedelta(seconds=6))
-    first.schedule()
+    # 1. A notification at 7pm, the night before the event
+    day_of_event = None
+    day_before_event = None
+    seven_pm_on_day_before_event = None
+    # night_before = self.notifications.create(name='night_before', timestamp=seven_pm_on_day_before_event)
+    night_before = self.notifications.create(name='night_before', timestamp=self.end_time - timedelta(seconds=6))
+    night_before.schedule()
 
-    second = self.notifications.create(name='second', timestamp=self.end_time - timedelta(seconds=3))
-    second.schedule()
+    # 2. A notification one hour before the event
+    # one_hour_before = self.notifications.create(name='one_hour_before', timestamp=self.end_time - timedelta(seconds=3600))
+    one_hour_before = self.notifications.create(name='one_hour_before', timestamp=self.end_time - timedelta(seconds=3))
+    one_hour_before.schedule()
 
-    third = self.notifications.create(name='third', timestamp=self.end_time)
-    third.schedule()
+    # 3. A notification 15 minutes before the event
+    # fifteen_minutes_before = self.notifications.create(name='fifteen_minutes_before', timestamp=self.end_time - timedelta(seconds=900))
+    fifteen_minutes_before = self.notifications.create(name='fifteen_minutes_before', timestamp=self.end_time)
+    fifteen_minutes_before.schedule()
 
 def trigger(_id):
   # get the model from the parent and call the trigger function
@@ -127,6 +135,8 @@ class EventNotification(Model):
     try:
       # make request to websocket server
       http.request('POST', 'http://{}:{}'.format(settings.WEBSOCKET['host'], settings.WEBSOCKET['message']), body=json.dumps({'data': {'ref': self._ref}, 'keys': self.keys()}))
+      self.is_active = False
+      self.save()
     except urllib3.exceptions.NewConnectionError:
       print('Connection to websocket server failed.')
 
