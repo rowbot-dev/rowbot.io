@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="230">
+  <defs>
+    <linearGradient id="loomGradient" gradientUnits="userSpaceOnUse" x2="0" y1="-14" y2="14">
+      <stop offset="0%" style="stop-color:black;"/>
+      <stop offset="25%" style="stop-color:lightgray;"/>
+      <stop offset="60%" style="stop-color:black;"/>
+    </linearGradient>
+    
+    <linearGradient id="ridgeGradient" gradientUnits="userSpaceOnUse" x2="0" y1="-15" y2="15">
+      <stop offset="0%" style="stop-color:#F5F5F5;"/>
+      <stop offset="45%" style="stop-color:#FFFFFF;"/>
+      <stop offset="55%" style="stop-color:#C0C0C0;"/>
+      <stop offset="100%" style="stop-color:#F5F5F5;"/>
+    </linearGradient>
+    
+    <radialGradient id="fadeRidgeGradient" cx="0%" cy="50%" r="100%">
+      <stop offset="50%" style="stop-color:#F5F5F5; stop-opacity:0"/>
+      <stop offset="95%" style="stop-color:#F5F5F5;"/>
+    </radialGradient>
+    
+    <path id="spoonPath" d="M 105,75 C 105,76 106,77 107,77 C 139,89 170,149 177,181 C 231,199 389,201 455,201 C 458,201 461,198 461,195 L 450,27 C 450,24 447,21 444,21 L 113,43 C 112,43 111,44 111,45  Z"/>
+
+    <clipPath id="spoonClip">
+      <use xlink:href="#spoonPath"/>
+    </clipPath>
+  </defs>
+
+  <use xlink:href="#spoonPath" style="stroke:Black; stroke-width:1; fill:#F5F5F5;"/>
+  <g transform="rotate(9) translate(117, 41)">
+    <rect x="-200" y="-14" height="28" width="200" style="stroke:Black; stroke-width:1; fill:url(#loomGradient);"/>
+    <rect x="0" y="-15" height="30" width="200" class="spoon" style="stroke:none; fill:url(#ridgeGradient);"/>
+    <rect x="0" y="-15" height="30" width="200" class="spoon" style="stroke:none; fill:url(#fadeRidgeGradient);"/>
+  </g>
+  <g clip-rule="nonzero" clip-path="url(#spoonClip)" opacity="0.9">
+  </g>
+  <g>
+    <!--Put deign in here-->
+  </g>
+
+</svg>

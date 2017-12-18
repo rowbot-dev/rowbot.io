@@ -1,0 +1,70 @@
+{
+  "external": {
+    "description": "The collection of functions that lie outside of the operation of the scheduling application (login, signup, conversion, activation).",
+    "children": {
+      "login": {
+        "description": "",
+      },
+      "signup": {
+        "description": "",
+      },
+      "conversion": {
+        "description": "",
+      },
+      "activation": {
+        "description": "",
+      },
+    },
+  },
+  "internal": {
+    "description": "The scheduling application itself, including member and event management.",
+    "notes": [
+      "Standard CRUD rules apply. An action implies its reverse is possible, everything can be listed and filtered, etc.",
+    ],
+    "children": {
+      "member": {
+        "description": "Member management. Add and remove functions from members.",
+        "children": {
+          "Create user and invite": {
+
+          },
+          "Create role models": {
+
+          },
+          "Create role permissions": {
+
+          },
+          "Create roles": {
+
+          },
+          "Assign roles to users": {
+
+          },
+          "Create role records": {
+
+          },
+          "Edit profile": {
+
+          },
+        },
+      },
+      "event": {
+        "description": "The user should be able to create events and event models, schedule event instances and invite members, based on their permissions.",
+        "children": {
+          "Create event models": {
+
+          },
+          "Create event notification models": {
+
+          },
+          "Create events": {
+
+          },
+          "Schedule event instances, single and recurring": {
+
+          },
+        },
+      },
+    },
+  },
+}
