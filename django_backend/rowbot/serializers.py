@@ -5,7 +5,7 @@ from rest_framework import serializers
 # Local
 from rowbot.models.asset import AssetModel, Asset, AssetInstance
 from rowbot.models.club import Club
-from rowbot.models.event import EventModel, Event, EventInstance, EventNotification
+from rowbot.models.event import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
 from rowbot.models.member import Member
 from rowbot.models.role import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
 from rowbot.models.team import TeamModel, Team, TeamInstance, TeamRecord
@@ -195,6 +195,14 @@ class EventSerializer(serializers.ModelSerializer):
 
 class EventRepeatSerializer(serializers.Serializer):
   interval = serializers.DurationField()
+
+class EventNotificationModelSerializer(serializers.ModelSerializer):
+  model = UUIDRelatedField(queryset=EventModel.objects.all())
+
+  class Meta:
+    model = EventNotificationModel
+    fields = ('_id', '_ref', 'date_created', 'name', 'relative_duration', 'is_absolute', 'absolute_hour', 'absolute_minute', 'model')
+    depth = 1
 
 class EventModelSerializer(serializers.ModelSerializer):
   club = UUIDRelatedField(queryset=Club.objects.all())

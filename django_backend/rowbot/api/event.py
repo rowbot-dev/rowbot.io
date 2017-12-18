@@ -12,13 +12,17 @@ from rest_framework.decorators import detail_route, list_route
 
 # Local
 from rowbot.api.base import BaseModelViewSet
-from rowbot.models import EventModel, Event, EventInstance, EventNotification
-from rowbot.serializers import EventModelSerializer, EventSerializer, EventRepeatSerializer, EventInstanceSerializer, EventNotificationSerializer
+from rowbot.models import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
+from rowbot.serializers import EventModelSerializer, EventNotificationModelSerializer, EventSerializer, EventRepeatSerializer, EventInstanceSerializer, EventNotificationSerializer
 
 # API
 class EventModelViewSet(BaseModelViewSet):
   queryset = EventModel.objects.all()
   serializer = EventModelSerializer
+
+class EventNotificationModelViewSet(BaseModelViewSet):
+  queryset = EventNotificationModel.objects.all()
+  serializer = EventNotificationModelSerializer
 
 class EventViewSet(BaseModelViewSet):
   queryset = Event.objects.all()

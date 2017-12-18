@@ -46,6 +46,33 @@ class EventModel(Model):
   verbose_name_plural = models.CharField(max_length=255)
 
 
+class EventNotificationModel(Model):
+  class Meta:
+    permissions = ()
+
+  # Connections
+  model = models.ForeignKey('rowbot.EventModel', related_name='notification_models')
+
+  # Properties
+  name = models.CharField(max_length=255)
+  relative_duration = models.DurationField(default=timedelta(seconds=0))
+  is_absolute = models.BooleanField(default=False)
+  absolute_hour = models.IntegerField(default=0)
+  absolute_minute = models.DateTimeField(default=0)
+
+  # Methods
+  def apply(date):
+    # return the new date based on the relative_component and absolute_hour
+    # shift by relative component
+    shifted_date = date + self.relative_component
+
+    # replace time components with those of the absolute_hour and absolute_minute
+    if self.is_absolute:
+      shifted_date.hour = max(min(self.absolute_hour, 23), 0)
+      shifted_date.minute = max(min(self.absolute_minute, 59), 0)
+
+    return shifted_date
+
 class Event(Model):
   class Meta:
     permissions = ()
@@ -91,24 +118,13 @@ class EventInstance(Model):
     pass
 
   def schedule(self):
-    # create a set of several notifications
-    # 1. A notification at 7pm, the night before the event
-    day_of_event = None
-    day_before_event = None
-    seven_pm_on_day_before_event = None
-    # night_before = self.notifications.create(name='night_before', timestamp=seven_pm_on_day_before_event)
-    night_before = self.notifications.create(name='night_before', timestamp=self.end_time - timedelta(seconds=6))
-    night_before.schedule()
-
-    # 2. A notification one hour before the event
-    # one_hour_before = self.notifications.create(name='one_hour_before', timestamp=self.end_time - timedelta(seconds=3600))
-    one_hour_before = self.notifications.create(name='one_hour_before', timestamp=self.end_time - timedelta(seconds=3))
-    one_hour_before.schedule()
-
-    # 3. A notification 15 minutes before the event
-    # fifteen_minutes_before = self.notifications.create(name='fifteen_minutes_before', timestamp=self.end_time - timedelta(seconds=900))
-    fifteen_minutes_before = self.notifications.create(name='fifteen_minutes_before', timestamp=self.end_time)
-    fifteen_minutes_before.schedule()
+    # create a set of several notifications based on notification models of the event model
+    for notification_model in self.event.model.notification_models.all():
+      notification, notification_created = self.notifications.get_or_create(name=notification_model.name)
+      if notification_created:
+        notification.timestamp = notification_model.apply(self.end_time)
+        notification.schedule()
+        notification.save()
 
 def trigger(_id):
   # get the model from the parent and call the trigger function

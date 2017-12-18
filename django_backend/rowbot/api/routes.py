@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rowbot.api.router import SchemaRouter
 from rowbot.api.member import MemberViewSet
 from rowbot.api.club import ClubViewSet
-from rowbot.api.event import EventModelViewSet, EventViewSet, EventInstanceViewSet, EventNotificationViewSet
+from rowbot.api.event import EventModelViewSet, EventNotificationModelViewSet, EventViewSet, EventInstanceViewSet, EventNotificationViewSet
 from rowbot.api.team import TeamModelViewSet, TeamViewSet, TeamInstanceViewSet, TeamRecordViewSet
 from rowbot.api.role import RoleModelViewSet, RolePermissionViewSet, RoleViewSet, RoleInstanceViewSet, RoleRecordViewSet
 from rowbot.api.asset import AssetModelViewSet, AssetViewSet, AssetInstanceViewSet
@@ -28,6 +28,7 @@ router.register(r'clubs', ClubViewSet)
 
 # event
 router.register(r'events/models', EventModelViewSet)
+router.register(r'events/notificationmodels', EventNotificationModelViewSet)
 router.register(r'events/root', EventViewSet)
 router.register(r'events/instances', EventInstanceViewSet)
 router.register(r'events/notifications', EventNotificationViewSet)
