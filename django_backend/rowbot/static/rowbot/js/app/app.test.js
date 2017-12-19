@@ -75,7 +75,6 @@ function create_and_schedule_event () {
           description: 'a test',
           // roles: [], // test by creating role instance first and putting id here
         }).then(function (_eventInstance) {
-          _.l(_role);
           return _models.RoleInstance.objects.create({
             role: _role._id,
             event: _eventInstance._id,
