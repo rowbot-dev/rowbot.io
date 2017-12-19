@@ -8,7 +8,7 @@ from rowbot.models import Club, Member, RoleModel, Role
 # Command
 class Command(BaseCommand):
   def handle(self, *args, **options):
-    for i in range(10):
+    for i in range(2):
       club, club_created = Club.objects.get_or_create(name='TestClub{}'.format(i))
       member = Member.objects.get(username='npiano')
 

@@ -1,0 +1,55 @@
+body {
+	margin: 0px;
+}
+
+div.sidebar {
+	height: 100%;
+	width: 200px;
+	border-right: 1px solid #bbb;
+	float: left;
+	box-sizing: border-box;
+}
+
+div.s-crest {
+	width: 200px;
+}
+
+div.s-crest img {
+	position: relative;
+	width: 80%;
+	left: 10%;
+	top: 20px;
+}
+
+div.main {
+	float: left;
+	width: calc(100% - 200px);
+	height: 100%;
+	box-sizing: border-box;
+}
+
+div.m-header {
+
+}
+
+div.m-boat {
+	height: 100%;
+}
+
+div.m-boat img {
+	position: relative;
+	left: 100px;
+	height: 100%;
+}
+
+div.m-rowers {
+
+}
+
+div.m-r-rower.right {
+
+}
+
+div.m-r-rower.left {
+
+}

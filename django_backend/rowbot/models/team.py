@@ -42,7 +42,7 @@ class TeamInstance(Model):
 
 	### Connections
   team = models.ForeignKey('rowbot.Team', related_name='instances')
-  event = models.ForeignKey('rowbot.EventInstance', related_name='teams')
+  event = models.ForeignKey('rowbot.EventInstance', related_name='teams', null=True)
 
 
 class TeamRecord(Model):

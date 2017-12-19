@@ -13,3 +13,14 @@ This redis server will be used to set up events that will call out when complete
 
 make start.sh
 sudo chmod +x start.sh
+
+https://github.com/nvie/rq
+http://python-rq.org/docs/
+https://github.com/ui/rq-scheduler
+https://github.com/ui/django-rq
+
+Maybe use this instead:
+https://apscheduler.readthedocs.io/en/latest/userguide.html#starting-the-scheduler
+
+Texting:
+https://www.twilio.com/blog/2016/10/how-to-send-an-sms-with-python-using-twilio.html?utm_source=readthedocs&utm_medium=cpc&utm_campaign=python

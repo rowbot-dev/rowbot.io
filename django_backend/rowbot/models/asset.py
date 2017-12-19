@@ -46,6 +46,7 @@ class AssetInstance(Model):
   asset = models.ForeignKey('rowbot.Asset', related_name='instances')
   team = models.ForeignKey('rowbot.Team', related_name='assets')
   in_possession_of = models.ForeignKey('rowbot.Team', related_name='external_assets', null=True)
+  event = models.ForeignKey('rowbot.EventInstance', related_name='assets', null=True)
 
   # Properties
   metadata = models.TextField() # replace with django.contrib.postgres.fields.JSONField

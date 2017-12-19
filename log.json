@@ -1,0 +1,76 @@
+{
+  "entries": {
+    "E0001": {
+      "datetime": "2017-10-19:01-00",
+      "comment": "Completed most of the backend except invitations and advertisements. Should be a quick addtion. Need to concentrate now on the front end structure. The auth app needs to cope with an admin creating an account to create a club. He will then bulk add users via an interface that will notify them via email. The users will then navigate to a link in that email with a key that uniquely identifies them against the record from the admin. Users will fill in their personal details and have the option to request roles within the club and to request to join other clubs. A user can also sign up directly and request to join clubs without an admin adding them via email.",
+      "tasks": {
+        "T0001": {
+          "title": "Auth login view",
+          "detail": "A standard login page for a user that has been activated.",
+        },
+        "T0002": {
+          "title": "Activation view",
+          "detail": "Activation page when creating user directly.",
+        },
+        "T0003": {
+          "title": "Activation email view",
+          "detail": "Activation page when creating user after being notified by email.",
+        },
+        "T0004": {
+          "title": "Create user view",
+          "detail": "Standard user signup view.",
+        },
+      },
+    },
+    "E0002": {
+      "datetime": "2017-10-19:10-00",
+      "comment": "Installing django-guardian and making some more backend changes before continuing. For example, invitations and advertisements need to be added.",
+      "thoughts": {
+        "P0001": {
+          "title": "A realisation",
+          "details": "django-guardian cannot give me role-based object permissions, only user-based. I have to check everything against the member. Will this slow me down?"
+        },
+        "P0002": {
+          "title": "Role heirarchy?",
+          "details": "Should you be able to place some roles over others in terms of permission?"
+        },
+        "P0003": {
+          "title": "Asset heirarchy?",
+          "details": "Nested asset relationships?"
+        },
+        "P0004": {
+          "title": "Event heirarchy?",
+          "details": "Nested event relationships?"
+        },
+      },
+      "tasks": {
+        "X0005": {
+          "title": "Configure django-guardian and permissions",
+          "detail": "Give each model that needs it appropriate permissions for use with DRF.",
+        },
+        "T0006": {
+          "title": "Add invitations and advertisements",
+          "detail": "Invitations should be from one club to another about an event_instance. Advertisements are role offers for members.",
+        },
+        "T0007": {
+          "title": "Create user view",
+          "detail": "Standard user signup view.",
+        },
+      },
+    },
+    "E0003": {
+      "datetime": "2017-10-20:19-30",
+      "comment": "I've had a cup of tea, so I'm all fired up. The API seems solid, but the most daunting thing is the frontend. Basically, for each 'resource', as in Clubs, Members, etc, there has to be a basic CRUD interface will embellishments that make them a bit more unique. I'm not sure I can make a single interface component that will cover everything, but there are some widely applicable components, such as a new list, with scroll bar and pagination.",
+      "actions": {
+        "A0001": {
+          "title": "Adding assets",
+          "detail": "Need to decide what components we need and what we need to update.",
+        },
+      },
+    },
+    "E0004": {
+      "datetime": "2017-10-23:23-00",
+      "comment": "State calling, animation, context, actions, models.js",
+    },
+  }
+}

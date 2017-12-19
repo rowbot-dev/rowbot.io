@@ -57,7 +57,7 @@ class RoleInstance(Model):
 
 	### Connections
   role = models.ForeignKey('rowbot.Role', related_name='instances')
-  event = models.ForeignKey('rowbot.EventInstance', related_name='roles')
+  event = models.ForeignKey('rowbot.EventInstance', related_name='roles', null=True)
 
 
 class RoleRecord(Model):

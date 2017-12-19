@@ -5,15 +5,15 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, Permis
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-
-# DRF
-
+from django.conf import settings
 
 # Local
 from rowbot.models.base import Model, random_key
 
 # Util
 import uuid
+import urllib3
+http = urllib3.PoolManager(retries=False)
 
 # Member
 class MemberManager(BaseUserManager):
@@ -63,7 +63,35 @@ class Member(AbstractBaseUser, PermissionsMixin, Model):
     text_content = strip_tags(html_content)  # this strips the html, so people will have the text as well.
 
     # create the email, and attach the HTML version as well.
-    msg = EmailMultiAlternatives('deposit activation {}'.format(self.activation_email_key), text_content, 'signup@rowbot.com', [self.email])
+    msg = EmailMultiAlternatives('activation {}'.format(self.activation_email_key), text_content, 'signup@rowbot.com', [self.email])
     msg.attach_alternative(html_content, 'text/html')
     msg.send()
     return self.activation_email_key
+
+  def new_socket_token(self):
+    active_socket_token = self.socket_tokens.get(is_active=True)
+    previous = None
+    if active_socket_token is not None:
+      previous = active_socket_token._id
+      active_socket_token.is_active = False
+      active_socket_token.save()
+
+    new_socket_token = self.socket_tokens.create()
+
+    try:
+      # make request to websocket server
+      http.request('GET', 'http://{}:{}/{}.{}'.format(settings.WEBSOCKET['host'], settings.WEBSOCKET['message'], previous, new_socket_token._id))
+    except urllib3.exceptions.NewConnectionError:
+      print('Connection to websocket server failed.')
+
+    return new_socket_token
+
+class WebSocketAccessToken(Model):
+  class Meta:
+    permissions = ()
+
+  # Connections
+  member = models.ForeignKey('rowbot.Member', related_name='socket_tokens')
+
+  # Properties
+  is_active = models.BooleanField(default=True)

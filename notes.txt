@@ -55,3 +55,4 @@ Plan:
 2. quick iPhone app
 3. quick Android app
 
+API done. Next step is frontend.

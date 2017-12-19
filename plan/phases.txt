@@ -1,0 +1,17 @@
+
+Phase 1: mockup
+
+Two pages:
+  1. a list of colleges and their crests, click to go to the next page
+  2. a picture of the boat from above with member names and their roles next to them. College crest in the upper left hand corner.
+
+(path plan/mockup/html/boat.html)
+
+Phase 2: prototype
+
+An app with three sections:
+  1. Signup / login / activation / conversion
+  2. Member, role, and event management for admins
+  3. Event management for members
+
+(path plan/demo.json)
