@@ -20,6 +20,7 @@
     "description": "The scheduling application itself, including member and event management.",
     "notes": [
       "Standard CRUD rules apply. An action implies its reverse is possible, everything can be listed and filtered, etc.",
+      "Every task that includes 'create' also includes 'list', 'delete', and 'view single'."
     ],
     "children": {
       "member": {
@@ -52,19 +53,19 @@
         "description": "The user should be able to create events and event models, schedule event instances and invite members, based on their permissions.",
         "children": {
           "Create event models": {
-
+            "description": "An event model describes a type of event, that specific uses of that event link back to."
           },
           "Create event notification models": {
-
+            "description": "An event notification model is a standard for when notifications will be triggered for an event. For example, one type of event might call for a reminder triggered 15 minutes before an event. Another might have a reminder 1 hour before. This difference would be encoded in notification models. e.g. 'Race'."
           },
           "Create events": {
-
+            "description": "An actual implementation of an event model. For example, a 'Race' might be implemented as 'Emma Sprints'."
           },
           "Schedule event instances, single and recurring": {
-
-          },
-        },
-      },
-    },
-  },
+            "description": "An instance of an event, including a specific date. Allows time-dependent role records to be created for participants. e.g. 'Emma Sprints 2017'."
+          }
+        }
+      }
+    }
+  }
 }

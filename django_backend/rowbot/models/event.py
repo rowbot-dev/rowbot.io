@@ -126,7 +126,7 @@ class EventInstance(Model):
     for notification_model in self.event.model.notification_models.all():
       notification, notification_created = self.notifications.get_or_create(name=notification_model.name)
       if notification_created:
-        notification.timestamp = notification_model.apply(self.end_time)
+        notification.timestamp = notification_model.apply(self.start_time)
         notification.schedule()
         notification.save()
 
