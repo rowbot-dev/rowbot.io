@@ -184,6 +184,12 @@ var _ = {
     }, '');
   },
 
+  // duration formatting
+  duration: function (number, string) {
+    var data = moment.duration(number, string)._data;
+    return `${data.days} ${data.hours}:${data.minutes}:${data.seconds}.${data.milliseconds * 1000}`;
+  },
+
   // id
   id: function (length) {
     length = (length || 10);

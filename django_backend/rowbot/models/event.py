@@ -55,16 +55,20 @@ class EventNotificationModel(Model):
 
   # Properties
   name = models.CharField(max_length=255)
-  relative_duration = models.DurationField(default=timedelta(seconds=0))
+  relative_duration = models.DurationField()
+  is_negative = models.BooleanField(default=False)
   is_absolute = models.BooleanField(default=False)
   absolute_hour = models.IntegerField(default=0)
-  absolute_minute = models.DateTimeField(default=0)
+  absolute_minute = models.IntegerField(default=0)
 
   # Methods
-  def apply(date):
-    # return the new date based on the relative_component and absolute_hour
+  def apply(self, date):
+    # return the new date based on the relative_duration and absolute_hour
     # shift by relative component
-    shifted_date = date + self.relative_component
+    if self.is_negative:
+      shifted_date = date - self.relative_duration
+    else:
+      shifted_date = date + self.relative_duration
 
     # replace time components with those of the absolute_hour and absolute_minute
     if self.is_absolute:

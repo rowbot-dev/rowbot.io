@@ -69,8 +69,8 @@ class RolePermissionSerializer(serializers.ModelSerializer):
     depth = 1
 
 class RoleInstanceSerializer(serializers.ModelSerializer):
-  role = UUIDRelatedField(read_only=True)
-  event = UUIDRelatedField(read_only=True)
+  role = UUIDRelatedField(queryset=Role.objects.all())
+  event = UUIDRelatedField(queryset=EventInstance.objects.all())
 
   class Meta:
     model = RoleInstance
@@ -87,13 +87,13 @@ class RoleRecordSerializer(serializers.ModelSerializer):
     depth = 1
 
 class RoleSerializer(serializers.ModelSerializer):
-  team = UUIDRelatedField(read_only=True)
-  model = UUIDRelatedField(read_only=True)
-  member = UUIDRelatedField(read_only=True)
-  is_superior_to = UUIDRelatedField(queryset=Role.objects.all(), many=True)
-  is_subordinate_to = UUIDRelatedField(queryset=Role.objects.all(), many=True)
-  instances = RoleInstanceSerializer(many=True)
-  records = RoleRecordSerializer(many=True)
+  team = UUIDRelatedField(queryset=Team.objects.all(), required=False)
+  model = UUIDRelatedField(queryset=RoleModel.objects.all())
+  member = UUIDRelatedField(queryset=Member.objects.all())
+  is_superior_to = UUIDRelatedField(queryset=Role.objects.all(), many=True, required=False)
+  is_subordinate_to = UUIDRelatedField(queryset=Role.objects.all(), many=True, required=False)
+  instances = RoleInstanceSerializer(many=True, required=False)
+  records = RoleRecordSerializer(many=True, required=False)
 
   class Meta:
     model = Role
@@ -184,9 +184,9 @@ class EventInstanceSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
   model = UUIDRelatedField(queryset=EventModel.objects.all())
-  parts = UUIDRelatedField(queryset=Event.objects.all(), many=True)
-  is_part_of = UUIDRelatedField(queryset=Event.objects.all(), many=True)
-  instances = EventInstanceSerializer(many=True)
+  parts = UUIDRelatedField(queryset=Event.objects.all(), many=True, required=False)
+  is_part_of = UUIDRelatedField(queryset=Event.objects.all(), many=True, required=False)
+  instances = EventInstanceSerializer(many=True, required=False)
 
   class Meta:
     model = Event
