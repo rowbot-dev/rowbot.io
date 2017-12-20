@@ -1,22 +1,28 @@
 # rowbot.io
 A rowing schedule manager
 
+Briefly, the goal is to quickly manage the problem of finding a replacement for a position if someone drops out. An exact number of people are needed to fill the available roles, and events often take place very early in the morning (between 5am and 7am). Because of this, the roster needs to be solid the night before or even earlier. This inevitably leads to a flurry of panic the night before an event to lock everything down.
+
+This application smoothes that process by keeping a roster of people with their confirmation, and a list of reserves for an event. If someone drops out, it is on them to notify the reserves and fill their place. The number of times a person drops can be recorded, and they can be disciplined. If someone offers themselves as a reserve, their slate can be wiped clean.
+
+This model applies very well to a number of sports, but I wanted to start with rowing, as that is what I experienced personally as the Men's Captain of the St. Edmund's College Boat Club.
+
 ## Install
 
 Requires python3.6 and an internet connection.
 
 1. Go to directory
 2. Virtualenv: ~$ python3.6 -m venv .
-3. Requirements: ~$ pip install -r reqs/development.txt
-4. Create settings config: ~$ open django_backend/settings/conf.json
+3. Activate the virtualenv with ~$ source ./bin/activate
+4. Requirements: ~$ pip install -r reqs/development.txt
+5. Create settings config: ~$ open django_backend/settings/conf.json
 `{"path": "settings.development.np"} # path within django_backend/`
 If you want to override settings, you can create a new file and enter the path here. This file will not be tracked.
-5. Database: ~$ python manage.py migrate
-6. Start a second shell, go to redis_scheduler/
-7. Start redis server: ~$ ./start.sh
-8. Start a third shell, go to node_ws_gateway and install node if necessary: https://nodejs.org/en/download/
-9. Start websocket server: ~$ node server.js
-10. In the first shell, remember to activate the virtualenv with ~$ source ./bin/activate
+6. Database: ~$ python manage.py migrate
+7. Start a second shell, go to redis_scheduler/
+8. Start redis server: ~$ ./start.sh
+9. Start a third shell, go to node_ws_gateway and install node if necessary: https://nodejs.org/en/download/
+10. Start websocket server: ~$ node server.js
 11. Start the django development server: ~$ python manage.py runserver
 12. In a browser, go to localhost:8000.
 13. Check plan/phases.txt
@@ -49,4 +55,4 @@ In the browser, making a request to the schema url will yield the full list of a
 
 ## The Node websocket gateway
 
-The websocket gateway maintains named websocket connections that have been fed to it by the django backend. Websockets are associated with active user accounts and can be used to send messages to a specific set of users. When an event is triggered, a request will be sent to the node http server (can also use a simple unix socket). This will trigger a message to be sent out on all active websockets whose names match the 
+The websocket gateway maintains named websocket connections that have been fed to it by the django backend. Websockets are associated with active user accounts and can be used to send messages to a specific set of users. When an event is triggered, a request will be sent to the node http server (can also use a simple unix socket). This will trigger a message to be sent out on all active websockets whose names match the list sent by the Django server, corresponding to the subscribers of that event.

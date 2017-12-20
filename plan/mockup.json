@@ -1,0 +1,15 @@
+{
+  "Colleges page": {
+    "description": "A grid containing all the colleges of Cambridge and a mini version of their crests. Selecting a college will take the user to the Event page and display their crest in the menu bar.",
+    "children": [
+      "Grid of buttons with college crest and college name"
+    ]
+  },
+  "Event page": {
+    "description": "An example view of single event in the future, with a title, date and time, and location.",
+    "children": {
+      "Menu bar": "A vertical strip on the left side of the page with a single button to go back to the list of colleges.",
+      "Boat": "A top down view of the boat with a member-role card next to each position, showing their name."
+    }
+  }
+}
