@@ -23,9 +23,11 @@ If you want to override settings, you can create a new file and enter the path h
 8. Start redis server: ~$ ./start.sh
 9. Start a third shell, go to node_ws_gateway and install node if necessary: https://nodejs.org/en/download/
 10. Start websocket server: ~$ node server.js
-11. Start the django development server: ~$ python manage.py runserver
-12. In a browser, go to localhost:8000.
-13. Check plan/phases.txt
+11. Create a member to log in with: ~$ python manage.py fixture_user (edit this script [django_backend/rowbot/management/commands/fixture_user.py] for different user details)
+12. Create some clubs: ~$ python manage.py fixture_club
+13. Start the django development server: ~$ python manage.py runserver
+14. In a browser, go to localhost:8000.
+15. Check plan/phases.txt
 
 ## Processes
 
