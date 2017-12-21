@@ -13,3 +13,5 @@ pip-selfcheck.json
 # django
 *.sqlite3
 conf.json
+
+*.rdb
