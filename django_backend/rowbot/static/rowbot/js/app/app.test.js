@@ -12,7 +12,7 @@ function create_and_schedule_event () {
   // create role instance
 
   var _models = api.models;
-  var start_time = moment();
+  var start_time = moment().add(20, 'seconds');
   var end_time = start_time.clone().add(20, 'seconds');
 
   return _.all([
