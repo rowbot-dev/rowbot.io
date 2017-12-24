@@ -5,6 +5,7 @@ Components.buttonGroup = function (name, args) {
 
   }, args)).then(function (_buttonGroup) {
 
+    // set first and last
     _buttonGroup.setHover = function (index) {
       return _.all(_buttonGroup.children().map(function (_button, _index) {
         if (_index === index) {
@@ -22,14 +23,21 @@ Components.buttonGroup = function (name, args) {
 
     // map bindings to all children
     _buttonGroup.children().map(function (_button, index) {
-      _button.setBindings({
-        'mouseover': function (_this, event) {
-          _buttonGroup.setHover(index);
-        },
-        'mouseout': function (_this, event) {
-          _buttonGroup.setHover();
-        }
-      });
+      _.all([
+        _.p(function () {
+          if (index === 0) {
+            return _button.setClasses(['first']);
+          }
+        }),
+        _button.setBindings({
+          'mouseover': function (_this, event) {
+            _buttonGroup.setHover(index);
+          },
+          'mouseout': function (_this, event) {
+            _buttonGroup.setHover();
+          }
+        }),
+      ]);
     });
 
     return _buttonGroup;

@@ -50,22 +50,21 @@ var _ = {
   // objects
   merge: function (...objects) {
     return objects.reduce(function (whole, part) {
-      part = (part || {});
-      Object.keys(part).forEach(function (key) {
-        if (key in whole) {
-          if (_.is.object.all(whole[key]) && _.is.object.all(part[key])) {
+      if (_.is.array(part)) {
+        whole = [...new Set([...whole, ...part])]; // union
+      } else {
+        whole = (whole || {});
+        part = (part || {});
+        Object.keys(part).forEach(function (key) {
+          if ((key in whole && _.is.object.all(whole[key]) && _.is.object.all(part[key])) || (_.is.array(whole[key]) && _.is.array(part[key]))) {
             whole[key] = _.merge(whole[key], part[key]); // objects go deeper again recursively
-          } else if (_.is.array(whole[key]) && _.is.array(part[key])) {
-            whole[key] = [...new Set([...whole[key], ...part[key]])]; // arrays union
           } else {
-            whole[key] = part[key]; // strings and "other" replace
+            whole[key] = part[key]; // add if it does not exist
           }
-        } else {
-          whole[key] = part[key]; // add if it does not exist
-        }
-      });
+        });
+      }
       return whole;
-    }, {});
+    });
   },
   map: function (object, fn) {
     return Object.keys(object).map(function (key) {

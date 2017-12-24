@@ -42,7 +42,7 @@ Components.input = function (name, args) {
 
     // bound to input event
     _input.input = function (value, event) {
-      
+
     }
 
     // bound to keypress event
