@@ -49,16 +49,21 @@ class Role(Model):
   # Properties
   nickname = models.CharField(max_length=255)
   is_active = models.BooleanField(default=True)
+  is_confirmed = models.BooleanField(default=False)
 
 
 class RoleInstance(Model):
   class Meta:
     permissions = ()
 
-	### Connections
+	# Connections
   role = models.ForeignKey('rowbot.Role', related_name='instances')
   event = models.ForeignKey('rowbot.EventInstance', related_name='roles', null=True)
 
+  # Properties
+  is_active = models.BooleanField(default=True)
+  is_confirmed = models.BooleanField(default=False)
+  
 
 class RoleRecord(Model):
   class Meta:

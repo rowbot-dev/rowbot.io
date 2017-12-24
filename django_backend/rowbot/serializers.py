@@ -74,7 +74,7 @@ class RoleInstanceSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = RoleInstance
-    fields = ('_id', '_ref', 'date_created', 'role', 'event')
+    fields = ('_id', '_ref', 'date_created', 'is_active', 'is_confirmed', 'role', 'event')
     depth = 1
 
 class RoleRecordSerializer(serializers.ModelSerializer):
@@ -97,7 +97,7 @@ class RoleSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Role
-    fields = ('_id', '_ref', 'date_created', 'nickname', 'team', 'model', 'member', 'is_superior_to', 'is_subordinate_to', 'instances', 'records')
+    fields = ('_id', '_ref', 'date_created', 'nickname', 'is_active', 'is_confirmed', 'team', 'model', 'member', 'is_superior_to', 'is_subordinate_to', 'instances', 'records')
     depth = 1
 
 class RoleModelSerializer(serializers.ModelSerializer):
