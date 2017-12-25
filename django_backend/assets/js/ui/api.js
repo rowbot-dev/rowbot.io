@@ -132,7 +132,7 @@ var API = function () {
         if (_.is.object.all(_id)) { // substitute args for _id
           args = _id;
         } else {
-          args.id = _id;
+          args._id = _id;
         }
         return _model.objects.filter(args).then(function (results) {
           return results.length ? results[0] : undefined;
@@ -169,7 +169,7 @@ var API = function () {
             return _api.request(`${_api.urls.base}${_model.prefix}/${path_or_id}`, 'GET', data).then(function (result) {
               result = _.is.array(result) ? result : [result];
               result.map(function (item) {
-                var instance = _model.instance(item)
+                var instance = _model.instance(item);
                 _api.buffer[_model.name][item._id] = instance;
                 return instance;
               });

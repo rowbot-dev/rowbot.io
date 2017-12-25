@@ -6,6 +6,9 @@ Test.application = function (args) {
       'width': '100%',
       'top': '0%',
       'top': '0%',
+      '.hidden': {
+        'display': 'none',
+      },
     },
     children: [
       Test.interfaces.centred({
@@ -27,13 +30,13 @@ Test.application = function (args) {
 
     _list.setTargets([
       _list._target('clubs', {
-        exclusive: false,
+        exclusive: true,
         source: function (force) {
           var _target = this;
           return api.models.Club.objects.all();
         },
         normalise: function (_item) {
-          return {_id: _item._id, main: _item.name};
+          return _.p({_id: _item._id, main: _item.name});
         },
         unit: function (name, args) {
           return ui._component(`${name}`, {

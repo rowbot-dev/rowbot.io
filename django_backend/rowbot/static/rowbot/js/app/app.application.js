@@ -7,6 +7,9 @@ App.application = function () {
       'width': '100%',
       'top': '0%',
       'top': '0%',
+      '.hidden': {
+        'display': 'none',
+      },
     },
     children: [
       ui._component('sidebar', {
@@ -78,5 +81,15 @@ App.application = function () {
         ],
       }),
     ],
+  }).then(function (_app) {
+
+    var _buttons = _app.get('sidebar.menu');
+    var _roles = _buttons.get('roles');
+
+    _roles.click = function (event) {
+      return ui.states.call('roles');
+    }
+
+    return _app;
   });
 }

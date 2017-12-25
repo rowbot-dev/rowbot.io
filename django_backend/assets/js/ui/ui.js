@@ -287,6 +287,18 @@ var UI = function () {
         return _this;
       });
     },
+    hide: function (duration) {
+      var _this = this;
+      return _this.setStyle({'opacity': '0.0'}).then(function () {
+        return _this.setClasses('hidden');
+      });
+    },
+    show: function (duration) {
+      var _this = this;
+      return _this.removeClass('hidden').then(function () {
+        return _this.setStyle({'opacity': '1.0'});
+      });
+    },
 
     // tree
     child: function (name) {

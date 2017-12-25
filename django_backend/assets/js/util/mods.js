@@ -78,11 +78,11 @@ Array.prototype.contains = function (object) {
 Array.prototype.sum = function (object) {
   return this.reduce(function (f, s) {
     return f+s;
-  });
+  }, 0);
 }
 
 Array.prototype.mean = function () {
-  return this.sum() / this.length;
+  return this.sum() / (this.length || 1);
 }
 
 Array.prototype.index = function (property) {

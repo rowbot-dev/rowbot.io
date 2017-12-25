@@ -6,19 +6,29 @@ List component
 2. Results list
 3. Filter list
 4. Pagination bar
-5.
+
+How to modify query management:
+1. Override _input.input to insert query elements into _list.metadata.query.buffer
+2. Override _list.metadata.query.score if necessary
+3. Override _list.data.storage.compare for sorting
+4. Override _list.data.display.filter.condition for filtering
 
 */
 
 var Components = (Components || {});
 Components.list = function (name, args) {
+  args = (args || {});
   return ui._component(name, {
+    style: args.style,
     children: [
       ui._component('search', {
+        style: args.searchStyle,
         children: [
           // toggle filter
           Components.button('filter', {
-
+            style: {
+              'position': 'absolute',
+            },
           }),
 
           // search field
@@ -28,6 +38,9 @@ Components.list = function (name, args) {
         ],
       }),
       ui._component('pagination', {
+        style: {
+          'height': '40px',
+        },
         children: [
 
           // previous set
@@ -48,12 +61,6 @@ Components.list = function (name, args) {
       }),
       Components.panel('list', {
         tramline: args.tramline,
-        style: {
-          'height': '300px',
-          'div.hidden': {
-            'display': 'none',
-          },
-        },
         children: [
 
           // contains list items
@@ -67,21 +74,29 @@ Components.list = function (name, args) {
           }),
         ],
       }),
-      Components.panel('filter', {
-        style: {
-          'top': '0px',
-          'position': 'absolute',
-        },
-        children: [
-
-        ],
-      }),
+      // Components.panel('filter', {
+      //   style: {
+      //     'top': `${searchHeight}`,
+      //     'position': 'absolute',
+      //     'height': `${mainHeight}px`,
+      //   },
+      //   children: [
+      //
+      //   ],
+      // }),
     ],
   }).then(function (_list) {
 
     // component variables
     var _input = _list.get('search.input');
     var _wrapper = _list.get('list.container.content.wrapper');
+
+    // handle combined height of components
+    _list.adjustHeights = function () {
+      if (_list._.is.rendered) {
+        //
+      }
+    }
 
     /*
 
@@ -110,9 +125,8 @@ Components.list = function (name, args) {
           // for each category, check against query.buffer
           var _query = this;
           var _target = _datum.target;
-          var _normalised = _datum.normalised;
           return _.p(function () {
-            return _.map(_normalised, function (_key, _value) {
+            return _.map(_datum.normalised, function (_key, _value) {
               let results = {};
               let exclusive = (_list.metadata.exclusive || _target.exclusive);
               if (_key in _query.buffer) {
@@ -146,6 +160,7 @@ Components.list = function (name, args) {
       _target.update = function (args) {
         return _.p(function () {
           args = (args || {});
+          _target.main = (args.main || _target.main);
           _target.source = args.source;
           _target.force = (args.force || _target.force);
           _target.normalise = (args.normalise || _target.normalise);
@@ -161,20 +176,26 @@ Components.list = function (name, args) {
         return _target.source().then(function (_data) {
           return _._all(_data.map(function (_item, i) {
             return function () {
-              return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
+              return _target.normalise(_item).then(function (_normalised) {
+                return _list.data.display.main({target: _target, item: _item, normalised: _normalised});
+              });
             }
           }));
-        }).then(function () {
-          return _target.force().then(function (_data) {
-            return _._all(_data.map(function (_item, i) {
-              return function () {
-                return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
-              }
-            }));
-          });
         });
+
+        // .then(function () {
+        //   return _target.force().then(function (_data) {
+        //     return _._all(_data.map(function (_item, i) {
+        //       return function () {
+        //         return _target.normalise(_item).then(function (_normalised) {
+        //           return _list.data.display.main({target: _target, item: _item, normalised: _normalised});
+        //         });
+        //       }
+        //     }));
+        //   });
+        // });
       }
-      _target.delay = 100;
+      _target.delay = 300;
       _target.force = function () {
         var _query = '';
         return new Promise(function (resolve, reject) {
@@ -190,11 +211,11 @@ Components.list = function (name, args) {
 
       // normalised objects should contain a list of properties to be compared with the queries
       _target.normalise = function (_item) {
-        return _item;
+        return _.p(_item);
       }
       _target.unit = function (name, args) {
         return ui._component(name, {
-          
+
         }).then(function (_block) {
           return _block;
         });
@@ -281,11 +302,11 @@ Components.list = function (name, args) {
       load: function () {
         // for each target
         // _list.data.storage.sorted = [];
-        return _list.data.storage.garbage().then(function () {
-          // _.l(0, _list.data.storage.sorted);
-          return _._all(_list.targets.map(function (_target) {
-            return _target.load;
-          }));
+        // _.l(0, _list.data.storage.sorted);
+        return _._all(_list.targets.map(function (_target) {
+          return _target.load;
+        })).then(function () {
+          return _list.data.storage.garbage();
         });
       },
       storage: {
@@ -300,7 +321,7 @@ Components.list = function (name, args) {
 
             // run sorting
             var direction, previous;
-            var searchLength = Math.floor(_storage.sorted.length / 2); // halving distance moved each time from centre
+            var searchLength = _storage.sorted.length; // halving distance moved each time from end
             var index = searchLength; // start index at centre
             if (!_storage.sorted.contains(_datum.item._id)) {
               while (true) {
@@ -320,6 +341,7 @@ Components.list = function (name, args) {
 
                 // if flip-flop, leave high because of how indexes work
                 if (direction === 1 && previous === -1 || direction === 0) {
+                  index += 1;
                   break;
                 }
 
@@ -360,8 +382,8 @@ Components.list = function (name, args) {
             return function () {
               return _.p(function () {
                 if (_child.isReleased) {
-                  let index = _storage.sorted.indexOf(_child.datum.item._id);
-                  _storage.sorted.splice(index, 1);
+                  _storage.sorted.splice(_storage.sorted.indexOf(_child.datum.item._id), 1);
+                  delete _storage.buffer[_child.datum.item._id];
                 }
               });
             }
@@ -413,7 +435,7 @@ Components.list = function (name, args) {
           },
           condition: function (_datum) { // override
             return _.p(function () {
-              _datum.accepted = _datum.scores.main > 0;
+              _datum.accepted = 'main' in _datum.scores ? _datum.scores.main > 0 : true;
               // _.l(4, 'filter.condition', _datum.item._id, _datum.accepted);
             });
           },
@@ -452,10 +474,10 @@ Components.list = function (name, args) {
             }
 
             var _before = _wrapper.get(_render.buffer[_datum.index+1]);
-
             var _blockName = _.id();
             _render.buffer.splice(_datum.index, 0, _blockName);
             return _list.block(_blockName, {before: (_before || {}).name}).then(function (_block) {
+              _block.isReleased = false;
               return _wrapper.setChildren(_block);
             });
           },
