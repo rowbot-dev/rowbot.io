@@ -181,19 +181,17 @@ Components.list = function (name, args) {
               });
             }
           }));
+        }).then(function () {
+          return _target.force().then(function (_data) {
+            return _._all(_data.map(function (_item, i) {
+              return function () {
+                return _target.normalise(_item).then(function (_normalised) {
+                  return _list.data.display.main({target: _target, item: _item, normalised: _normalised});
+                });
+              }
+            }));
+          });
         });
-
-        // .then(function () {
-        //   return _target.force().then(function (_data) {
-        //     return _._all(_data.map(function (_item, i) {
-        //       return function () {
-        //         return _target.normalise(_item).then(function (_normalised) {
-        //           return _list.data.display.main({target: _target, item: _item, normalised: _normalised});
-        //         });
-        //       }
-        //     }));
-        //   });
-        // });
       }
       _target.delay = 300;
       _target.force = function () {

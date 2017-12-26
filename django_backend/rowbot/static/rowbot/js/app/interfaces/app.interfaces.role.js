@@ -53,7 +53,7 @@ App.interfaces.role = function () {
         exclusive: false,
         source: function (force) {
           var _target = this;
-          return api.models.Role.objects.all();
+          return api.models.Role.objects.all(force);
         },
         normalise: function (_item) {
           return _.all([
