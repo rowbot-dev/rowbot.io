@@ -30,13 +30,27 @@ var _ = {
       return fn(key, obj);
     }));
   },
-  _all: function (list) {
-    return Promise.mapSeries((list || []));
+  _all: function (fnList, input) {
+    // return Promise.mapSeries()
+    fnList = (fnList || []);
+    var results = [];
+    return fnList.reduce(function (whole, part) {
+      return whole.then(function (value) {
+        return _.is.f(part) ? part(value) : value;
+      }).then(function (result) {
+        results.push(result);
+        return result;
+      });
+    }, _.p(input)).then(function () {
+      return results;
+    });
   },
   _pmap: function (object, fn) {
     return _._all(Object.keys(object).map(function (key) {
-      let obj = object[key];
-      return fn(key, obj);
+      return function () {
+        let obj = object[key];
+        return fn(key, obj);
+      }
     }));
   },
 

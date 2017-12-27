@@ -155,7 +155,9 @@ var UI = function () {
             }
           });
         }
-      }));
+      })).then(function () {
+        return _this;
+      });
     },
     setHTML: function (html) {
       var _this = this;

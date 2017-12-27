@@ -70,7 +70,6 @@ App.interfaces.role = function () {
               value: _value,
               model: function (_instance) {
                 return _instance.relation('member').then(function (_member) {
-                  // _.l(_member);
                   return _member.email.contains(_value);
                 });
               },
@@ -80,7 +79,6 @@ App.interfaces.role = function () {
               value: _value,
               model: function (_instance) {
                 return _instance.relation('model').then(function (_model) {
-                  // _.l(_model);
                   return _model.verbose_name.contains(_value);
                 });
               },
@@ -88,14 +86,14 @@ App.interfaces.role = function () {
           });
           return data;
         },
-        normalise: function (_item) {
+        normalise: function (_instance) {
           return _.all([
-            _item.relation('model'),
-            _item.relation('member'),
+            _instance.relation('model'),
+            _instance.relation('member'),
           ]).then(function (results) {
             var [_model, _member] = results;
             return {
-              _id: _item._id,
+              _id: _instance._id,
               model: _model.verbose_name,
               email: _member.email,
             }

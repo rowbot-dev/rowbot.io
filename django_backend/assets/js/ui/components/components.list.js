@@ -302,9 +302,9 @@ Components.list = function (name, args) {
               var _unitName = _.id();
               _block.types[_datum.target.name] = _unitName;
               return _datum.target.unit(_unitName).then(function (_unit) {
-                return _block.setChildren(_unit);
-              }).then(function (_unit) {
-                return _unit.update(_datum);
+                return _block.setChildren(_unit).then(function () {
+                  return _unit.update(_datum);
+                });
               });
             }
           }).then(function (_unit) {
@@ -541,7 +541,9 @@ Components.list = function (name, args) {
             _render.buffer.splice(_datum.index, 0, _blockName);
             return _list.block(_blockName, {before: (_before || {}).name}).then(function (_block) {
               _block.isReleased = false;
-              return _wrapper.setChildren(_block);
+              return _wrapper.setChildren(_block).then(function () {
+                return _block;
+              });
             });
           },
         },

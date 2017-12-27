@@ -114,7 +114,6 @@ var API = function () {
         if (_model.fields.contains(property)) {
           var [model, id] = _instance[property].split('.');
           return _api.get(model, id, force).then(function (_relation) {
-            _.l(property, model, id, _relation);
             return _relation;
           });
         }
@@ -214,8 +213,10 @@ var API = function () {
         data = (data || []);
         return _._pmap(_api.buffer[_model.name], function (_id, _instance) {
           return _._all(data.map(function (item) {
-            return item.model(_instance);
-          })).then(function (tests) {
+            return function () {
+              return item.model(_instance);
+            }
+          }), 'hello').then(function (tests) {
             if (!tests.length || tests.sum()) {
               return _instance;
             }
