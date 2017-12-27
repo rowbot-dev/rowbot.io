@@ -53,7 +53,40 @@ App.interfaces.role = function () {
         exclusive: false,
         source: function (force) {
           var _target = this;
-          return api.models.Role.objects.all(force);
+          return api.models.Role.objects.filter({force: force, data: _target.data()});
+        },
+        data: function () {
+          var _target = this;
+          var _buffer = _list.metadata.query.buffer;
+
+          // The queries must be put into a form that both the filter in the browser and the server understand.
+          // This will most likely be simply a list of key-value pairs for each query and each field in the model.
+          // http://www.django-rest-framework.org/api-guide/filtering/
+
+          var data = [];
+          _.map(_buffer, function (_key, _value) {
+            data.push({
+              server: 'member__email__icontains',
+              value: _value,
+              model: function (_instance) {
+                return _instance.relation('member').then(function (_member) {
+                  // _.l(_member);
+                  return _member.email.contains(_value);
+                });
+              },
+            });
+            data.push({
+              server: 'model__verbose_name__icontains',
+              value: _value,
+              model: function (_instance) {
+                return _instance.relation('model').then(function (_model) {
+                  // _.l(_model);
+                  return _model.verbose_name.contains(_value);
+                });
+              },
+            });
+          });
+          return data;
         },
         normalise: function (_item) {
           return _.all([
@@ -155,10 +188,9 @@ App.interfaces.role = function () {
     ]);
     _list.get('pagination').setClasses('hidden');
     _input.input = function (value, event) {
-      return _.p(function () {
-        value.split(' ').forEach(function (_value, index) {
-          _list.metadata.query.buffer[index] = _value;
-        });
+      return _.pmap(value.split(' '), function (_index, _value) {
+        return _list.metadata.query.add(_index, _value);
+      }).then(function () {
         return _list.data.load();
       });
     }

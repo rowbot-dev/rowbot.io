@@ -2,6 +2,7 @@
 # Django
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 # DRF
 from rest_framework import status
@@ -64,11 +65,16 @@ class BaseModelViewSet(viewsets.ViewSet):
   permission_classes = (IsAuthenticated, CustomDjangoPermissions)
 
   def get_queryset(self):
-    return self.queryset
+    filter_q = Q()
+    for index, pair in self.request.query_params.dict().items():
+      (field, value) = tuple(pair.split('-'))
+      filter_q = filter_q | Q(**{field: value})
+
+    return self.queryset.filter(filter_q)
 
   # GET
   def list(self, request):
-    serializer = self.serializer(self.get_queryset().filter(**self.request.query_params.dict()), many=True)
+    serializer = self.serializer(self.get_queryset(), many=True)
     return Response(serializer.data)
 
   # GET

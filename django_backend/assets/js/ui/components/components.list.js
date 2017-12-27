@@ -104,8 +104,7 @@ Components.list = function (name, args) {
 
     */
     _input.input = function (value, event) {
-      return _.p(function () {
-        _list.metadata.query.buffer.main = value;
+      return _list.metadata.query.add('main', value).then(function () {
         return _list.data.load();
       });
     }
@@ -120,6 +119,43 @@ Components.list = function (name, args) {
       exclusive: false,
       query: {
         buffer: {},
+        history: {},
+        temp: {},
+        snapshot: function () {
+          var _query = this;
+          return {
+            buffer: Object.assign(_query.buffer),
+            static: function () {
+              // tests whether the query has stayed the same
+              var _snapshot = this;
+              return _.map(_snapshot.buffer, function (_key, _value) {
+                return _query.buffer[_key] === _value;
+              }).reduce(function (whole, part) {
+                return whole || part;
+              }, false);
+            },
+            new: function () {
+              // tests whether the query already exists in the history
+              var _snapshot = this;
+              return _.map(_snapshot.buffer, function (_key, _value) {
+                return !(_query.history[_key] && _query.history[_key].contains(_value));
+              }).reduce(function (whole, part) {
+                return whole || part;
+              }, false);
+            },
+          }
+        },
+        add: function (key, value) {
+          var _query = this;
+          return _.p(function () {
+            _query.buffer[key] = value;
+            _query.history[key] = (_query.history[key] || []);
+            if (!_query.history[key].contains(_query.temp[key])) {
+              _query.history[key].push(_query.temp[key]);
+            }
+            _query.temp[key] = value;
+          });
+        },
         score: function (_datum) {
           // normalised is an object with categories as keys and corresponding values.
           // for each category, check against query.buffer
@@ -163,6 +199,7 @@ Components.list = function (name, args) {
           _target.main = (args.main || _target.main);
           _target.source = args.source;
           _target.force = (args.force || _target.force);
+          _target.data = (args.data || _target.data);
           _target.normalise = (args.normalise || _target.normalise);
           _target.exclusive = (args.exclusive || _target.exclusive);
           _target.unit = (args.unit || _target.unit);
@@ -171,8 +208,11 @@ Components.list = function (name, args) {
       }
       _target.load = function () {
 
-        // from here, each individual item makes its way down into the display function, accruing
-        // modifications as it goes. It will eventually have a normalised version,
+        /*
+
+        from here, each individual item makes its way down into the display function, accruing modifications as it goes. It will eventually have a normalised version.
+
+        */
         return _target.source().then(function (_data) {
           return _._all(_data.map(function (_item, i) {
             return function () {
@@ -195,19 +235,24 @@ Components.list = function (name, args) {
       }
       _target.delay = 300;
       _target.force = function () {
-        var _query = '';
+        var _snapshot = _list.metadata.query.snapshot();
         return new Promise(function (resolve, reject) {
           setTimeout(function () {
-            if (true) {
+            if (_snapshot.static() && _snapshot.new()) {
               _target.source(true).then(function (_data) {
                 resolve(_data);
               });
+            } else {
+              resolve([]);
             }
           }, _target.delay);
         });
       }
 
       // normalised objects should contain a list of properties to be compared with the queries
+      _target.data = function () {
+        return [];
+      }
       _target.normalise = function (_item) {
         return _.p(_item);
       }
@@ -297,14 +342,34 @@ Components.list = function (name, args) {
     */
     window._list = _list;
     _list.data = {
+      lock: {
+        primary: false, // if true, cannot start loading
+        secondary: false, // if true, cannot make primary false
+      },
       load: function () {
-        // for each target
-        // _list.data.storage.sorted = [];
         // _.l(0, _list.data.storage.sorted);
-        return _._all(_list.targets.map(function (_target) {
-          return _target.load;
-        })).then(function () {
-          return _list.data.storage.garbage();
+        // run the load process for each target
+        return _.p(function () {
+
+          // disable locks after timeout
+          setTimeout(function () {
+            if (!_list.data.lock.secondary) {
+              _list.data.lock.primary = false; // disable only if secondary is not active
+            }
+            _list.data.lock.secondary = false;
+          }, 200);
+
+          // based on primary or secondary lock, specify point in cycle and run process
+          if (!_list.data.lock.primary) {
+            _list.data.lock.primary = true;
+            return _._all(_list.targets.map(function (_target) {
+              return _target.load;
+            })).then(function () {
+              return _list.data.storage.garbage();
+            });
+          } else {
+            _list.data.lock.secondary = true;
+          }
         });
       },
       storage: {

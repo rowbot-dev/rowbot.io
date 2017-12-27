@@ -79,6 +79,7 @@ var API = function () {
     // model instance
     _model.Instance = function (_args) {
       var _instance = this;
+      _instance._model = _model;
       _.map(_args, function (_key, _arg) {
         if (_model.fields.contains(_key)) {
           if (_.is.array(_arg) && _arg.length && _.is.object.all(_arg[0])) {
@@ -112,7 +113,10 @@ var API = function () {
         var _instance = this;
         if (_model.fields.contains(property)) {
           var [model, id] = _instance[property].split('.');
-          return _api.get(model, id, force);
+          return _api.get(model, id, force).then(function (_relation) {
+            _.l(property, model, id, _relation);
+            return _relation;
+          });
         }
       },
       remove: function () {
@@ -161,34 +165,65 @@ var API = function () {
         _api.buffer[_model.name] = (_api.buffer[_model.name] || {});
         args = (args || {});
         var force = (args.force || false);
-        var data = (args.data || {});
-        var path_or_id = (args.id || args.path);
+        var data = (args.data || []); // a list of key-pairs for searching
+
+        /* data is of the form:
+        [
+          {
+            server: 'server query string, e.g. model__name',
+            value: 'value',
+            model: function () {
+              // used to filter instances
+            },
+          },
+          ...
+        ]
+
+        */
+
+        var path_or_id = (args._id || args.path);
         path_or_id = path_or_id ? `${path_or_id}/` : '';
-        return _model.objects.local().then(function (_models) {
-          if (force || !_models.length) {
-            return _api.request(`${_api.urls.base}${_model.prefix}/${path_or_id}`, 'GET', data).then(function (result) {
-              result = _.is.array(result) ? result : [result];
-              result.map(function (item) {
-                var instance = _model.instance(item);
-                _api.buffer[_model.name][item._id] = instance;
-                return instance;
+        return _model.objects.local(data).then(function (instances) {
+          if (force || !instances.length) {
+
+            // convert data list into dictionary for request
+            var requestData = data.map(function (item, index) {
+              let newItem = {};
+              newItem[`${index}`] = `${item.server}-${item.value}`;
+              return newItem;
+            }).reduce(function (whole, part) {
+              return _.merge(whole, part);
+            }, {});
+
+            // send request
+            return _api.request(`${_api.urls.base}${_model.prefix}/${path_or_id}`, 'GET', requestData).then(function (results) {
+              // convert the list of results into instances of the model
+              results = _.is.array(results) ? results : [results];
+              results.map(function (item) {
+                let _instance = _model.instance(item);
+                _api.buffer[_model.name][item._id] = _instance;
               });
             });
           }
         }).then(function () {
-          return _model.objects.local();
-        }).then(function (data) {
-          return data.filter(function (item) {
-            return Object.keys(args).reduce(function (whole, part) {
-              return whole && args[part] === item[part];
-            }, true);
-          });
+          // fetch the results from the local buffer again, this time including the ones just brought from the server
+          return _model.objects.local(data);
         });
       },
-      local: function () {
-        return _.p(function () {
-          return _.map(_api.buffer[_model.name], function (index, item) {
-            return item;
+      local: function (data) {
+        data = (data || []);
+        return _._pmap(_api.buffer[_model.name], function (_id, _instance) {
+          return _._all(data.map(function (item) {
+            return item.model(_instance);
+          })).then(function (tests) {
+            if (!tests.length || tests.sum()) {
+              return _instance;
+            }
+          });
+        }).then(function (results) {
+          results = (results || []);
+          return results.filter(function (_instance) {
+            return _instance;
           });
         });
       },
@@ -225,6 +260,7 @@ var API = function () {
     _api.models[args.name] = _model;
   }
 
+  // shortcuts
   _api.get = function (model, id, force) {
     return _.p(function () {
       if (model in _api.models) {

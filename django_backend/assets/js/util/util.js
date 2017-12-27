@@ -30,20 +30,13 @@ var _ = {
       return fn(key, obj);
     }));
   },
-  _all: function (fnList, input) {
-    fnList = (fnList || []);
-    return fnList.reduce(function (whole, part) {
-      return whole.then(function (value) {
-        return _.is.f(part) ? part(value) : value;
-      });
-    }, _.p(input));
+  _all: function (list) {
+    return Promise.mapSeries((list || []));
   },
   _pmap: function (object, fn) {
     return _._all(Object.keys(object).map(function (key) {
-      return function () {
-        let obj = object[key];
-        return fn(key, obj);
-      }
+      let obj = object[key];
+      return fn(key, obj);
     }));
   },
 
