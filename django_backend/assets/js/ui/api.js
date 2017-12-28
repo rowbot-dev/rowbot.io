@@ -188,7 +188,9 @@ var API = function () {
             // convert data list into dictionary for request
             var requestData = data.map(function (item, index) {
               let newItem = {};
-              newItem[`${index}`] = `${item.server}-${item.value}`;
+              if (item.value) {
+                newItem[`${index}`] = `${item.server}-${item.value}`;
+              }
               return newItem;
             }).reduce(function (whole, part) {
               return _.merge(whole, part);
@@ -216,15 +218,15 @@ var API = function () {
             return function () {
               return item.model(_instance);
             }
-          }), 'hello').then(function (tests) {
-            if (!tests.length || tests.sum()) {
+          })).then(function (tests) {
+            if (!tests.length || tests.sum() > 0) {
               return _instance;
             }
           });
         }).then(function (results) {
           results = (results || []);
           return results.filter(function (_instance) {
-            return _instance;
+            return _instance !== undefined;
           });
         });
       },

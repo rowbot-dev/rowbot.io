@@ -33,10 +33,24 @@ Test.application = function (args) {
         exclusive: true,
         source: function (force) {
           var _target = this;
-          return api.models.Club.objects.all();
+          return api.models.Club.objects.filter({force: force, data: _target.data()});
         },
-        normalise: function (_item) {
-          return _.p({_id: _item._id, main: _item.name});
+        data: function () {
+          var _target = this;
+          var _main = _list.metadata.query.buffer.main;
+
+          return [
+            {
+              server: 'name__icontains',
+              value: _main,
+              model: function (_instance) {
+                return _.p(_instance.name.toLowerCase().contains(_main));
+              },
+            }
+          ]
+        },
+        normalise: function (_instance) {
+          return _.p({_id: _instance._id, main: _instance.name});
         },
         unit: function (name, args) {
           return ui._component(`${name}`, {

@@ -58,11 +58,6 @@ App.interfaces.role = function () {
         data: function () {
           var _target = this;
           var _buffer = _list.metadata.query.buffer;
-
-          // The queries must be put into a form that both the filter in the browser and the server understand.
-          // This will most likely be simply a list of key-value pairs for each query and each field in the model.
-          // http://www.django-rest-framework.org/api-guide/filtering/
-
           var data = [];
           _.map(_buffer, function (_key, _value) {
             data.push({
@@ -70,7 +65,7 @@ App.interfaces.role = function () {
               value: _value,
               model: function (_instance) {
                 return _instance.relation('member').then(function (_member) {
-                  return _member.email.contains(_value);
+                  return _member.email.toLowerCase().contains(_value);
                 });
               },
             });
@@ -79,7 +74,7 @@ App.interfaces.role = function () {
               value: _value,
               model: function (_instance) {
                 return _instance.relation('model').then(function (_model) {
-                  return _model.verbose_name.contains(_value);
+                  return _model.verbose_name.toLowerCase().contains(_value);
                 });
               },
             });

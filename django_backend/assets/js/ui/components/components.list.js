@@ -248,12 +248,15 @@ Components.list = function (name, args) {
           }, _target.delay);
         });
       }
-
-      // normalised objects should contain a list of properties to be compared with the queries
       _target.data = function () {
+        // The queries must be put into a form that both the filter in the browser and the server understand.
+        // This will most likely be simply a list of key-value pairs for each query and each field in the model.
+        // http://www.django-rest-framework.org/api-guide/filtering/
+
         return [];
       }
       _target.normalise = function (_item) {
+        // normalised objects should contain a list of properties to be compared with the queries
         return _.p(_item);
       }
       _target.unit = function (name, args) {
@@ -347,7 +350,6 @@ Components.list = function (name, args) {
         secondary: false, // if true, cannot make primary false
       },
       load: function () {
-        // _.l(0, _list.data.storage.sorted);
         // run the load process for each target
         return _.p(function () {
 
@@ -357,15 +359,15 @@ Components.list = function (name, args) {
               _list.data.lock.primary = false; // disable only if secondary is not active
             }
             _list.data.lock.secondary = false;
-          }, 200);
+          }, 100);
 
           // based on primary or secondary lock, specify point in cycle and run process
           if (!_list.data.lock.primary) {
             _list.data.lock.primary = true;
-            return _._all(_list.targets.map(function (_target) {
-              return _target.load;
-            })).then(function () {
-              return _list.data.storage.garbage();
+            return _list.data.storage.garbage().then(function () {
+              return _._all(_list.targets.map(function (_target) {
+                return _target.load;
+              }));
             });
           } else {
             _list.data.lock.secondary = true;
@@ -440,13 +442,15 @@ Components.list = function (name, args) {
         },
         garbage: function () {
           var _storage = this;
-          return _._all(_wrapper.children().map(function (_child, i) {
+          return _.all(_wrapper.children().map(function (_child) {
             // for each child, if released, remove from storage list
-            return function () {
-              return _.p(function () {
+            if (_child.datum && _storage.sorted.contains(_child.datum.item._id)) {
+              _child.datum.block = _child.name;
+              return _list.data.display.main(_child.datum).then(function () {
                 if (_child.isReleased) {
                   _storage.sorted.splice(_storage.sorted.indexOf(_child.datum.item._id), 1);
                   delete _storage.buffer[_child.datum.item._id];
+                  _child.datum = undefined; // this must happen, otherwise blocks will retain data.
                 }
               });
             }
@@ -460,7 +464,6 @@ Components.list = function (name, args) {
 
           // run datum through filter
           _datum.accepted = false;
-          // _.l(2, 'display.main', _datum.item._id);
           return _display.filter.main(_datum).then(function () {
             // _.l(7, 'display.main', _datum.item._id, _datum.sorted, _datum.accepted);
             if (_datum.sorted && _datum.accepted) {
@@ -523,6 +526,7 @@ Components.list = function (name, args) {
             return _.p(function () {
               if (_datum.sorted) {
                 return _render.block(_datum).then(function (_block) {
+                  _block.isReleased = false;
                   return _block.unit(_datum);
                 });
               }
@@ -530,6 +534,13 @@ Components.list = function (name, args) {
           },
           block: function (_datum) {
             var _render = this;
+
+            // already bound
+            var _current = _wrapper.get(_datum.block);
+            if (_current) {
+              return _.p(_current);
+            }
+
             // get or create unit
             var _current = _wrapper.get(_render.buffer[_datum.index]);
             if (_current && _current.isReleased) {
@@ -540,7 +551,6 @@ Components.list = function (name, args) {
             var _blockName = _.id();
             _render.buffer.splice(_datum.index, 0, _blockName);
             return _list.block(_blockName, {before: (_before || {}).name}).then(function (_block) {
-              _block.isReleased = false;
               return _wrapper.setChildren(_block).then(function () {
                 return _block;
               });
