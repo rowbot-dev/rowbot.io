@@ -327,7 +327,6 @@ Components.list = function (name, args) {
         _block.release = function () {
           // hide all units except the active one
           _block.isReleased = true;
-          // _.l(9, 'block.release', _block.name);
           return _.all(_block.children().map(function (_unit) {
             return _unit.hide();
           }));
@@ -416,8 +415,6 @@ Components.list = function (name, args) {
               // add to buffer
               _storage.buffer[_datum.item._id] = _datum;
             }
-
-            // _.l(6, 'storage.add', _datum.item.name, _datum.index);
           });
         },
         compare: function (_d1, _d2) { // override
@@ -438,7 +435,6 @@ Components.list = function (name, args) {
         test: function () {
           var _storage = this;
           return _._pmap(_storage.buffer, function (_key, _datum) {
-            // _.l('test', _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
             _storage.sorted.splice(_storage.sorted.indexOf(_datum.item._id), 1);
             return _list.data.display.main(_datum);
           });
@@ -466,10 +462,8 @@ Components.list = function (name, args) {
           _datum.accepted = false;
           return _display.filter.main(_datum).then(function () {
             if (_datum.accepted) {
-              // _.l('render', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
               return _display.render.main(_datum);
             } else {
-              // _.l('remove', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
               return _display.remove(_datum);
             }
           });
@@ -495,20 +489,17 @@ Components.list = function (name, args) {
           // fuzzy sorting
           score: function (_datum) {
             return _list.metadata.query.score(_datum).then(function (_scores) {
-              // _.l(4, 'filter.score', _datum.item._id, _scores);
               _datum.scores = _scores;
             });
           },
           condition: function (_datum) { // override
             return _.p(function () {
               _datum.accepted = 'main' in _datum.scores ? _datum.scores.main > 0 : true;
-              // _.l(4, 'filter.condition', _datum.item._id, _datum.accepted);
             });
           },
           sort: function (_datum) { // override
             return _.p(function () {
               // modify scores here based on current sorting order or other condition
-              // _.l(5, 'filter.sort', _datum.item._id, _datum.accepted);
               if (_datum.accepted) {
                 return _list.data.storage.add(_datum);
               }
@@ -560,7 +551,6 @@ Components.list = function (name, args) {
             var _release = _wrapper.children().filter(function (_block) {
               return _block.datum && _block.datum.item._id === _datum.item._id;
             })[0];
-            // _.l(_release);
             if (_release) {
               return _release.release();
             }

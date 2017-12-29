@@ -174,7 +174,7 @@ App.interfaces.role = function () {
       ui._state('roles', {
         fn: {
           after: function () {
-            return _list.data.load();
+            return _list.data.load.main();
           },
         },
       }),
@@ -184,7 +184,7 @@ App.interfaces.role = function () {
       return _.pmap(value.split(' '), function (_index, _value) {
         return _list.metadata.query.add(_index, _value);
       }).then(function () {
-        return _list.data.load();
+        return _list.data.load.main();
       });
     }
 
