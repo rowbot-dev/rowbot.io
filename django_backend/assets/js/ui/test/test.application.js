@@ -71,6 +71,7 @@ Test.application = function (args) {
               _unit.datum = _datum;
               return _unit.get('text').update({
                 title: _datum.item.name,
+                value: _datum.item._id,
               }).then(function () {
                 return _unit;
               });

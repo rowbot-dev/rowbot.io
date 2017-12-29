@@ -103,6 +103,8 @@ Components.list = function (name, args) {
     Input bindings
 
     */
+
+    _list.inputBuffer = [];
     _input.input = function (value, event) {
       return _list.metadata.query.add('main', value).then(function () {
         return _list.data.load();
@@ -345,33 +347,14 @@ Components.list = function (name, args) {
     */
     window._list = _list;
     _list.data = {
-      lock: {
-        primary: false, // if true, cannot start loading
-        secondary: false, // if true, cannot make primary false
-      },
       load: function () {
         // run the load process for each target
-        return _.p(function () {
-
-          // disable locks after timeout
-          setTimeout(function () {
-            if (!_list.data.lock.secondary) {
-              _list.data.lock.primary = false; // disable only if secondary is not active
-            }
-            _list.data.lock.secondary = false;
-          }, 100);
-
-          // based on primary or secondary lock, specify point in cycle and run process
-          if (!_list.data.lock.primary) {
-            _list.data.lock.primary = true;
-            return _list.data.storage.garbage().then(function () {
-              return _._all(_list.targets.map(function (_target) {
-                return _target.load;
-              }));
-            });
-          } else {
-            _list.data.lock.secondary = true;
-          }
+        return _list.data.storage.test().then(function () {
+          return _._all(_list.targets.map(function (_target) {
+            return _target.load;
+          }));
+        }).then(function () {
+          return _list.data.storage.garbage();
         });
       },
       storage: {
@@ -380,15 +363,11 @@ Components.list = function (name, args) {
         add: function (_datum) { // basic implementation of a binary search function
           var _storage = this;
           return _.p(function () {
-            // add to buffer
-            _datum.sorted = false;
-            _storage.buffer[_datum.item._id] = _datum;
-
             // run sorting
             var direction, previous;
             var searchLength = _storage.sorted.length; // halving distance moved each time from end
             var index = searchLength; // start index at centre
-            if (!_storage.sorted.contains(_datum.item._id)) {
+            if (!_storage.sorted.contains(_datum.item._id) && !(_datum.item._id in _storage.buffer)) {
               while (true) {
 
                 // most likely, the array length is zero, but could be placed at end.
@@ -420,8 +399,11 @@ Components.list = function (name, args) {
               // add to sorted
               _storage.sorted.splice(index, 0, _datum.item._id);
               _datum.index = index;
-              _datum.sorted = true;
+
+              // add to buffer
+              _storage.buffer[_datum.item._id] = _datum;
             }
+
             // _.l(6, 'storage.add', _datum.item.name, _datum.index);
           });
         },
@@ -440,20 +422,25 @@ Components.list = function (name, args) {
             return 1;
           }
         },
+        test: function () {
+          var _storage = this;
+          return _._pmap(_storage.buffer, function (_key, _datum) {
+            _.l('test', _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
+            _storage.sorted.splice(_storage.sorted.indexOf(_datum.item._id), 1);
+            return _list.data.display.main(_datum);
+          });
+        },
         garbage: function () {
           var _storage = this;
           return _.all(_wrapper.children().map(function (_child) {
             // for each child, if released, remove from storage list
-            if (_child.datum && _storage.sorted.contains(_child.datum.item._id)) {
-              _child.datum.block = _child.name;
-              return _list.data.display.main(_child.datum).then(function () {
-                if (_child.isReleased) {
-                  _storage.sorted.splice(_storage.sorted.indexOf(_child.datum.item._id), 1);
-                  delete _storage.buffer[_child.datum.item._id];
-                  _child.datum = undefined; // this must happen, otherwise blocks will retain data.
-                }
-              });
-            }
+            return _.p(function () {
+              if (_child.isReleased && _child.datum) {
+                _storage.sorted.splice(_storage.sorted.indexOf(_child.datum.item._id), 1);
+                delete _storage.buffer[_child.datum.item._id];
+                _child.datum = undefined; // this must happen, otherwise blocks will retain data.
+              }
+            });
           }));
         },
       },
@@ -465,10 +452,11 @@ Components.list = function (name, args) {
           // run datum through filter
           _datum.accepted = false;
           return _display.filter.main(_datum).then(function () {
-            // _.l(7, 'display.main', _datum.item._id, _datum.sorted, _datum.accepted);
-            if (_datum.sorted && _datum.accepted) {
+            if (_datum.accepted) {
+              _.l('render', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
               return _display.render.main(_datum);
-            } else if (!_datum.sorted && !_datum.accepted) {
+            } else {
+              _.l('remove', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
               return _display.remove(_datum);
             }
           });
@@ -479,7 +467,6 @@ Components.list = function (name, args) {
             var _filter = _list.data.display.filter;
 
             // get query score
-            // _.l(3, 'filter.main', _datum.item._id);
             return _filter.score(_datum).then(function () {
               return _filter.condition(_datum);
             }).then(function () {
@@ -522,31 +509,29 @@ Components.list = function (name, args) {
             // 1. does a unit exist with this index?
             // 2. is the unit at this index hidden?
             // 3. (create and update) or (update and show)
-            // _.l(8, 'render.main', _datum.item._id);
-            return _.p(function () {
-              if (_datum.sorted) {
-                return _render.block(_datum).then(function (_block) {
-                  _block.isReleased = false;
-                  return _block.unit(_datum);
-                });
-              }
+            return _render.block(_datum).then(function (_block) {
+              _block.isReleased = false;
+              return _block.unit(_datum);
             });
           },
           block: function (_datum) {
             var _render = this;
 
-            // already bound
-            var _current = _wrapper.get(_datum.block);
-            if (_current) {
-              return _.p(_current);
-            }
-
-            // get or create unit
+            // released and available
             var _current = _wrapper.get(_render.buffer[_datum.index]);
             if (_current && _current.isReleased) {
               return _.p(_current);
             }
 
+            // already bound
+            _current = _wrapper.children().filter(function (_block) {
+              return _block.datum && _block.datum.item._id === _datum.item._id;
+            })[0];
+            if (_current && _current.datum.item._id === _datum.item._id) {
+              return _.p(_current);
+            }
+
+            // create block
             var _before = _wrapper.get(_render.buffer[_datum.index+1]);
             var _blockName = _.id();
             _render.buffer.splice(_datum.index, 0, _blockName);
@@ -559,10 +544,10 @@ Components.list = function (name, args) {
         },
         remove: function (_datum) {
           return _.p(function () {
-            var index = _list.data.storage.sorted.indexOf(_datum.item._id);
-            if (index !== -1) {
-              var _release = _wrapper.get(_list.data.display.render.buffer[index]);
-              // _.l(8, 'remove', _datum.item._id, _list.data.storage.sorted.length, index, _release.name);
+            var _release = _wrapper.children().filter(function (_block) {
+              return _block.datum && _block.datum.item._id === _datum.item._id;
+            })[0];
+            if (_release) {
               return _release.release();
             }
           });
