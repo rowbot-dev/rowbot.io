@@ -95,7 +95,7 @@ Test.application = function (args) {
       ui._state('main', {
         fn: {
           after: function () {
-            return _list.data.load();
+            return _list.data.load.main();
           },
         },
       }),

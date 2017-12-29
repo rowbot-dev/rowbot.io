@@ -107,7 +107,7 @@ Components.list = function (name, args) {
     _list.inputBuffer = [];
     _input.input = function (value, event) {
       return _list.metadata.query.add('main', value).then(function () {
-        return _list.data.load();
+        return _list.data.load.main();
       });
     }
 
@@ -208,31 +208,28 @@ Components.list = function (name, args) {
           return _target;
         });
       }
-      _target.load = function () {
-
+      _target.load = function (_data) {
         /*
 
         from here, each individual item makes its way down into the display function, accruing modifications as it goes. It will eventually have a normalised version.
 
         */
+        return _._all(_data.map(function (_item, i) {
+          return function () {
+            return _target.normalise(_item).then(function (_normalised) {
+              return _list.data.display.main({target: _target, item: _item, normalised: _normalised});
+            });
+          }
+        }));
+      }
+      _target.local = function () {
         return _target.source().then(function (_data) {
-          return _._all(_data.map(function (_item, i) {
-            return function () {
-              return _target.normalise(_item).then(function (_normalised) {
-                return _list.data.display.main({target: _target, item: _item, normalised: _normalised});
-              });
-            }
-          }));
-        }).then(function () {
-          return _target.force().then(function (_data) {
-            return _._all(_data.map(function (_item, i) {
-              return function () {
-                return _target.normalise(_item).then(function (_normalised) {
-                  return _list.data.display.main({target: _target, item: _item, normalised: _normalised});
-                });
-              }
-            }));
-          });
+          return _target.load(_data);
+        });
+      }
+      _target.remote = function () {
+        return _target.force().then(function (_data) {
+          return _target.load(_data);
         });
       }
       _target.delay = 300;
@@ -347,15 +344,31 @@ Components.list = function (name, args) {
     */
     window._list = _list;
     _list.data = {
-      load: function () {
-        // run the load process for each target
-        return _list.data.storage.test().then(function () {
-          return _._all(_list.targets.map(function (_target) {
-            return _target.load;
-          }));
-        }).then(function () {
-          return _list.data.storage.garbage();
-        });
+      load: {
+        main: function () {
+          return _.all([
+            _list.data.load.local(),
+            _list.data.load.remote(),
+          ]);
+        },
+        local: function () {
+          return _list.data.storage.test().then(function () {
+            return _._all(_list.targets.map(function (_target) {
+              return _target.local;
+            }));
+          }).then(function () {
+            return _list.data.storage.garbage();
+          });
+        },
+        remote: function () {
+          return _list.data.storage.test().then(function () {
+            return _._all(_list.targets.map(function (_target) {
+              return _target.remote;
+            }));
+          }).then(function () {
+            return _list.data.storage.garbage();
+          });
+        },
       },
       storage: {
         buffer: {}, // needed as an intermediate for sorting
@@ -425,7 +438,7 @@ Components.list = function (name, args) {
         test: function () {
           var _storage = this;
           return _._pmap(_storage.buffer, function (_key, _datum) {
-            _.l('test', _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
+            // _.l('test', _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
             _storage.sorted.splice(_storage.sorted.indexOf(_datum.item._id), 1);
             return _list.data.display.main(_datum);
           });
@@ -453,10 +466,10 @@ Components.list = function (name, args) {
           _datum.accepted = false;
           return _display.filter.main(_datum).then(function () {
             if (_datum.accepted) {
-              _.l('render', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
+              // _.l('render', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
               return _display.render.main(_datum);
             } else {
-              _.l('remove', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
+              // _.l('remove', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
               return _display.remove(_datum);
             }
           });
@@ -547,6 +560,7 @@ Components.list = function (name, args) {
             var _release = _wrapper.children().filter(function (_block) {
               return _block.datum && _block.datum.item._id === _datum.item._id;
             })[0];
+            // _.l(_release);
             if (_release) {
               return _release.release();
             }
