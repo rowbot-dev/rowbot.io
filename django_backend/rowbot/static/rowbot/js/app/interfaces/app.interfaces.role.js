@@ -51,15 +51,17 @@ App.interfaces.role = function () {
     _list.setTargets([
       _list._target('roles', {
         exclusive: false,
-        source: function (force) {
+        _source: function (args) {
+          args = (args || {});
           var _target = this;
-          return api.models.Role.objects.filter({force: force, data: _target.data()});
+          return api.models.Role.objects.filter({force: args.force, data: (args.data || _target.data())});
         },
-        data: function () {
+        data: function (args) {
+          args = (args || {});
           var _target = this;
-          var _buffer = _list.metadata.query.buffer;
+          var _query = (args.query || _list.metadata.query);
           var data = [];
-          _.map(_buffer, function (_key, _value) {
+          _.map(_query.buffer, function (_key, _value) {
             data.push({
               server: 'member__email__icontains',
               value: _value,

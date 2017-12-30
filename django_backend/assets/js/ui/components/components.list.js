@@ -126,8 +126,8 @@ Components.list = function (name, args) {
         snapshot: function () {
           var _query = this;
           return {
-            buffer: Object.assign(_query.buffer),
-            static: function () {
+            buffer: _.merge(_query.buffer),
+            hasChanged: function () {
               // tests whether the query has stayed the same
               var _snapshot = this;
               return _.map(_snapshot.buffer, function (_key, _value) {
@@ -136,7 +136,7 @@ Components.list = function (name, args) {
                 return whole || part;
               }, false);
             },
-            new: function () {
+            notInHistory: function () {
               // tests whether the query already exists in the history
               var _snapshot = this;
               return _.map(_snapshot.buffer, function (_key, _value) {
@@ -199,8 +199,7 @@ Components.list = function (name, args) {
         return _.p(function () {
           args = (args || {});
           _target.main = (args.main || _target.main);
-          _target.source = args.source;
-          _target.force = (args.force || _target.force);
+          _target._source = args._source;
           _target.data = (args.data || _target.data);
           _target.normalise = (args.normalise || _target.normalise);
           _target.exclusive = (args.exclusive || _target.exclusive);
@@ -223,32 +222,20 @@ Components.list = function (name, args) {
           }
         }));
       }
-      _target.local = function () {
-        return _target.source().then(function (_data) {
-          return _target.load(_data);
+      _target.source = function (args) {
+        return _target._source(args).then(_target.load);
+      }
+      _target.defer = function () {
+        return _.p(function () {
+          // package snapshot into deferred.
+          var _query = _list.metadata.query.snapshot();
+          _target.deferred = {
+            id: _.id(),
+            data: _target.data({query: _query}),
+          }
         });
       }
-      _target.remote = function () {
-        return _target.force().then(function (_data) {
-          return _target.load(_data);
-        });
-      }
-      _target.delay = 300;
-      _target.force = function () {
-        var _snapshot = _list.metadata.query.snapshot();
-        return new Promise(function (resolve, reject) {
-          setTimeout(function () {
-            if (_snapshot.static() && _snapshot.new()) {
-              _target.source(true).then(function (_data) {
-                resolve(_data);
-              });
-            } else {
-              resolve([]);
-            }
-          }, _target.delay);
-        });
-      }
-      _target.data = function () {
+      _target.data = function (args) {
         // The queries must be put into a form that both the filter in the browser and the server understand.
         // This will most likely be simply a list of key-value pairs for each query and each field in the model.
         // http://www.django-rest-framework.org/api-guide/filtering/
@@ -354,16 +341,43 @@ Components.list = function (name, args) {
         local: function () {
           return _list.data.storage.test().then(function () {
             return _._all(_list.targets.map(function (_target) {
-              return _target.local;
+              return _target.source;
             }));
           });
         },
         remote: function () {
           return _list.data.storage.test().then(function () {
             return _._all(_list.targets.map(function (_target) {
-              return _target.remote;
+              return _target.defer;
             }));
-          });
+          }).then(_list.data.load.deferred.main);
+        },
+        deferred: {
+          delay: 200, // ms
+          lock: false,
+          main: function () {
+            // the purpose of this method is to restrict the flow of outgoing requests to 5 per second.
+            var _deferred = this;
+            return _._all(_list.targets.map(function (_target) {
+              return function () {
+                // get the active deferred item, load it, and run "display.main".
+                return _.p(function () {
+                  if (!_deferred.lock) {
+                    _deferred.lock = true;
+                    let _current_deferred = _target.deferred;
+                    return _target.source({force: true, data: _current_deferred.data}).then(function () {
+                      return new Promise(function(resolve, reject) {
+                        setTimeout(function () {
+                          _deferred.lock = false;
+                          resolve();
+                        }, _deferred.delay);
+                      });
+                    });
+                  }
+                });
+              }
+            }));
+          },
         },
       },
       storage: {
