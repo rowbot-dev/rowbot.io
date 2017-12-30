@@ -353,9 +353,10 @@ Components.list = function (name, args) {
           }).then(_list.data.load.deferred.main);
         },
         deferred: {
-          delay: 2000, // ms
+          delay: 0, // ms
           lock: false,
           main: function () {
+            _.l('deferred');
             // the purpose of this method is to restrict the flow of outgoing requests to 5 per second.
             var _deferred = this;
             return _._all(_list.targets.map(function (_target) {
@@ -363,9 +364,8 @@ Components.list = function (name, args) {
                 // get the active deferred item, load it, and run "display.main".
                 return _.p(function () {
                   if (!_deferred.lock) {
-                    _deferred.lock = true;
+                    // _deferred.lock = true;
                     let _current_deferred = _.merge(_target.deferred);
-                    _.l(_current_deferred);
                     return _target.source({force: true, data: _current_deferred.data}).then(function () {
                       return new Promise(function(resolve, reject) {
                         setTimeout(function () {
@@ -461,9 +461,9 @@ Components.list = function (name, args) {
           _datum.accepted = false;
           return _display.filter.main(_datum).then(function () {
             if (_datum.accepted) {
-              return _display.render.main(_datum);
+              _display.render.main(_datum);
             } else {
-              return _display.remove(_datum);
+              _display.remove(_datum);
             }
           });
         },
