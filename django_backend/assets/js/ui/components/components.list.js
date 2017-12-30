@@ -353,7 +353,7 @@ Components.list = function (name, args) {
           }).then(_list.data.load.deferred.main);
         },
         deferred: {
-          delay: 200, // ms
+          delay: 2000, // ms
           lock: false,
           main: function () {
             // the purpose of this method is to restrict the flow of outgoing requests to 5 per second.
@@ -364,7 +364,8 @@ Components.list = function (name, args) {
                 return _.p(function () {
                   if (!_deferred.lock) {
                     _deferred.lock = true;
-                    let _current_deferred = _target.deferred;
+                    let _current_deferred = _.merge(_target.deferred);
+                    _.l(_current_deferred);
                     return _target.source({force: true, data: _current_deferred.data}).then(function () {
                       return new Promise(function(resolve, reject) {
                         setTimeout(function () {
