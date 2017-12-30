@@ -43,9 +43,6 @@ Test.application = function (args) {
             {
               server: 'name__icontains',
               value: _main,
-              model: function (_instance) {
-                return _.p(_instance.name.toLowerCase().contains(_main));
-              },
             }
           ]
         },

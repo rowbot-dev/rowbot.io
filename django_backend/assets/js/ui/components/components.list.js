@@ -214,6 +214,7 @@ Components.list = function (name, args) {
         from here, each individual item makes its way down into the display function, accruing modifications as it goes. It will eventually have a normalised version.
 
         */
+        _data = (_data || []);
         return _._all(_data.map(function (_item, i) {
           return function () {
             return _target.normalise(_item).then(function (_normalised) {
@@ -327,6 +328,7 @@ Components.list = function (name, args) {
         _block.release = function () {
           // hide all units except the active one
           _block.isReleased = true;
+          _block.datum = undefined;
           return _.all(_block.children().map(function (_unit) {
             return _unit.hide();
           }));
@@ -345,18 +347,15 @@ Components.list = function (name, args) {
     _list.data = {
       load: {
         main: function () {
-          return _.all([
-            _list.data.load.local(),
-            _list.data.load.remote(),
-          ]);
+          return _list.data.load.local().then(function () {
+            return _list.data.load.remote();
+          });
         },
         local: function () {
           return _list.data.storage.test().then(function () {
             return _._all(_list.targets.map(function (_target) {
               return _target.local;
             }));
-          }).then(function () {
-            return _list.data.storage.garbage();
           });
         },
         remote: function () {
@@ -364,8 +363,6 @@ Components.list = function (name, args) {
             return _._all(_list.targets.map(function (_target) {
               return _target.remote;
             }));
-          }).then(function () {
-            return _list.data.storage.garbage();
           });
         },
       },
@@ -375,11 +372,15 @@ Components.list = function (name, args) {
         add: function (_datum) { // basic implementation of a binary search function
           var _storage = this;
           return _.p(function () {
+
+            // add to buffer
+            _storage.buffer[_datum.item._id] = _datum;
+
             // run sorting
             var direction, previous;
             var searchLength = _storage.sorted.length; // halving distance moved each time from end
             var index = searchLength; // start index at centre
-            if (!_storage.sorted.contains(_datum.item._id) && !(_datum.item._id in _storage.buffer)) {
+            if (!_storage.sorted.contains(_datum.item._id)) {
               while (true) {
 
                 // most likely, the array length is zero, but could be placed at end.
@@ -410,10 +411,6 @@ Components.list = function (name, args) {
 
               // add to sorted
               _storage.sorted.splice(index, 0, _datum.item._id);
-              _datum.index = index;
-
-              // add to buffer
-              _storage.buffer[_datum.item._id] = _datum;
             }
           });
         },
@@ -438,19 +435,6 @@ Components.list = function (name, args) {
             _storage.sorted.splice(_storage.sorted.indexOf(_datum.item._id), 1);
             return _list.data.display.main(_datum);
           });
-        },
-        garbage: function () {
-          var _storage = this;
-          return _.all(_wrapper.children().map(function (_child) {
-            // for each child, if released, remove from storage list
-            return _.p(function () {
-              if (_child.isReleased && _child.datum) {
-                _storage.sorted.splice(_storage.sorted.indexOf(_child.datum.item._id), 1);
-                delete _storage.buffer[_child.datum.item._id];
-                _child.datum = undefined; // this must happen, otherwise blocks will retain data.
-              }
-            });
-          }));
         },
       },
       display: {
@@ -520,12 +504,7 @@ Components.list = function (name, args) {
           },
           block: function (_datum) {
             var _render = this;
-
-            // released and available
-            var _current = _wrapper.get(_render.buffer[_datum.index]);
-            if (_current && _current.isReleased) {
-              return _.p(_current);
-            }
+            var _index = _list.data.storage.sorted.indexOf(_datum.item._id);
 
             // already bound
             _current = _wrapper.children().filter(function (_block) {
@@ -535,11 +514,17 @@ Components.list = function (name, args) {
               return _.p(_current);
             }
 
+            // released and available
+            var _current = _wrapper.get(_render.buffer[_index]);
+            if (_current && _current.isReleased) {
+              return _.p(_current);
+            }
+
             // create block
-            var _before = _wrapper.get(_render.buffer[_datum.index+1]);
-            var _blockName = _.id();
-            _render.buffer.splice(_datum.index, 0, _blockName);
-            return _list.block(_blockName, {before: (_before || {}).name}).then(function (_block) {
+            var _before = _wrapper.get(_render.buffer[_index+1]);
+            var _name = _.id();
+            _render.buffer.splice(_index, 0, _name);
+            return _list.block(_name, {before: (_before || {}).name}).then(function (_block) {
               return _wrapper.setChildren(_block).then(function () {
                 return _block;
               });
@@ -547,11 +532,14 @@ Components.list = function (name, args) {
           },
         },
         remove: function (_datum) {
+          var _storage = _list.data.storage;
           return _.p(function () {
             var _release = _wrapper.children().filter(function (_block) {
               return _block.datum && _block.datum.item._id === _datum.item._id;
             })[0];
             if (_release) {
+              _storage.sorted.splice(_storage.sorted.indexOf(_release.datum.item._id), 1);
+              delete _storage.buffer[_release.datum.item._id];
               return _release.release();
             }
           });

@@ -63,20 +63,10 @@ App.interfaces.role = function () {
             data.push({
               server: 'member__email__icontains',
               value: _value,
-              model: function (_instance) {
-                return _instance.relation('member').then(function (_member) {
-                  return _member.email.toLowerCase().contains(_value);
-                });
-              },
             });
             data.push({
               server: 'model__verbose_name__icontains',
               value: _value,
-              model: function (_instance) {
-                return _instance.relation('model').then(function (_model) {
-                  return _model.verbose_name.toLowerCase().contains(_value);
-                });
-              },
             });
           });
           return data;
