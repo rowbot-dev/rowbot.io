@@ -31,7 +31,6 @@ var _ = {
     }));
   },
   _all: function (fnList, input) {
-    var _now = moment();
     // return Promise.mapSeries()
     fnList = (fnList || []);
     var results = [];
@@ -43,11 +42,6 @@ var _ = {
         return result;
       });
     }, _.p(input)).then(function () {
-      var _then = moment();
-      var _difference = _then.valueOf() - _now.valueOf();
-      if (_difference > 300) {
-        _.l('_all', fnList.length, _difference);  
-      }
       return results;
     });
   },

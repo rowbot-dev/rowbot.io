@@ -13,6 +13,20 @@ How to modify query management:
 3. Override _list.data.storage.compare for sorting
 4. Override _list.data.display.filter.condition for filtering
 
+How to begin? The goal is to create a list. What does it mean for items to be in a list?
+1. They are ordered. There is a way to decide how to place one above another. The top is reserved for the most interesting item.
+2. They are homogeneous. Items are displayed in a consistent way.
+3. They are filtered. Only the most relevant and interesting items should be displayed.
+4. The list is either exclusive or inclusive. A null query means display none or all.
+
+List items must be comparable to one another, but that is not to say that they must be the same kind of thing. For example, both humans and dogs can have names, so a list containing both human objects and dog objects can be ordered by name. Objects of different types can be compared as long as they are folded into a single mould that has a single set of comparable properties.
+
+Ordering by name implies alphabetically, but there are many ways the decision can be made. This decision can be distilled into a single value for each property in the mould, or "normalised" item. These single values are known as the "score" of an item. The score can change based on the queries submitted to the list, and thus change the ordering.
+
+Filtering can also be expressed in terms of the score. A threshold can be applied (as simple as >0) to the score to decide which items should be included.
+
+(file components.list.json)
+
 */
 
 var Components = (Components || {});
@@ -103,8 +117,6 @@ Components.list = function (name, args) {
     Input bindings
 
     */
-
-    _list.inputBuffer = [];
     _input.input = function (value, event) {
       return _list.metadata.query.add('main', value).then(function () {
         return _list.data.load.main();
@@ -356,7 +368,6 @@ Components.list = function (name, args) {
           delay: 0, // ms
           lock: false,
           main: function () {
-            _.l('deferred');
             // the purpose of this method is to restrict the flow of outgoing requests to 5 per second.
             var _deferred = this;
             return _._all(_list.targets.map(function (_target) {
@@ -461,9 +472,13 @@ Components.list = function (name, args) {
           _datum.accepted = false;
           return _display.filter.main(_datum).then(function () {
             if (_datum.accepted) {
-              _display.render.main(_datum);
+              setTimeout(function () {
+                _display.render.main(_datum);
+              }, 0);
             } else {
-              _display.remove(_datum);
+              setTimeout(function () {
+                _display.remove(_datum);
+              }, 0);
             }
           });
         },
