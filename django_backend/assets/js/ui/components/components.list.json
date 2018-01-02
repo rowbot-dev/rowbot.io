@@ -1,12 +1,12 @@
 {
   "topics": {
     "metadata": {
-      "description": "",
+      "description": "Metadata stores information affecting the decision-making in the list, but not the data to be displayed.",
       "children": {
-        "limit": "",
-        "exclusive": "",
+        "limit": "The value of the limit sets the maximum number of list items that can be displayed at once.",
+        "exclusive": "If true, will display nothing on a null query.",
         "query": {
-          "description": "",
+          "description": "The query structure is the collection of data used to filter the ",
           "children": {
 
           }
