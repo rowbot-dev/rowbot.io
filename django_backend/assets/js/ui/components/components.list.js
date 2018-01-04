@@ -19,7 +19,9 @@ var Components = (Components || {});
 Components.list = function (name, args) {
   args = (args || {});
   return ui._component(name, {
-    style: args.style,
+    style: _.merge({
+      'height': '100%',
+    }, args.style),
     children: [
       ui._component('search', {
         style: args.searchStyle,
@@ -60,6 +62,9 @@ Components.list = function (name, args) {
         ],
       }),
       Components.panel('list', {
+        style: {
+          'height': '100%',
+        },
         tramline: args.tramline,
         children: [
 
@@ -356,7 +361,6 @@ Components.list = function (name, args) {
           delay: 0, // ms
           lock: false,
           main: function () {
-            _.l('deferred');
             // the purpose of this method is to restrict the flow of outgoing requests to 5 per second.
             var _deferred = this;
             return _._all(_list.targets.map(function (_target) {
