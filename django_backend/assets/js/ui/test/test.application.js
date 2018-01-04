@@ -31,21 +31,20 @@ Test.application = function (args) {
     _list.setTargets([
       _list._target('clubs', {
         exclusive: true,
-        source: function (force) {
+        _source: function (args) {
+          args = (args || {});
           var _target = this;
-          return api.models.Club.objects.filter({force: force, data: _target.data()});
+          return api.models.Club.objects.filter({force: args.force, data: (args.data || _target.data())});
         },
-        data: function () {
+        data: function (args) {
+          args = (args || {});
           var _target = this;
-          var _main = _list.metadata.query.buffer.main;
+          var _query = (args.query || _list.metadata.query);
 
           return [
             {
               server: 'name__icontains',
-              value: _main,
-              model: function (_instance) {
-                return _.p(_instance.name.toLowerCase().contains(_main));
-              },
+              value: _query.buffer.main,
             }
           ]
         },

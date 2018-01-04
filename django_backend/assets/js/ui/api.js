@@ -171,9 +171,6 @@ var API = function () {
           {
             server: 'server query string, e.g. model__name',
             value: 'value',
-            model: function () {
-              // used to filter instances
-            },
           },
           ...
         ]
@@ -182,7 +179,7 @@ var API = function () {
 
         var path_or_id = (args._id || args.path);
         path_or_id = path_or_id ? `${path_or_id}/` : '';
-        return _model.objects.local(data).then(function (instances) {
+        return _model.objects.local().then(function (instances) {
           if (force || !instances.length) {
 
             // convert data list into dictionary for request
@@ -207,26 +204,13 @@ var API = function () {
             });
           }
         }).then(function () {
-          // fetch the results from the local buffer again, this time including the ones just brought from the server
-          return _model.objects.local(data);
+          return _model.objects.local();
         });
       },
-      local: function (data) {
-        data = (data || []);
-        return _._pmap(_api.buffer[_model.name], function (_id, _instance) {
-          return _._all(data.map(function (item) {
-            return function () {
-              return item.model(_instance);
-            }
-          })).then(function (tests) {
-            if (!tests.length || tests.sum() > 0) {
-              return _instance;
-            }
-          });
-        }).then(function (results) {
-          results = (results || []);
-          return results.filter(function (_instance) {
-            return _instance !== undefined;
+      local: function () {
+        return _.p(function () {
+          return _.map(_api.buffer[_model.name], function (_id, _instance) {
+            return _instance;
           });
         });
       },

@@ -52,7 +52,7 @@ Auth.interfaces.login = function () {
       results.forEach(function (result) {
         data[result.name] = result.value;
       });
-      return _.request('/auth/', 'POST', data).then(function (result) {
+      return api.request('/auth/', 'POST', data).then(function (result) {
         if (result.success) {
           window.location = '/';
         } else {

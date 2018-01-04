@@ -19,7 +19,9 @@ var Components = (Components || {});
 Components.list = function (name, args) {
   args = (args || {});
   return ui._component(name, {
-    style: args.style,
+    style: _.merge({
+      'height': '100%',
+    }, args.style),
     children: [
       ui._component('search', {
         style: args.searchStyle,
@@ -60,6 +62,9 @@ Components.list = function (name, args) {
         ],
       }),
       Components.panel('list', {
+        style: {
+          'height': '100%',
+        },
         tramline: args.tramline,
         children: [
 
@@ -126,8 +131,8 @@ Components.list = function (name, args) {
         snapshot: function () {
           var _query = this;
           return {
-            buffer: Object.assign(_query.buffer),
-            static: function () {
+            buffer: _.merge(_query.buffer),
+            hasChanged: function () {
               // tests whether the query has stayed the same
               var _snapshot = this;
               return _.map(_snapshot.buffer, function (_key, _value) {
@@ -136,7 +141,7 @@ Components.list = function (name, args) {
                 return whole || part;
               }, false);
             },
-            new: function () {
+            notInHistory: function () {
               // tests whether the query already exists in the history
               var _snapshot = this;
               return _.map(_snapshot.buffer, function (_key, _value) {
@@ -199,8 +204,7 @@ Components.list = function (name, args) {
         return _.p(function () {
           args = (args || {});
           _target.main = (args.main || _target.main);
-          _target.source = args.source;
-          _target.force = (args.force || _target.force);
+          _target._source = args._source;
           _target.data = (args.data || _target.data);
           _target.normalise = (args.normalise || _target.normalise);
           _target.exclusive = (args.exclusive || _target.exclusive);
@@ -214,6 +218,7 @@ Components.list = function (name, args) {
         from here, each individual item makes its way down into the display function, accruing modifications as it goes. It will eventually have a normalised version.
 
         */
+        _data = (_data || []);
         return _._all(_data.map(function (_item, i) {
           return function () {
             return _target.normalise(_item).then(function (_normalised) {
@@ -222,32 +227,20 @@ Components.list = function (name, args) {
           }
         }));
       }
-      _target.local = function () {
-        return _target.source().then(function (_data) {
-          return _target.load(_data);
+      _target.source = function (args) {
+        return _target._source(args).then(_target.load);
+      }
+      _target.defer = function () {
+        return _.p(function () {
+          // package snapshot into deferred.
+          var _query = _list.metadata.query.snapshot();
+          _target.deferred = {
+            id: _.id(),
+            data: _target.data({query: _query}),
+          }
         });
       }
-      _target.remote = function () {
-        return _target.force().then(function (_data) {
-          return _target.load(_data);
-        });
-      }
-      _target.delay = 300;
-      _target.force = function () {
-        var _snapshot = _list.metadata.query.snapshot();
-        return new Promise(function (resolve, reject) {
-          setTimeout(function () {
-            if (_snapshot.static() && _snapshot.new()) {
-              _target.source(true).then(function (_data) {
-                resolve(_data);
-              });
-            } else {
-              resolve([]);
-            }
-          }, _target.delay);
-        });
-      }
-      _target.data = function () {
+      _target.data = function (args) {
         // The queries must be put into a form that both the filter in the browser and the server understand.
         // This will most likely be simply a list of key-value pairs for each query and each field in the model.
         // http://www.django-rest-framework.org/api-guide/filtering/
@@ -327,7 +320,7 @@ Components.list = function (name, args) {
         _block.release = function () {
           // hide all units except the active one
           _block.isReleased = true;
-          // _.l(9, 'block.release', _block.name);
+          _block.datum = undefined;
           return _.all(_block.children().map(function (_unit) {
             return _unit.hide();
           }));
@@ -346,28 +339,50 @@ Components.list = function (name, args) {
     _list.data = {
       load: {
         main: function () {
-          return _.all([
-            _list.data.load.local(),
-            _list.data.load.remote(),
-          ]);
+          return _list.data.load.local().then(function () {
+            return _list.data.load.remote();
+          });
         },
         local: function () {
           return _list.data.storage.test().then(function () {
             return _._all(_list.targets.map(function (_target) {
-              return _target.local;
+              return _target.source;
             }));
-          }).then(function () {
-            return _list.data.storage.garbage();
           });
         },
         remote: function () {
           return _list.data.storage.test().then(function () {
             return _._all(_list.targets.map(function (_target) {
-              return _target.remote;
+              return _target.defer;
             }));
-          }).then(function () {
-            return _list.data.storage.garbage();
-          });
+          }).then(_list.data.load.deferred.main);
+        },
+        deferred: {
+          delay: 0, // ms
+          lock: false,
+          main: function () {
+            // the purpose of this method is to restrict the flow of outgoing requests to 5 per second.
+            var _deferred = this;
+            return _._all(_list.targets.map(function (_target) {
+              return function () {
+                // get the active deferred item, load it, and run "display.main".
+                return _.p(function () {
+                  if (!_deferred.lock) {
+                    // _deferred.lock = true;
+                    let _current_deferred = _.merge(_target.deferred);
+                    return _target.source({force: true, data: _current_deferred.data}).then(function () {
+                      return new Promise(function(resolve, reject) {
+                        setTimeout(function () {
+                          _deferred.lock = false;
+                          resolve();
+                        }, _deferred.delay);
+                      });
+                    });
+                  }
+                });
+              }
+            }));
+          },
         },
       },
       storage: {
@@ -376,11 +391,15 @@ Components.list = function (name, args) {
         add: function (_datum) { // basic implementation of a binary search function
           var _storage = this;
           return _.p(function () {
+
+            // add to buffer
+            _storage.buffer[_datum.item._id] = _datum;
+
             // run sorting
             var direction, previous;
             var searchLength = _storage.sorted.length; // halving distance moved each time from end
             var index = searchLength; // start index at centre
-            if (!_storage.sorted.contains(_datum.item._id) && !(_datum.item._id in _storage.buffer)) {
+            if (!_storage.sorted.contains(_datum.item._id)) {
               while (true) {
 
                 // most likely, the array length is zero, but could be placed at end.
@@ -411,13 +430,7 @@ Components.list = function (name, args) {
 
               // add to sorted
               _storage.sorted.splice(index, 0, _datum.item._id);
-              _datum.index = index;
-
-              // add to buffer
-              _storage.buffer[_datum.item._id] = _datum;
             }
-
-            // _.l(6, 'storage.add', _datum.item.name, _datum.index);
           });
         },
         compare: function (_d1, _d2) { // override
@@ -438,23 +451,9 @@ Components.list = function (name, args) {
         test: function () {
           var _storage = this;
           return _._pmap(_storage.buffer, function (_key, _datum) {
-            // _.l('test', _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
             _storage.sorted.splice(_storage.sorted.indexOf(_datum.item._id), 1);
             return _list.data.display.main(_datum);
           });
-        },
-        garbage: function () {
-          var _storage = this;
-          return _.all(_wrapper.children().map(function (_child) {
-            // for each child, if released, remove from storage list
-            return _.p(function () {
-              if (_child.isReleased && _child.datum) {
-                _storage.sorted.splice(_storage.sorted.indexOf(_child.datum.item._id), 1);
-                delete _storage.buffer[_child.datum.item._id];
-                _child.datum = undefined; // this must happen, otherwise blocks will retain data.
-              }
-            });
-          }));
         },
       },
       display: {
@@ -466,11 +465,9 @@ Components.list = function (name, args) {
           _datum.accepted = false;
           return _display.filter.main(_datum).then(function () {
             if (_datum.accepted) {
-              // _.l('render', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
-              return _display.render.main(_datum);
+              _display.render.main(_datum);
             } else {
-              // _.l('remove', _datum.index, _datum.accepted, _datum.normalised.main, _list.metadata.query.buffer.main);
-              return _display.remove(_datum);
+              _display.remove(_datum);
             }
           });
         },
@@ -495,20 +492,17 @@ Components.list = function (name, args) {
           // fuzzy sorting
           score: function (_datum) {
             return _list.metadata.query.score(_datum).then(function (_scores) {
-              // _.l(4, 'filter.score', _datum.item._id, _scores);
               _datum.scores = _scores;
             });
           },
           condition: function (_datum) { // override
             return _.p(function () {
               _datum.accepted = 'main' in _datum.scores ? _datum.scores.main > 0 : true;
-              // _.l(4, 'filter.condition', _datum.item._id, _datum.accepted);
             });
           },
           sort: function (_datum) { // override
             return _.p(function () {
               // modify scores here based on current sorting order or other condition
-              // _.l(5, 'filter.sort', _datum.item._id, _datum.accepted);
               if (_datum.accepted) {
                 return _list.data.storage.add(_datum);
               }
@@ -529,12 +523,7 @@ Components.list = function (name, args) {
           },
           block: function (_datum) {
             var _render = this;
-
-            // released and available
-            var _current = _wrapper.get(_render.buffer[_datum.index]);
-            if (_current && _current.isReleased) {
-              return _.p(_current);
-            }
+            var _index = _list.data.storage.sorted.indexOf(_datum.item._id);
 
             // already bound
             _current = _wrapper.children().filter(function (_block) {
@@ -544,11 +533,17 @@ Components.list = function (name, args) {
               return _.p(_current);
             }
 
+            // released and available
+            var _current = _wrapper.get(_render.buffer[_index]);
+            if (_current && _current.isReleased) {
+              return _.p(_current);
+            }
+
             // create block
-            var _before = _wrapper.get(_render.buffer[_datum.index+1]);
-            var _blockName = _.id();
-            _render.buffer.splice(_datum.index, 0, _blockName);
-            return _list.block(_blockName, {before: (_before || {}).name}).then(function (_block) {
+            var _before = _wrapper.get(_render.buffer[_index+1]);
+            var _name = _.id();
+            _render.buffer.splice(_index, 0, _name);
+            return _list.block(_name, {before: (_before || {}).name}).then(function (_block) {
               return _wrapper.setChildren(_block).then(function () {
                 return _block;
               });
@@ -556,12 +551,14 @@ Components.list = function (name, args) {
           },
         },
         remove: function (_datum) {
+          var _storage = _list.data.storage;
           return _.p(function () {
             var _release = _wrapper.children().filter(function (_block) {
               return _block.datum && _block.datum.item._id === _datum.item._id;
             })[0];
-            // _.l(_release);
             if (_release) {
+              _storage.sorted.splice(_storage.sorted.indexOf(_release.datum.item._id), 1);
+              delete _storage.buffer[_release.datum.item._id];
               return _release.release();
             }
           });
