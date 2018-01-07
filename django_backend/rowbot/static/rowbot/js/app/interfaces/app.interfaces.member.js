@@ -16,6 +16,7 @@ App.interfaces.member = function () {
         'float': 'left',
         'width': '410px',
         'height': '100%',
+        'margin-right': '25px',
       },
     },
     children: [
@@ -28,17 +29,16 @@ App.interfaces.member = function () {
           }),
 
           // new
-          App.components.new('new', {
+          App.components.new('member', {
 
           }),
 
           // list
-          Components.list('list', {
+          Components.list('members', {
 
           }),
         ],
       }),
-
       ui._component('single', {
         classes: ['panel', 'hidden'],
         children: [
@@ -63,12 +63,14 @@ App.interfaces.member = function () {
         ],
       }),
     ],
-  }).then(function (_member) {
+  }).then(function (_members) {
 
     // vars
-    var _list = _member.get('all.list');
+    var _list = _members.get('all.members');
     window.member_list = _list;
-    var _input = _list.get('search.input');
+    var _input = _list.get('search.container.input');
+    var _single = _members.get('single');
+    var _roles = _single.get('roles');
 
     // all.list
     _list.setTargets([
@@ -118,7 +120,9 @@ App.interfaces.member = function () {
               'padding-right': '10px',
             },
             children: [
-              Components.text('text'),
+              Components.text('text', {
+                classes: ['notouch'],
+              }),
             ],
           }).then(function (_unit) {
 
@@ -140,6 +144,13 @@ App.interfaces.member = function () {
               _unit.isHidden = false;
               return _unit.removeClass('hidden');
             }
+            _unit.setBindings({
+              'click': function (_this, event) {
+                return _single.load(_this.datum.item._id).then(function () {
+                  return ui.states.call('members.single');
+                });
+              },
+            });
 
             return _unit;
           });
@@ -203,6 +214,39 @@ App.interfaces.member = function () {
       });
     }
 
-    return _member;
+    // single
+    _single.load = function (_id) {
+      // loads a member id from the api buffer
+      return api.get('Member', _id).then(function (_member) {
+        return _.all([
+          _single.get('name').update({value: `${_member.first_name} ${_member.last_name}`}),
+          // _single.get('email').update({value: _member.email}),
+          // _single.get('activation').update({value: _member.is_activated}),
+          // _roles.load(_id),
+        ]);
+      });
+    }
+    _single.setStates([
+      ui._state('members', {
+        children: [
+          ui._state('single', {
+            fn: {
+              before: function (_this) {
+                return _this.removeClass('hidden');
+              },
+            },
+          }),
+        ],
+      }),
+    ]);
+
+    // single.roles
+    _roles.load = function (_id) {
+      return api.get('Member', _id).then(function (_member) {
+
+      });
+    }
+
+    return _members;
   });
 }

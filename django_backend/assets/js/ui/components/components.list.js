@@ -35,9 +35,30 @@ Components.list = function (name, args) {
             },
           }),
 
-          // search field
-          Components.input('input', {
+          // container
+          ui._component('container', {
+            children: [
+              // search field
+              Components.input('input', {
+                style: {
+                  'width': 'calc(100% - 100px)',
+                  'float': 'left',
+                },
+              }),
 
+              // search button
+              Components.button('button', {
+                style: {
+                  'position': 'relative',
+                  'float': 'left',
+                  'height': '40px',
+                  'width': '90px',
+                  'left': '10px',
+                  'border': '1px solid black',
+                },
+                html: 'Search',
+              }),
+            ],
           }),
         ],
       }),
@@ -97,7 +118,7 @@ Components.list = function (name, args) {
   }).then(function (_list) {
 
     // component variables
-    var _input = _list.get('search.input');
+    var _input = _list.get('search.container.input');
     var _wrapper = _list.get('list.container.content.wrapper');
 
     // handle combined height of components
@@ -118,13 +139,13 @@ Components.list = function (name, args) {
         return _list.data.load.local();
       });
     }
-    _input.submit = function () {
-      return _list.data.load.main();
-    }
     _input.keypress = function (value, event) {
       if (event.keyCode === 13) { // enter
         return _list.data.load.main();
       }
+    }
+    _list.submit = function () {
+      return _list.data.load.main();
     }
 
     /*
@@ -570,6 +591,13 @@ Components.list = function (name, args) {
 
     // override component methods
 
+
+    // bindings
+    _list.get('search.container.button').setBindings({
+      'click': function (_button) {
+        return _list.submit();
+      },
+    });
 
     return _list;
   });

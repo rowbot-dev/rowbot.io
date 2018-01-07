@@ -6,7 +6,6 @@ Components.input = function (name, args) {
     style: {
       'position': 'relative',
       'height': '40px',
-      'width': '385px',
     },
     properties: {
 
@@ -21,7 +20,7 @@ Components.input = function (name, args) {
         style: {
           'position': 'absolute',
           'height': '100%',
-          'width': 'calc(100% - 100px)',
+          'width': '100%',
           'top': '0px',
           'box-sizing': 'border-box',
           'padding-left': '8px',
@@ -32,17 +31,6 @@ Components.input = function (name, args) {
           'outline': 'none',
           'border': '1px solid black',
         },
-      }),
-      Components.button('search', {
-        style: {
-          'position': 'absolute',
-          'height': '40px',
-          'width': '90px',
-          'right': '0px',
-          'top': '0px',
-          'border': '1px solid black',
-        },
-        html: 'Search',
       }),
       Components.button('message', {
 
@@ -55,11 +43,6 @@ Components.input = function (name, args) {
 
     // set and get content
     // set and get position, blur, and focus
-
-    // bound to click
-    _input.submit = function (value, event) {
-
-    }
 
     // bound to input event
     _input.input = function (value, event) {
@@ -117,12 +100,6 @@ Components.input = function (name, args) {
       },
       'keypress': function (_this, event) {
         return _input.keypress(_this.element().value, event);
-      },
-    });
-
-    _input.get('search').setBindings({
-      'click': function (_this, event) {
-        return _input.submit(_this.element().value, event);
       },
     });
 

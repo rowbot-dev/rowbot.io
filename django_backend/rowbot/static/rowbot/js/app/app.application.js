@@ -10,6 +10,9 @@ App.application = function () {
       '.hidden': {
         'display': 'none',
       },
+      '.notouch': {
+        'pointer-events': 'none',
+      },
     },
     children: [
       ui._component('sidebar', {
