@@ -1,22 +1,28 @@
 
 var Components = (Components || {});
 Components.input = function (name, args) {
+  args = (args || {});
   return ui._component(name, _.merge({
     style: {
       'position': 'relative',
       'height': '40px',
-      'width': '200px',
+      'width': '385px',
+    },
+    properties: {
+
     },
     children: [
       ui._component('input', {
         tag: 'input',
         properties: _.merge({
           type: 'text',
+          placeholder: (args.placeholder || 'Search...'),
         }, args.properties),
         style: {
           'position': 'absolute',
           'height': '100%',
-          'width': '100%',
+          'width': 'calc(100% - 100px)',
+          'top': '0px',
           'box-sizing': 'border-box',
           'padding-left': '8px',
           'font-size': '15px',
@@ -24,8 +30,19 @@ Components.input = function (name, args) {
           '-webkit-box-shadow': 'inset 0 0px 0px rgba(0, 0, 0, .075), 0 0 0px rgba(102, 175, 233, .6)',
           'box-shadow': 'inset 0 0px 0px rgba(0, 0, 0, .075), 0 0 0px rgba(102, 175, 233, .6),',
           'outline': 'none',
-          'border': '0px',
+          'border': '1px solid black',
         },
+      }),
+      Components.button('search', {
+        style: {
+          'position': 'absolute',
+          'height': '40px',
+          'width': '90px',
+          'right': '0px',
+          'top': '0px',
+          'border': '1px solid black',
+        },
+        html: 'Search',
       }),
       Components.button('message', {
 
@@ -39,6 +56,10 @@ Components.input = function (name, args) {
     // set and get content
     // set and get position, blur, and focus
 
+    // bound to click
+    _input.submit = function (value, event) {
+
+    }
 
     // bound to input event
     _input.input = function (value, event) {
@@ -96,6 +117,12 @@ Components.input = function (name, args) {
       },
       'keypress': function (_this, event) {
         return _input.keypress(_this.element().value, event);
+      },
+    });
+
+    _input.get('search').setBindings({
+      'click': function (_this, event) {
+        return _input.submit(_this.element().value, event);
       },
     });
 

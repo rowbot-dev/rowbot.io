@@ -8,7 +8,7 @@ App.application().then(function (app) {
     return api.setup();
   }).then(function () {
     return _.all([
-      ui.states.call('roles'),
+      ui.states.call('members'),
       // api.models.EventModel.objects.all(),
       // api.models.Event.objects.all(),
       // api.models.Role.objects.all(),

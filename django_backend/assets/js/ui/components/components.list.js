@@ -24,7 +24,9 @@ Components.list = function (name, args) {
     }, args.style),
     children: [
       ui._component('search', {
-        style: args.searchStyle,
+        style: _.merge({
+          'margin-bottom': '10px',
+        }, args.searchStyle),
         children: [
           // toggle filter
           Components.button('filter', {
@@ -70,7 +72,9 @@ Components.list = function (name, args) {
 
           // contains list items
           ui._component('wrapper', {
-
+            style: {
+              'padding-bottom': '1px',
+            },
           }),
 
           // "load more" and spinner
@@ -109,11 +113,18 @@ Components.list = function (name, args) {
 
     */
 
-    _list.inputBuffer = [];
     _input.input = function (value, event) {
       return _list.metadata.query.add('main', value).then(function () {
-        return _list.data.load.main();
+        return _list.data.load.local();
       });
+    }
+    _input.submit = function () {
+      return _list.data.load.main();
+    }
+    _input.keypress = function (value, event) {
+      if (event.keyCode === 13) { // enter
+        return _list.data.load.main();
+      }
     }
 
     /*
@@ -230,15 +241,8 @@ Components.list = function (name, args) {
       _target.source = function (args) {
         return _target._source(args).then(_target.load);
       }
-      _target.defer = function () {
-        return _.p(function () {
-          // package snapshot into deferred.
-          var _query = _list.metadata.query.snapshot();
-          _target.deferred = {
-            id: _.id(),
-            data: _target.data({query: _query}),
-          }
-        });
+      _target.force = function () {
+        return _target._source(_.merge(args, {force: true})).then(_target.load);
       }
       _target.data = function (args) {
         // The queries must be put into a form that both the filter in the browser and the server understand.
@@ -335,7 +339,6 @@ Components.list = function (name, args) {
     Data contains a series of methods and buffers to handle intermediate processing and storage for incoming data.
 
     */
-    window._list = _list;
     _list.data = {
       load: {
         main: function () {
@@ -352,37 +355,10 @@ Components.list = function (name, args) {
         },
         remote: function () {
           return _list.data.storage.test().then(function () {
-            return _._all(_list.targets.map(function (_target) {
-              return _target.defer;
-            }));
-          }).then(_list.data.load.deferred.main);
-        },
-        deferred: {
-          delay: 0, // ms
-          lock: false,
-          main: function () {
-            // the purpose of this method is to restrict the flow of outgoing requests to 5 per second.
-            var _deferred = this;
-            return _._all(_list.targets.map(function (_target) {
-              return function () {
-                // get the active deferred item, load it, and run "display.main".
-                return _.p(function () {
-                  if (!_deferred.lock) {
-                    // _deferred.lock = true;
-                    let _current_deferred = _.merge(_target.deferred);
-                    return _target.source({force: true, data: _current_deferred.data}).then(function () {
-                      return new Promise(function(resolve, reject) {
-                        setTimeout(function () {
-                          _deferred.lock = false;
-                          resolve();
-                        }, _deferred.delay);
-                      });
-                    });
-                  }
-                });
-              }
-            }));
-          },
+            // return _._all(_list.targets.map(function (_target) {
+            //   return _target.force;
+            // }));
+          });
         },
       },
       storage: {
@@ -526,6 +502,7 @@ Components.list = function (name, args) {
             var _index = _list.data.storage.sorted.indexOf(_datum.item._id);
 
             // already bound
+            _.l(_wrapper.children());
             _current = _wrapper.children().filter(function (_block) {
               return _block.datum && _block.datum.item._id === _datum.item._id;
             })[0];
@@ -545,6 +522,9 @@ Components.list = function (name, args) {
             _render.buffer.splice(_index, 0, _name);
             return _list.block(_name, {before: (_before || {}).name}).then(function (_block) {
               return _wrapper.setChildren(_block).then(function () {
+                _.l(_wrapper.children().map(function (_child) {
+                  return _child.name;
+                }));
                 return _block;
               });
             });

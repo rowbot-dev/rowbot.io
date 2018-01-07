@@ -1,60 +1,83 @@
 
 /*
 
-The role interface should show a list of roles and any individual role.
-
-What roles to display:
-1. Admin: all users' roles
-2. User: only their roles
+Members: a list of members and their roles
 
 */
 
 var App = (App || {});
 App.interfaces = (App.interfaces || {});
-App.interfaces.role = function () {
-  return ui._component('role', {
+App.interfaces.member = function () {
+  return ui._component('member', {
     classes: ['interface'],
+    style: {
+      'padding-left': '20px',
+      '.panel': {
+        'float': 'left',
+        'width': '410px',
+        'height': '100%',
+      },
+    },
     children: [
-      ui._component('single', {
-        classes: ['interface', 'hidden'],
-      }),
-      ui._component('new', {
-        classes: ['interface', 'hidden'],
-      }),
-      ui._component('newModel', {
-        classes: ['interface', 'hidden'],
-      }),
       ui._component('all', {
-        classes: ['interface'],
-        style: {
-          'padding-left': '10px',
-        },
+        classes: ['panel'],
         children: [
+          // title
           Components.text('title', {
-            title: 'Roles',
+            title: 'Members',
           }),
+
+          // new
+          App.components.new('new', {
+
+          }),
+
+          // list
           Components.list('list', {
-            tramline: true,
-            style: {
-              'width': '600px',
-              'height': '600px',
-            },
+
+          }),
+        ],
+      }),
+
+      ui._component('single', {
+        classes: ['panel', 'hidden'],
+        children: [
+          // member name
+          App.components.field('name'),
+
+          // member email
+          App.components.field('email'),
+
+          // member activation
+          Components.text('activation'),
+
+          // member new role
+          App.components.new('role', {
+
+          }),
+
+          // member role list
+          Components.list('roles', {
+
           }),
         ],
       }),
     ],
-  }).then(function (_role) {
+  }).then(function (_member) {
 
-    var _list = _role.get('all.list');
+    // vars
+    var _list = _member.get('all.list');
+    window.member_list = _list;
     var _input = _list.get('search.input');
 
+    // all.list
     _list.setTargets([
-      _list._target('roles', {
+      _list._target('members', {
         exclusive: false,
         _source: function (args) {
           args = (args || {});
           var _target = this;
-          return api.models.Role.objects.filter({force: args.force, data: (args.data || _target.data())});
+          return api.models.Member.objects.filter({force: args.force, data: (args.data || _target.data())});
         },
         data: function (args) {
           args = (args || {});
@@ -63,27 +86,26 @@ App.interfaces.role = function () {
           var data = [];
           _.map(_query.buffer, function (_key, _value) {
             data.push({
-              server: 'member__email__icontains',
+              server: 'email__icontains',
               value: _value,
             });
             data.push({
-              server: 'model__verbose_name__icontains',
+              server: 'first_name__icontains',
+              value: _value,
+            });
+            data.push({
+              server: 'last_name__icontains',
               value: _value,
             });
           });
           return data;
         },
         normalise: function (_instance) {
-          return _.all([
-            _instance.relation('model'),
-            _instance.relation('member'),
-          ]).then(function (results) {
-            var [_model, _member] = results;
-            return {
-              _id: _instance._id,
-              model: _model.verbose_name,
-              email: _member.email,
-            }
+          return _.p({
+            _id: _instance._id,
+            first_name: _instance.first_name,
+            last_name: _instance.last_name,
+            email: _instance.email,
           });
         },
         unit: function (name, args) {
@@ -91,8 +113,9 @@ App.interfaces.role = function () {
             style: {
               'width': '100%',
               'height': 'auto',
-              'border': '1px solid black',
-              'padding': '10px',
+              'border-bottom': '1px solid black',
+              'padding-left': '10px',
+              'padding-right': '10px',
             },
             children: [
               Components.text('text'),
@@ -103,7 +126,7 @@ App.interfaces.role = function () {
             _unit.update = function (_datum) {
               _unit.datum = _datum;
               return _unit.get('text').update({
-                title: _datum.normalised.model,
+                title: `${_datum.normalised.first_name} ${_datum.normalised.last_name}`,
                 value: _datum.normalised.email,
               }).then(function () {
                 return _unit;
@@ -124,9 +147,9 @@ App.interfaces.role = function () {
       }),
     ]);
     _list.data.storage.compare = function (_d1, _d2) { // override
-      if (_d1.scores.model > _d2.scores.model) {
+      if ((_d1.scores.first_name + _d1.scores.last_name) > (_d2.scores.first_name + _d2.scores.last_name)) {
         return -1;
-      } else if (_d1.scores.model === _d2.scores.model) {
+      } else if ((_d1.scores.first_name + _d1.scores.last_name) === (_d2.scores.first_name + _d2.scores.last_name)) {
         if (_d1.normalised.email < _d2.normalised.email) {
           return -1;
         } else if (_d1.normalised.email === _d2.normalised.email) {
@@ -138,7 +161,6 @@ App.interfaces.role = function () {
         return 1;
       }
     }
-    _list.metadata.exclusive = true;
     _list.metadata.query.score = function (_datum) {
       var _query = this;
       var _target = _datum.target;
@@ -159,14 +181,13 @@ App.interfaces.role = function () {
     }
     _list.data.display.filter.condition = function (_datum) { // override
       return _.p(function () {
-        _datum.accepted = _datum.scores.model > 0 || _datum.scores.email > 0;
+        _datum.accepted = _datum.scores.first_name > 0 || _datum.scores.last_name > 0 || _datum.scores.email > 0;
       });
     }
     _list.setStates([
-      ui._state('roles', {
+      ui._state('members', {
         fn: {
           after: function () {
-            _.l('load');
             return _list.data.load.main();
           },
         },
@@ -174,14 +195,13 @@ App.interfaces.role = function () {
     ]);
     _list.get('pagination').setClasses('hidden');
     _input.input = function (value, event) {
-      _.l('input');
       return _.pmap(value.split(' '), function (_index, _value) {
         return _list.metadata.query.add(_index, _value);
       }).then(function () {
-        return _list.data.load.main();
+        return _list.data.load.local();
       });
     }
 
-    return _role;
+    return _member;
   });
 }

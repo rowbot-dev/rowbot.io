@@ -146,12 +146,12 @@ var UI = function () {
       children = _.is.array(children) ? children : [children];
       return _._all(children.map(function (unresolved) {
         return function () {
-          return _.p(unresolved).then(function (child) {
-            child._.parent = _this;
+          return _.p(unresolved).then(function (_child) {
+            _child._.parent = _this;
             if (_this._.is.rendered) {
-              return _this.renderChild(child);
+              return _this.renderChild(_child);
             } else {
-              return _this.bufferChild(child);
+              return _this.bufferChild(_child);
             }
           });
         }
