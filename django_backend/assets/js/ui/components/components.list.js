@@ -185,7 +185,7 @@ Components.list = function (name, args) {
               let exclusive = (_list.metadata.exclusive || _target.exclusive);
               if (_key in _query.buffer) {
                 let _partial = _query.buffer[_key];
-                results[_key] = _value.score(_partial, exclusive);
+                results[_key] = _value.score(_partial);
               } else {
                 results[_key] = exclusive ? 0 : 1;
               }

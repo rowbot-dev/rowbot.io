@@ -168,11 +168,12 @@ App.interfaces.member = function () {
         return _.map(_datum.normalised, function (_key, _value) {
           let results = {};
           let exclusive = (_list.metadata.exclusive || _target.exclusive);
+          let noQuery = true;
           let _score = _.map(_query.buffer, function (_index, _partial) {
-            // _.l(_partial, _value, _value.score(_partial, exclusive));
-            return _value.score(_partial, exclusive);
+            noQuery = _partial === '';
+            return _value.score(_partial);
           }).mean();
-          results[_key] = _score === 0 ? (exclusive ? 0 : 1) : _score;
+          results[_key] = (_score === 0 && !exclusive && noQuery) ? 1 : _score;
           return results;
         }).reduce(function (whole, part) {
           return _.merge(whole, part);

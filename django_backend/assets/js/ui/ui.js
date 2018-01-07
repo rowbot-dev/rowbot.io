@@ -171,14 +171,7 @@ var UI = function () {
     renderChild: function (child) {
       // root, before, indices
       var _this = this;
-      // if (_this.name.contains('wrapper')) {
-      //   _.l('here');
-      //   child.render = child.render2;
-      // }
       return child.render().then(function () {
-        if (_this.name.contains('wrapper')) {
-          _.l(_this.id, 'child.render', child.name);
-        }
         // remove recently rendered child from buffer
         return _.p(function () {
           _this._.children.buffer.shift();
