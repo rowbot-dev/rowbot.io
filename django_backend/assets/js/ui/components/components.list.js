@@ -355,9 +355,9 @@ Components.list = function (name, args) {
         },
         remote: function () {
           return _list.data.storage.test().then(function () {
-            // return _._all(_list.targets.map(function (_target) {
-            //   return _target.force;
-            // }));
+            return _._all(_list.targets.map(function (_target) {
+              return _target.force;
+            }));
           });
         },
       },
@@ -502,7 +502,6 @@ Components.list = function (name, args) {
             var _index = _list.data.storage.sorted.indexOf(_datum.item._id);
 
             // already bound
-            _.l(_wrapper.children());
             _current = _wrapper.children().filter(function (_block) {
               return _block.datum && _block.datum.item._id === _datum.item._id;
             })[0];
@@ -522,9 +521,6 @@ Components.list = function (name, args) {
             _render.buffer.splice(_index, 0, _name);
             return _list.block(_name, {before: (_before || {}).name}).then(function (_block) {
               return _wrapper.setChildren(_block).then(function () {
-                _.l(_wrapper.children().map(function (_child) {
-                  return _child.name;
-                }));
                 return _block;
               });
             });

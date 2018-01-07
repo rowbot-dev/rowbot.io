@@ -131,7 +131,7 @@ var UI = function () {
       }
     },
     setStates: function (states) {
-      let _this = this;
+      var _this = this;
       states = (states || []);
       return _.all(states.map(function (unresolved) {
         return _.p(unresolved).then(function (state) {
@@ -141,7 +141,7 @@ var UI = function () {
       }));
     },
     setChildren: function (children) {
-      let _this = this;
+      var _this = this;
       children = (children || _this._.children.buffer);
       children = _.is.array(children) ? children : [children];
       return _._all(children.map(function (unresolved) {
@@ -171,7 +171,14 @@ var UI = function () {
     renderChild: function (child) {
       // root, before, indices
       var _this = this;
+      // if (_this.name.contains('wrapper')) {
+      //   _.l('here');
+      //   child.render = child.render2;
+      // }
       return child.render().then(function () {
+        if (_this.name.contains('wrapper')) {
+          _.l(_this.id, 'child.render', child.name);
+        }
         // remove recently rendered child from buffer
         return _.p(function () {
           _this._.children.buffer.shift();
@@ -262,18 +269,16 @@ var UI = function () {
     render: function (root) {
       var _this = this;
       return _this.setID().then(function () {
-        // 1. actually render to DOM
-        var element = _this.element();
+        var _element = _this.element();
         var root = _this._.parent !== undefined ? _this._.parent.element() : _this.hook;
         var before = _this._.before !== undefined ? _this._.parent.child(_this._.before) : undefined;
         if (before !== undefined) {
           var beforeElement = before.element();
-          root.insertBefore(element, beforeElement);
+          root.insertBefore(_element, beforeElement);
         } else {
-          root.appendChild(element);
+          root.appendChild(_element);
         }
 
-        // 2. write styles to DOM
         _this._.is.rendered = true;
         return _.all([
           _this.setStyle(),
@@ -282,11 +287,8 @@ var UI = function () {
           _this.setBindings(),
           _this.setHTML(),
         ]).then(function () {
-          // 3. go down through children
           return _this.setChildren();
         });
-      }).then(function () {
-        return _this;
       });
     },
     hide: function (duration) {
