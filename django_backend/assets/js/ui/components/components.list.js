@@ -368,17 +368,21 @@ Components.list = function (name, args) {
           });
         },
         local: function () {
+          $('#hook').append(`<p>test</p>`);
           return _list.data.storage.test().then(function () {
+            $('#hook').append(`<p>local</p>`);
             return _._all(_list.targets.map(function (_target) {
               return _target.source;
             }));
           });
         },
         remote: function () {
+          $('#hook').append(`<p>test</p>`);
           return _list.data.storage.test().then(function () {
-            return _._all(_list.targets.map(function (_target) {
-              return _target.force;
-            }));
+            // $('#hook').append(`<p>remote</p>`);
+            // return _._all(_list.targets.map(function (_target) {
+            //   return _target.force;
+            // }));
           });
         },
       },
@@ -519,6 +523,7 @@ Components.list = function (name, args) {
             });
           },
           block: function (_datum) {
+            $('#hook').append(`<p>${_datum.item._id}</p>`);
             var _render = this;
             var _index = _list.data.storage.sorted.indexOf(_datum.item._id);
 
@@ -537,10 +542,12 @@ Components.list = function (name, args) {
             }
 
             // create block
+            $('#hook').append(`<p>${_current}</p>`);
             var _before = _wrapper.get(_render.buffer[_index+1]);
             var _name = _.id();
             _render.buffer.splice(_index, 0, _name);
             return _list.block(_name, {before: (_before || {}).name}).then(function (_block) {
+              $('#hook').append(`<p>block</p>`);
               return _wrapper.setChildren(_block).then(function () {
                 return _block;
               });
