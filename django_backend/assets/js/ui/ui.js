@@ -150,6 +150,9 @@ var UI = function () {
           return _.p(unresolved).then(function (_child) {
             _child._.parent = _this;
             if (_this._.is.rendered) {
+              if (_this.name.contains('wrapper')) {
+                $('#hook').append(`<p>${_child.name}</p>`);
+              }
               return _this.renderChild(_child);
             } else {
               return _this.bufferChild(_child);
