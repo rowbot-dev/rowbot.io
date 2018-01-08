@@ -66,8 +66,8 @@ var UI = function () {
           // TODO: allow nested styles for active, etc.
           // This sets up a new css rule with a string reduced from the style object
           if (key) {
-            return _.css.create(`${_this._.tag}#${_this.id} ${key}`, _.map(_style, function (_key, _value) {
-              return `${_key}: ${_value};`;
+            return _.css.create(`${_this._.tag}#${_this.id}${key}`, _.map(_style, function (_key, _value) {
+              return `${_key}: ${_value} !important;`;
             }).reduce(function (whole, part) {
               return `${whole}\n${part}`;
             }, '').trim());

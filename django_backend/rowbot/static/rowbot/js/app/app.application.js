@@ -7,10 +7,10 @@ App.application = function () {
       'width': '100%',
       'top': '0%',
       'top': '0%',
-      '.hidden': {
+      ' .hidden': {
         'display': 'none',
       },
-      '.notouch': {
+      ' .notouch': {
         'pointer-events': 'none',
       },
     },
@@ -31,25 +31,25 @@ App.application = function () {
           }),
           Components.buttonGroup('menu', {
             style: {
-              '.button': {
+              ' .button': {
                 'min-height': '50px',
                 'height': 'auto',
                 'width': '100%',
                 'border-bottom': '1px solid black',
               },
-              '.first': {
+              ' .first': {
                 'border-top': '1px solid black',
               },
-              '.hover': {
+              ' .hover': {
                 'border-color': 'red',
               },
-              '.before': {
+              ' .before': {
                 'border-bottom-color': 'red',
               },
-              '.sub': {
+              ' .sub': {
                 'width': '100%',
               },
-              '.sub .button': {
+              ' .sub .button': {
                 'position': 'relative',
                 'width': '80%',
                 'left': '20%',
@@ -77,7 +77,7 @@ App.application = function () {
           'height': '100%',
           'width': 'calc(100% - 200px)',
           'float': 'left',
-          '.interface': {
+          ' .interface': {
             'position': 'absolute',
             'height': '100%',
             'width': '100%',

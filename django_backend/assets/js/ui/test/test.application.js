@@ -6,7 +6,7 @@ Test.application = function (args) {
       'width': '100%',
       'top': '0%',
       'top': '0%',
-      '.hidden': {
+      ' .hidden': {
         'display': 'none',
       },
     },

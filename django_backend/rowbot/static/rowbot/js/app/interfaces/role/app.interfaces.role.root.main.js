@@ -7,7 +7,7 @@ App.interfaces.role.root.main = function () {
   return ui._component('root', {
     classes: ['interface'],
     style: {
-      '.panel': {
+      ' .panel': {
         'position': 'relative',
         'float': 'left',
         'padding-left': '10px',

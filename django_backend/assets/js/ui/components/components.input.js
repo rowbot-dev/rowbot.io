@@ -6,30 +6,30 @@ Components.input = function (name, args) {
     style: {
       'position': 'relative',
       'height': '40px',
+      'border': '1px solid black',
     },
     properties: {
 
     },
     children: [
-      ui._component('input', {
+      ui._component('content', {
         tag: 'input',
         properties: _.merge({
           type: 'text',
           placeholder: (args.placeholder || 'Search...'),
         }, args.properties),
         style: {
-          'position': 'absolute',
+          'position': 'relative',
           'height': '100%',
-          'width': '100%',
           'top': '0px',
           'box-sizing': 'border-box',
           'padding-left': '8px',
           'font-size': '15px',
           'background-color': 'transparent',
+          'border': '1px solid transparent',
           '-webkit-box-shadow': 'inset 0 0px 0px rgba(0, 0, 0, .075), 0 0 0px rgba(102, 175, 233, .6)',
           'box-shadow': 'inset 0 0px 0px rgba(0, 0, 0, .075), 0 0 0px rgba(102, 175, 233, .6),',
           'outline': 'none',
-          'border': '1px solid black',
         },
       }),
       Components.button('message', {
@@ -41,8 +41,15 @@ Components.input = function (name, args) {
     ],
   }, args)).then(function (_input) {
 
+    var _content = _input.get('content');
+
     // set and get content
     // set and get position, blur, and focus
+    _input.setContent = function (content) {
+      return _.p(function () {
+        _content.element().value = content;
+      });
+    }
 
     // bound to input event
     _input.input = function (value, event) {
@@ -72,7 +79,7 @@ Components.input = function (name, args) {
       return _input.validators[_input.type]();
     }
     _input.export = function () {
-      _input.value = _input.get('input').element().value;
+      _input.value = _content.element().value;
       if (_input.validate()) {
         return _.p({
           name: _input.name,
@@ -94,7 +101,7 @@ Components.input = function (name, args) {
       });
     }
 
-    _input.get('input').setBindings({
+    _content.setBindings({
       'input': function (_this, event) {
         return _input.input(_this.element().value, event);
       },

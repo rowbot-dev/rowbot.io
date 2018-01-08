@@ -12,7 +12,7 @@ App.interfaces.member = function () {
     classes: ['interface'],
     style: {
       'padding-left': '20px',
-      '.panel': {
+      ' .panel': {
         'float': 'left',
         'width': '410px',
         'height': '100%',
@@ -43,13 +43,29 @@ App.interfaces.member = function () {
         classes: ['panel', 'hidden'],
         children: [
           // member name
-          App.components.field('name'),
+          Components.input('name'),
 
           // member email
-          App.components.field('email'),
+          Components.input('email', {
+            style: {
+              'display': 'inline-block',
+            },
+          }),
 
           // member activation
-          Components.text('activation'),
+          Components.text('activation', {
+            style: {
+              '.activated': {
+                'color': 'green',
+                'border': '1px solid green',
+              },
+              'color': 'red',
+              'border': '1px solid red',
+              'display': 'inline-block',
+              'padding-left': '8px',
+              'padding-right': '8px',
+            },
+          }),
 
           // member new role
           App.components.new('role', {
@@ -70,6 +86,7 @@ App.interfaces.member = function () {
     window.member_list = _list;
     var _input = _list.get('search.container.input');
     var _single = _members.get('single');
+    var _activation = _single.get('activation');
     var _roles = _single.get('roles');
 
     // all.list
@@ -219,10 +236,10 @@ App.interfaces.member = function () {
       // loads a member id from the api buffer
       return api.get('Member', _id).then(function (_member) {
         return _.all([
-          _single.get('name').update({value: `${_member.first_name} ${_member.last_name}`}),
-          // _single.get('email').update({value: _member.email}),
-          // _single.get('activation').update({value: _member.is_activated}),
-          // _roles.load(_id),
+          _single.get('name').setContent(`${_member.first_name} ${_member.last_name}`),
+          _single.get('email').setContent(_member.email),
+          _activation.load({activated: _member.is_activated}),
+          _roles.load(_id),
         ]);
       });
     }
@@ -239,6 +256,20 @@ App.interfaces.member = function () {
         ],
       }),
     ]);
+
+    // single.activation
+    _activation.load = function (args) {
+      args = (args || {});
+      if (args.activated) {
+        return _activation.update({value: 'Activated'}).then(function () {
+          return _activation.setClasses('activated');
+        });
+      } else {
+        return _activation.update({value: 'Not yet activated'}).then(function () {
+          return _activation.removeClass('activated');
+        });
+      }
+    }
 
     // single.roles
     _roles.load = function (_id) {
