@@ -39,3 +39,11 @@ class MemberViewSet(BaseModelViewSet):
       changed = True
       user.save()
     return Response({'changed': changed})
+
+  @detail_route(methods=['GET'])
+  def send_activation_email(self, request, pk=None):
+    if pk is not None:
+      user = get_object_or_404(self.get_queryset(), pk=pk)
+      success = user.send_activation_email()
+      return Response({'success': success})
+    return Response({'success': False})

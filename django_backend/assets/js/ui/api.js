@@ -19,7 +19,9 @@ var API = function () {
       http.setRequestHeader('Content-Type', 'application/json');
       http.onreadystatechange = function () {
         if (http.readyState == 4 && http.status == 200) {
-          resolve(JSON.parse(http.responseText));
+          setTimeout(function () {
+            resolve(JSON.parse(http.responseText));
+          }, 0); // artificial delay
         }
       }
       http.send(JSON.stringify(data));

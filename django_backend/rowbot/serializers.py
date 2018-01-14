@@ -211,7 +211,7 @@ class ClubSerializer(serializers.ModelSerializer):
 
 # Member
 class MemberSerializer(serializers.ModelSerializer):
-  roles = UUIDRelatedField(queryset=Role.objects.all(), many=True)
+  roles = UUIDRelatedField(queryset=Role.objects.all(), many=True, required=False)
 
   class Meta:
     model = Member

@@ -94,7 +94,9 @@ App.interfaces.member = function () {
                 ],
               }),
               Components.list('models', {
-
+                style: {
+                  'height': '40px',
+                },
               }),
             ],
           }),
@@ -140,14 +142,82 @@ App.interfaces.member = function () {
             },
           }),
 
-          // member new role
-          App.components.new('role', {
-
-          }),
-
           // member role list
           Components.list('roles', {
 
+          }),
+        ],
+      }),
+      ui._component('new', {
+        classes: ['panel', 'hidden'],
+        children: [
+
+          // title
+          Components.text('title', {
+            title: 'Create a new user',
+          }),
+
+          // form
+          Components.form('form', {
+            children: [
+              // member first name
+              Components.input('first', {
+                placeholder: 'First name...',
+              }),
+
+              // member last name
+              Components.input('last', {
+                placeholder: 'Last name...',
+              }),
+
+              // member email
+              Components.input('email', {
+                placeholder: 'Email...',
+                type: 'email',
+              }),
+
+              // member role models
+              Components.text('modeltitle', {
+                title: 'Available roles',
+              }),
+              Components.list('models', {
+                style: {
+                  'height': '40px',
+                },
+              }),
+
+              // submit button
+              Components.button('submit', {
+                style: {
+                  'height': '40px',
+                  'width': '100px',
+                  'border': '1px solid black',
+                  'float': 'left',
+                },
+                html: 'Create',
+              }),
+
+              // information
+              Components.button('info', {
+                classes: ['hidden'],
+                style: {
+                  'height': '40px',
+                  'border': '1px solid black',
+                  'margin-left': '10px',
+                  'padding': '10px',
+                  'float': 'left',
+                  '.error': {
+                    'border': '1px solid red',
+                    'color': 'red',
+                  },
+                  '.success': {
+                    'border': '1px solid green',
+                    'color': 'green',
+                  },
+                },
+                html: 'Loading...',
+              }),
+            ],
           }),
         ],
       }),
@@ -156,11 +226,16 @@ App.interfaces.member = function () {
 
     // vars
     var _models = _members.get('all.search.models');
+    var _newButton = _members.get('all.search.buttons.new');
     var _list = _members.get('all.members');
     var _input = _list.get('search.container.input');
     var _single = _members.get('single');
     var _activation = _single.get('activation');
     var _roles = _single.get('roles');
+    var _new = _members.get('new');
+    var _newform = _new.get('form');
+    var _newmodels = _new.get('form.models');
+    var _newinfo = _new.get('form.info');
 
     // all.search.models
     _models.setTargets([
@@ -189,10 +264,15 @@ App.interfaces.member = function () {
               'border': '1px solid black',
               'padding': '6px',
               'margin-left': '10px',
+              '.active': {
+                'border': '1px solid green',
+                'color': 'green',
+              },
             }
           }).then(function (_unit) {
 
             _unit.isHidden = false;
+            _unit.isActive = false; // on or off
             _unit.update = function (_datum) {
               _unit.datum = _datum;
               return _unit.setHTML(_datum.normalised.main).then(function () {
@@ -209,7 +289,12 @@ App.interfaces.member = function () {
             }
             _unit.setBindings({
               'click': function (_this, event) {
-                _.l(_unit.datum.normalised.main);
+                _this.isActive = !_this.isActive;
+                if (_this.isActive) {
+                  return _this.setClasses('active');
+                } else {
+                  return _this.removeClass('active');
+                }
               },
             });
 
@@ -283,6 +368,13 @@ App.interfaces.member = function () {
         },
       }),
     ]);
+
+    // all.search.buttons.new
+    _newButton.setBindings({
+      'click': function (_this) {
+        return ui.states.call('members.new');
+      },
+    });
 
     // all.list
     _list.setTargets([
@@ -457,6 +549,13 @@ App.interfaces.member = function () {
               },
             },
           }),
+          ui._state('new', {
+            fn: {
+              before: function (_this) {
+                return _this.setClasses('hidden');
+              },
+            },
+          }),
         ],
       }),
     ]);
@@ -550,6 +649,218 @@ App.interfaces.member = function () {
         },
       }),
     ]);
+
+    // new
+    _new.setStates([
+      ui._state('members', {
+        children: [
+          ui._state('single', {
+            fn: {
+              before: function (_this) {
+                return _this.setClasses('hidden');
+              },
+            },
+          }),
+          ui._state('new', {
+            fn: {
+              before: function (_this) {
+                return _this.removeClass('hidden');
+              },
+            },
+          }),
+        ],
+      }),
+    ]);
+
+    // new.form
+    _newform.send = function (results) {
+      // 1. first stage, create new user and send activation email
+      return api.models.Member.objects.create({
+        username: `${results.first.toLowerCase()}${results.last.toLowerCase()}${_.id()}`, // temp
+        email: results.email,
+        first_name: results.first,
+        last_name: results.last,
+      }).then(function (_member) {
+        // 2. second stage, send the activation email, returning the success
+        return _member.method('send_activation_email', 'GET').then(function (result) {
+          if (result.success) {
+
+          } else {
+            // notify the user
+          }
+        });
+      });
+
+      // 2. second stage, create role for each role model selected
+    }
+
+    // new.form.models
+    _newmodels.setTargets([
+      _newmodels._target('models', {
+        exclusive: false,
+        _source: function (args) {
+          args = (args || {});
+          var _target = this;
+          return api.models.RoleModel.objects.filter({force: args.force, data: (args.data || _target.data())});
+        },
+        data: function (args) {
+          return [{
+            key: 'club__id',
+            value: api.active.Club._id,
+          }];
+        },
+        normalise: function (_instance) {
+          return _.p({
+            _id: _instance._id,
+            main: _instance.verbose_name,
+          });
+        },
+        unit: function (name, args) {
+          return Components.button(name, {
+            style: {
+              'border': '1px solid black',
+              'padding': '6px',
+              'margin-right': '10px',
+              '.active': {
+                'border': '1px solid green',
+                'color': 'green',
+              },
+            }
+          }).then(function (_unit) {
+
+            _unit.isHidden = false;
+            _unit.isActive = false; // on or off
+            _unit.update = function (_datum) {
+              _unit.datum = _datum;
+              return _unit.setHTML(_datum.normalised.main).then(function () {
+                return _unit;
+              });
+            }
+            _unit.hide = function () {
+              _unit.isHidden = true;
+              return _unit.setClasses('hidden');
+            }
+            _unit.show = function () {
+              _unit.isHidden = false;
+              return _unit.removeClass('hidden');
+            }
+            _unit.setBindings({
+              'click': function (_this, event) {
+                _this.isActive = !_this.isActive;
+                if (_this.isActive) {
+                  return _this.setClasses('active');
+                } else {
+                  return _this.removeClass('active');
+                }
+              },
+            });
+
+            return _unit;
+          });
+        },
+      }),
+    ]);
+    _newmodels.block = function (name, args) {
+      return ui._component(`${name}`, _.merge({
+        style: {
+          'display': 'inline-block',
+          'height': '40px',
+        },
+      }, args)).then(function (_block) {
+
+        _block.isReleased = true;
+        _block.types = {};
+        _block.unit = function (_datum) {
+          // get or create unit
+          _block.datum = _datum;
+          _block.isReleased = false;
+          var _unit = _block.get(_block.types[_datum.target.name]);
+          return _.p(function () {
+            if (_unit) {
+              return _unit.update(_datum);
+            } else {
+              var _unitName = _.id();
+              _block.types[_datum.target.name] = _unitName;
+              return _datum.target.unit(_unitName).then(function (_unit) {
+                return _block.setChildren(_unit).then(function () {
+                  return _unit.update(_datum);
+                });
+              });
+            }
+          }).then(function (_unit) {
+            // hide all units except the active one
+            return _.all(_block.children().map(function (_rest) {
+              if (_rest.name !== _unit.name) {
+                return _rest.hide();
+              }
+            })).then(function () {
+              if (!_block.isReleased) {
+                return _unit.show();
+              } else {
+                return _unit;
+              }
+            });
+          });
+        }
+        _block.release = function () {
+          // hide all units except the active one
+          _block.isReleased = true;
+          _block.datum = undefined;
+          return _.all(_block.children().map(function (_unit) {
+            return _unit.hide();
+          }));
+        }
+
+        return _block;
+      });
+    }
+    _newmodels.get('search').setStyle({'display': 'none'});
+    _newmodels.get('pagination').setClasses('hidden');
+    _newmodels.setStates([
+      ui._state('members', {
+        children: [
+          ui._state('new', {
+            fn: {
+              after: function () {
+                return _newmodels.data.load.main();
+              },
+            },
+          }),
+        ],
+      }),
+    ]);
+    _newmodels.export = function () {
+      var active = _newmodels.active().map(function (_active) {
+        return {
+          rolemodel: _active.datum.item._id,
+          active: _active.isActive,
+        }
+      });
+
+      var isValid = active.some(function (_active) {
+        return _active.active;
+      });
+
+      return _.p(function () {
+        if (!isValid) {
+          return _newmodels.error();
+        }
+      }).then(function () {
+        return active.reduce(function (whole, part) {
+          whole.value[part.rolemodel] = part.active;
+          return whole;
+        }, {name: 'rolemodels', validated: isValid, value: {}});
+      });
+    }
+    _newmodels.error = function () {
+      return _.p();
+    }
+
+    // new.form.info
+    _newinfo.display = function (args) {
+      args = (args || {});
+      
+    }
 
     // members
     _members.setStates([

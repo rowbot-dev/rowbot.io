@@ -354,6 +354,14 @@ Components.list = function (name, args) {
         return _block;
       });
     }
+    _list.active = function () {
+      // return all active units
+      return _wrapper.children().map(function (_block) {
+        return _block.children().filter(function (_unit) {
+          return !_unit.isHidden;
+        })[0];
+      });
+    }
 
     /*
 
