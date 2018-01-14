@@ -65,12 +65,16 @@ class BaseModelViewSet(viewsets.ViewSet):
   permission_classes = (IsAuthenticated, CustomDjangoPermissions)
 
   def get_queryset(self):
-    filter_q = Q()
+    filter_q_and = Q()
+    filter_q_or = Q()
     for index, pair in self.request.query_params.dict().items():
-      (field, value) = tuple(pair.split('-'))
-      filter_q = filter_q | Q(**{field: value})
+      (q, field, value) = tuple(pair.split('-'))
+      if q == 'AND':
+        filter_q_and = filter_q_and & Q(**{field: value})
+      elif q == 'OR':
+        filter_q_or = filter_q_or | Q(**{field: value})
 
-    return self.queryset.filter(filter_q)
+    return self.queryset.filter(filter_q_and).filter(filter_q_or)
 
   # GET
   def list(self, request):

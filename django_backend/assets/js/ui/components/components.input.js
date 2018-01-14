@@ -21,6 +21,7 @@ Components.input = function (name, args) {
         style: {
           'position': 'relative',
           'height': '100%',
+          'width': '100%',
           'top': '0px',
           'box-sizing': 'border-box',
           'padding-left': '8px',

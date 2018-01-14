@@ -376,10 +376,9 @@ Components.list = function (name, args) {
         },
         remote: function () {
           return _list.data.storage.test().then(function () {
-            // $('#hook').append(`<p>remote</p>`);
-            // return _._all(_list.targets.map(function (_target) {
-            //   return _target.force;
-            // }));
+            return _._all(_list.targets.map(function (_target) {
+              return _target.force;
+            }));
           });
         },
       },

@@ -32,7 +32,7 @@ class RolePermission(Model):
   roles = models.ManyToManyField('rowbot.RoleModel', related_name='permissions')
 
   # Properties
-  model_name = models.CharField(max_length=255)
+  model_name = models.CharField(max_length=255) # TODO: find out what this was for
   name = models.CharField(max_length=255)
 
 
@@ -63,7 +63,7 @@ class RoleInstance(Model):
   # Properties
   is_active = models.BooleanField(default=True)
   is_confirmed = models.BooleanField(default=False)
-  
+
 
 class RoleRecord(Model):
   class Meta:

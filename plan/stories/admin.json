@@ -1,0 +1,13 @@
+{
+  "I'm an admin of a club, and I want to": {
+    "description": "Things you might want to do as an admin of a club",
+    "children": {
+      "Add a user in order to give them roles": {
+        "description": "",
+        "children": {
+          
+        }
+      }
+    }
+  }
+}

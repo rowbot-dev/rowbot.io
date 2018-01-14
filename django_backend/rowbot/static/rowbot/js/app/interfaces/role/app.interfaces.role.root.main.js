@@ -76,8 +76,8 @@ App.interfaces.role.root.main = function () {
         },
         normalise: function (_instance) {
           return _.all([
-            _instance.relation('model'),
-            _instance.relation('member'),
+            _instance.related('model'),
+            _instance.related('member'),
           ]).then(function (results) {
             var [_model, _member] = results;
             return {

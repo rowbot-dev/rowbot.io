@@ -58,6 +58,7 @@ var _ = {
   merge: function (...objects) {
     return objects.reduce(function (whole, part) {
       if (_.is.array(part)) {
+        whole = (whole || []);
         whole = [...new Set([...whole, ...part])]; // union
       } else {
         whole = (whole || {});

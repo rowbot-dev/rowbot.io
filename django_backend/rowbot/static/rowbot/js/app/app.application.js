@@ -13,93 +13,99 @@ App.application = function () {
       ' .notouch': {
         'pointer-events': 'none',
       },
+      ' .interface': {
+        'position': 'absolute',
+        'height': '100%',
+        'width': '100%',
+        'top': '0%',
+        'top': '0%',
+      },
     },
     children: [
-      ui._component('sidebar', {
+      App.interfaces.club(),
+      ui._component('container', {
+        classes: ['hidden'],
         style: {
           'height': '100%',
-          'width': '200px',
-          'border-right': '1px solid black',
-          'float': 'left',
+          'width': '100%',
+          'top': '0%',
+          'top': '0%',
         },
         children: [
-          ui._component('crest', {
+          ui._component('sidebar', {
             style: {
-              'height': '250px',
-              'width': '100%',
-            },
-          }),
-          Components.buttonGroup('menu', {
-            style: {
-              ' .button': {
-                'min-height': '50px',
-                'height': 'auto',
-                'width': '100%',
-                'border-bottom': '1px solid black',
-              },
-              ' .first': {
-                'border-top': '1px solid black',
-              },
-              ' .hover': {
-                'border-color': 'red',
-              },
-              ' .before': {
-                'border-bottom-color': 'red',
-              },
-              ' .sub': {
-                'width': '100%',
-              },
-              ' .sub .button': {
-                'position': 'relative',
-                'width': '80%',
-                'left': '20%',
-              },
+              'height': '100%',
+              'width': '200px',
+              'border-right': '1px solid black',
+              'float': 'left',
             },
             children: [
-              Components.button('events', {
-                html: 'Events',
+              ui._component('crest', {
+                style: {
+                  'height': '250px',
+                  'width': '100%',
+                },
               }),
-              Components.button('members', {
-                html: 'Members',
-              }),
-              Components.button('roles', {
-                html: 'Roles',
-              }),
-              Components.button('account', {
-                html: 'Account',
+              Components.buttonGroup('menu', {
+                style: {
+                  ' .button': {
+                    'min-height': '50px',
+                    'height': 'auto',
+                    'width': '100%',
+                    'border-bottom': '1px solid black',
+                  },
+                  ' .first': {
+                    'border-top': '1px solid black',
+                  },
+                  ' .hover': {
+                    'border-color': 'red',
+                  },
+                  ' .before': {
+                    'border-bottom-color': 'red',
+                  },
+                  ' .sub': {
+                    'width': '100%',
+                  },
+                  ' .sub .button': {
+                    'position': 'relative',
+                    'width': '80%',
+                    'left': '20%',
+                  },
+                },
+                children: [
+                  Components.button('events', {
+                    html: 'Events',
+                  }),
+                  Components.button('members', {
+                    html: 'Members',
+                  }),
+                  Components.button('roles', {
+                    html: 'Roles',
+                  }),
+                  Components.button('account', {
+                    html: 'Account',
+                  }),
+                ],
               }),
             ],
           }),
-        ],
-      }),
-      ui._component('interfaces', {
-        style: {
-          'height': '100%',
-          'width': 'calc(100% - 200px)',
-          'float': 'left',
-          ' .interface': {
-            'position': 'absolute',
-            'height': '100%',
-            'width': '100%',
-            'top': '0%',
-            'top': '0%',
-          },
-        },
-        children: [
-          // App.interfaces.main(),
-          // App.interfaces.club(),
-          // App.interfaces.event(),
-          // App.interfaces.team(),
-          // App.interfaces.asset(),
-          // App.interfaces.account(),
-          // App.interfaces.role.main(),
-          App.interfaces.member(),
+          ui._component('interfaces', {
+            style: {
+              'height': '100%',
+              'width': 'calc(100% - 200px)',
+              'float': 'left',
+            },
+            children: [
+              App.interfaces.member(),
+            ],
+          }),
         ],
       }),
     ],
   }).then(function (_app) {
 
-    var _buttons = _app.get('sidebar.menu');
+    var _container = _app.get('container');
+    var _buttons = _container.get('sidebar.menu');
     var _roles = _buttons.get('roles');
 
     // modify buttons
@@ -114,10 +120,16 @@ App.application = function () {
         });
       }
     });
-
     _roles.click = function (event) {
       return ui.states.call('roles');
     }
+
+    // container
+    _container.setStates([
+      ui._state('members', {
+        classes: {remove: ['hidden']},
+      }),
+    ]);
 
     return _app;
   });

@@ -43,10 +43,10 @@ Components.form = function (name, args) {
     }
 
     // bind enter key in inputs to submit
-    _form._.children.buffer.forEach(function (child) {
-      let input = child.get('input');
-      if (input !== undefined) {
-        child.keypress = function (value, event) {
+    _form._.children.buffer.forEach(function (_child) {
+      let _content = _child.get('content');
+      if (_content !== undefined) {
+        _child.keypress = function (value, event) {
           if (event.which === 13) {
             return _form.export();
           }

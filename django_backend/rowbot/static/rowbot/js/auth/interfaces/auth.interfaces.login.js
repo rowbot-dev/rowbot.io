@@ -18,11 +18,13 @@ Auth.interfaces.login = function () {
           Components.form('form', {
             children: [
               Components.input('username', {
+                placeholder: 'username',
                 style: {
                   'border': '1px solid black',
                 },
               }),
               Components.input('password', {
+                placeholder: 'password',
                 style: {
                   'border': '1px solid black',
                 },
