@@ -14,74 +14,58 @@
         "children": {
           "root": {
             "children": {
-              "20180114": {
+              "create new member form": {
+                "description": "The new member form has fields for name, email, and avilable roles. It has to validate input and respond with error or success based on the server response when trying to create a new user.",
+                "date": 20180114,
                 "children": {
-                  "create new member form": {
-                    "description": "The new member form has fields for name, email, and avilable roles. It has to validate input and respond with error or success based on the server response when trying to create a new user.",
+                  "_newform.send": {
+                    "description": "Submitting the form can only be done when all the fields have been validated. Once validated, the results have to be sent to the server in the correct order. The first and last names and the email are sent to the server to create the user. Once the user is successfully created, an activation email must be sent. Once the email has been sent successfully, the roles can be added to the user, else it is deleted.",
                     "children": {
-                      "_newform.send": {
-                        "description": "Submitting the form can only be done when all the fields have been validated. Once validated, the results have to be sent to the server in the correct order. The first and last names and the email are sent to the server to create the user. Once the user is successfully created, an activation email must be sent. Once the email has been sent successfully, the roles can be added to the user, else it is deleted.",
+                      "check user": "Check if the user exists by fetching records",
+                      "create user": "Send a request with names and email. Username is created temporarily.",
+                      "send activation email": {
+                        "description": "Hit a snag where apparently this isn't a function.",
                         "children": {
-                          "check user": "Check if the user exists by fetching records",
-                          "create user": "Send a request with names and email. Username is created temporarily.",
-                          "send activation email": {
-                            "description": "Hit a snag where apparently this isn't a function.",
-                            "children": {
-                              "Member was not accessible by queryset due to 'staff' status": "SOLVED",
-                            }
-                          },
-                          "activation email template": "Simple template to display the key for copying.",
-                          "email connection refused": "Return true from email activation method for now.",
-                          "adding roles": "Role creation not working for some reason",
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "20180115": {
-                "children": {
-                  "create new member form": {
-                    "children": {
-                      "_newform.send": {
-                        "children": {
-                          "adding roles": {
-                            "description": "Picking up from the previous day, role creation not working for some reason. This is likely because it is failing at the serialiser and returning error that I ignore.",
-                            "children": {
-                              "added default='' to the nickname field in Role": "SOLVED"
-                            }
-                          },
-                          "all working. Before doing interface effects, there appears to be a problem with the list.": {
-                            "description": "",
-                            "children": {
-                              "likely to do with test prefiltering.": "It was. Added member id filter to filter.condition. SOLVED"
-                            }
-                          },
-                          "error and exception handling": {
-                            "description": "",
-                            "children": {
-                              "names are blank": "",
-                              "email is blank": "",
-                              "email no regex match": "",
-                              "no role selected": "",
-                              "member already exists": "maybe email input should be a global member search",
-                              "sending activation email": "",
-                              "activation email failed": "not a real email"
-                            }
-                          },
-                          "interface updates": {
-                            "children": {
-                              "update member list": "",
-                              "hide new panel": "",
-                              "show single panel of new member": ""
-                            }
-                          }
+                          "Member was not accessible by queryset due to 'staff' status": "SOLVED",
                         }
                       },
-                      "try email only with search": {
-                        "Change title to 'invite'": "DONE"
+                      "activation email template": "Simple template to display the key for copying.",
+                      "email connection refused": "Return true from email activation method for now.",
+                      "adding roles": {
+                        "description": "Picking up from the previous day, role creation not working for some reason. This is likely because it is failing at the serialiser and returning error that I ignore.",
+                        "children": {
+                          "added default='' to the nickname field in Role": "SOLVED"
+                        }
+                      },
+                      "all working. Before doing interface effects, there appears to be a problem with the list.": {
+                        "description": "",
+                        "children": {
+                          "likely to do with test prefiltering.": "It was. Added member id filter to filter.condition. SOLVED"
+                        }
+                      },
+                      "error and exception handling": {
+                        "description": "",
+                        "children": {
+                          "names are blank": "",
+                          "email is blank": "",
+                          "email no regex match": "",
+                          "no role selected": "",
+                          "member already exists": "maybe email input should be a global member search",
+                          "sending activation email": "",
+                          "activation email failed": "not a real email"
+                        }
+                      },
+                      "interface updates": {
+                        "children": {
+                          "update member list": "",
+                          "hide new panel": "",
+                          "show single panel of new member": ""
+                        }
                       }
                     }
+                  },
+                  "try email only with search": {
+                    "Change title to 'invite'": "DONE"
                   },
                   "moving member interfaces to multiple files to simplify definitions": {
                     "children": {
@@ -89,20 +73,16 @@
                     }
                   }
                 }
-              }
+              },
             }
           },
           "2.3.1-members-multi-interface": {
             "description": "Moving constituent member interfaces to different files to better separate the functions.",
             "children": {
               "root": {
-                "20180115": {
-                  "children": {
-                    "Create new files for each interface and add paths to app.html": "DONE",
-                    "Move single logic": "DONE",
-                    "Move new logic": "DONE",
-                  }
-                }
+                "Create new files for each interface and add paths to app.html": "DONE",
+                "Move single logic": "DONE",
+                "Move new logic": "DONE",
               }
             }
           },
@@ -119,36 +99,48 @@
           }
         }
       },
-      "2.4-account-focussed-interface": {
+      "2.4-account-focus": {
         "description": "Start from the point of view of the account-holder, and move through functionality in a natural way.",
+        "date": 20180115,
         "children": {
-          "Account details": {
+          "Idea of a unified interface": {
+            "description": "A single interface should have a single purpose and move around the screen as a unit. When dismissing an interface, no part of it should still be needed. When recalled, it resets to a natural resting state."
+          },
+          "Load": {
+            "description": "Open the app with a loading indicator to give the interface time to load all relevant objects into memory.",
+            "children": {
+              "just a bit of text": "DONE",
+              "something during loading process is causing style to change": "Make sure all elements stay inside boundary, including margins, such as from float."
+            }
+          },
+          "Account": {
             "description": "At the top of the page, the user should be able to access their user details, including password changing functions.",
             "children": {
-              
-            },
+
+            }
           },
-          "List of clubs": {
+          "Clubs": {
             "description": "Start from list of clubs that the member logged in is a part of.",
             "children": {
               "upcoming events"
               "invitations"
+              "single": {
+                "description": "Displays a single club. Most obvious thing should be a heads-up display of upcoming events for the active user."
+              }
             }
           },
-          "Single club": {
-            "description": "",
+          "Members": {
+            "description": "A list of users on the system, filtered by active club.",
             "children": {
-              "List of members": {
-
-              },
-              "List of events": {
-
-              },
-              "List of assets": {
-
-              },
-            }
+              ""
+            },
           },
+          "Events": {
+            "description": "A list of upcoming and past events, filtered by active club."
+          },
+          "Assets": {
+            "description": "A list of assets, filtered by active club."
+          }
         }
       }
     }

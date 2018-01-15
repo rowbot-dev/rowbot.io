@@ -74,9 +74,9 @@ var UI = function () {
             }, '').trim());
           } else {
             if (duration) {
-              return $(element).animate(_this._.style[''], {duration: duration}).promise();
+              return $(element).animate(_style, {duration: duration}).promise();
             } else {
-              return $(element).css(_this._.style[''], {queue: false}).promise();
+              return $(element).css(_style, {queue: false}).promise();
             }
           }
         });
