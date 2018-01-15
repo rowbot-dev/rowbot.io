@@ -79,7 +79,7 @@
                         }
                       },
                       "try email only with search": {
-
+                        
                       }
                     }
                   },
@@ -99,7 +99,8 @@
                 "20180115": {
                   "children": {
                     "Create new files for each interface and add paths to app.html": "DONE",
-                    ""
+                    "Move single logic": "DONE",
+                    "Move new logic": "DONE",
                   }
                 }
               }
