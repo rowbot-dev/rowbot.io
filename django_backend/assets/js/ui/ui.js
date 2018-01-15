@@ -57,7 +57,7 @@ var UI = function () {
       });
 
       // update style dictionary
-      // var _original = _this._.style[''];
+      var _changed = _.changed(_this._.style[''], style['']);
       _this._.style = _.merge(_this._.style, style);
 
       // add styles to DOM if rendered
@@ -74,7 +74,7 @@ var UI = function () {
             }, '').trim());
           } else {
             if (duration) {
-              return $(element).animate(_style, {duration: duration}).promise();
+              return $(element).animate(_changed, {duration: duration}).promise();
             } else {
               return $(element).css(_style, {queue: false}).promise();
             }

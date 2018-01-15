@@ -3,7 +3,7 @@ var App = (App || {});
 App.interfaces = (App.interfaces || {});
 App.interfaces.account = function () {
   return ui._component('account', {
-    classes: ['interface'],
+    classes: ['interface', 'hidden'],
     children: [
       // member name
       // member email

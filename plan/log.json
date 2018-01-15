@@ -103,6 +103,7 @@
         "description": "Start from the point of view of the account-holder, and move through functionality in a natural way.",
         "date": 20180115,
         "children": {
+          "Look at proxies": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
           "Idea of a unified interface": {
             "description": "A single interface should have a single purpose and move around the screen as a unit. When dismissing an interface, no part of it should still be needed. When recalled, it resets to a natural resting state."
           },

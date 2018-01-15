@@ -28,7 +28,7 @@ App.application = function () {
       // interfaces
       App.interfaces.load(),
       // App.interfaces.account(),
-      // App.interfaces.club.main(),
+      App.interfaces.club.main(),
     ],
   }).then(function (_app) {
     return _app;
