@@ -23,12 +23,6 @@ class MemberViewSet(BaseModelViewSet):
   permission_classes = (IsAuthenticated,)
   serializer = MemberSerializer
 
-  def get_queryset(self):
-    if self.request.user.is_staff:
-      return Member.objects.all()
-    else:
-      return Member.objects.filter(id=self.request.user.id)
-
   @detail_route(methods=['POST'])
   def change_password(self, request, pk=None):
     changed = False
@@ -40,7 +34,7 @@ class MemberViewSet(BaseModelViewSet):
       user.save()
     return Response({'changed': changed})
 
-  @detail_route(methods=['GET'])
+  @detail_route(methods=['POST'])
   def send_activation_email(self, request, pk=None):
     if pk is not None:
       user = get_object_or_404(self.get_queryset(), pk=pk)

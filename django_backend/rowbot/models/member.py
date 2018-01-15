@@ -65,8 +65,12 @@ class Member(AbstractBaseUser, PermissionsMixin, Model):
     # create the email, and attach the HTML version as well.
     msg = EmailMultiAlternatives('activation {}'.format(self.activation_email_key), text_content, 'signup@rowbot.com', [self.email])
     msg.attach_alternative(html_content, 'text/html')
-    number_of_messages_sent = msg.send()
-    return number_of_messages_sent > 0 # success?
+
+    # REAL WORLD NEEDS AN EMAIL ACCOUNT
+    # number_of_messages_sent = msg.send()
+    # return number_of_messages_sent > 0 # success?
+
+    return True
 
   def new_socket_token(self):
     active_socket_token = self.socket_tokens.get(is_active=True)

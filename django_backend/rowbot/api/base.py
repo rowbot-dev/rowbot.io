@@ -67,8 +67,8 @@ class BaseModelViewSet(viewsets.ViewSet):
   def get_queryset(self):
     filter_q_and = Q()
     filter_q_or = Q()
-    for index, pair in self.request.query_params.dict().items():
-      (q, field, value) = tuple(pair.split('-'))
+    for index, triplet in self.request.query_params.dict().items():
+      (q, field, value) = tuple(triplet.split('-'))
       if q == 'AND':
         filter_q_and = filter_q_and & Q(**{field: value})
       elif q == 'OR':

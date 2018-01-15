@@ -50,11 +50,7 @@ Auth.interfaces.login = function () {
     // send form to login
     var _form = _login.get('container.form');
     _form.send = function (results) {
-      var data = {};
-      results.forEach(function (result) {
-        data[result.name] = result.value;
-      });
-      return api.request('/auth/', 'POST', data).then(function (result) {
+      return api.request('/auth/', 'POST', results).then(function (result) {
         if (result.success) {
           window.location = '/';
         } else {

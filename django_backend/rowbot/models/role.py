@@ -47,7 +47,7 @@ class Role(Model):
   is_superior_to = models.ManyToManyField('self', symmetrical=False, related_name='is_subordinate_to')
 
   # Properties
-  nickname = models.CharField(max_length=255)
+  nickname = models.CharField(max_length=255, default='')
   is_active = models.BooleanField(default=True)
   is_confirmed = models.BooleanField(default=False)
 

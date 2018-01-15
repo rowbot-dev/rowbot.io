@@ -38,7 +38,8 @@ var API = function () {
     }
 
     return _api.request(_api.urls.base + _api.urls.schema).then(function (schema) {
-      return _.pmap(schema, function (_name, _args) {
+      _api.schema = schema;
+      return _.pmap(_api.schema, function (_name, _args) {
         _args['name'] = _name;
         let _model = _api.model(_args);
       });
@@ -189,9 +190,10 @@ var API = function () {
           return _.p(function () {
             if ('_id' in item) {
               _api.buffer[_model.name] = (_api.buffer[_model.name] || {});
-              _api.buffer[_model.name][item._id] = item;
+              _api.buffer[_model.name][item._id] = _model.instance(item);
               return _model.instance(item);
             } else {
+              _.l(item);
               return undefined;
             }
           });

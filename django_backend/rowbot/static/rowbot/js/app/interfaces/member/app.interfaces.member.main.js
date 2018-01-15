@@ -233,7 +233,7 @@ App.interfaces.member = function () {
     var _single = _members.get('single');
     var _activation = _single.get('activation');
     var _roles = _single.get('roles');
-    
+
     var _new = _members.get('new');
     var _newform = _new.get('form');
     var _newmodels = _new.get('form.models');

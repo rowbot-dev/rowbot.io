@@ -70,8 +70,8 @@ Components.input = function (name, args) {
 
       },
       email: function () {
-        var template = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // TODO: this filter is only needed for a quick check
-        return template.test(_input.value);
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(_input.value);
       },
       text: function () {
         return _input.value !== '';
