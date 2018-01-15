@@ -12,6 +12,7 @@ App.interfaces.member.main = function () {
   return ui._component('member', {
     classes: ['interface', 'hidden'],
     style: {
+      'opacity': '0',
       'padding-left': '20px',
       ' .panel': {
         'float': 'left',
@@ -40,9 +41,7 @@ App.interfaces.member.main = function () {
             children: [
               ui._component('fields', {
                 style: {
-                  'position': 'relative',
-                  'width': 'calc(100% - 50px)',
-                  'float': 'left',
+                  'width': '100%',
                 },
                 children: [
                   Components.input('name', {
@@ -59,38 +58,6 @@ App.interfaces.member.main = function () {
                     style: {
                       'border': '0px',
                     },
-                  }),
-                ],
-              }),
-              ui._component('buttons', {
-                style: {
-                  'position': 'relative',
-                  'width': '40px',
-                  'float': 'left',
-                  'margin-left': '10px',
-                },
-                children: [
-                  Components.button('new', {
-                    style: {
-                      'width': '40px',
-                      'height': '40px',
-                    },
-                    children: [
-                      Components.glyph('glyph', {
-                        glyph: 'plus',
-                      }),
-                    ],
-                  }),
-                  Components.button('reload', {
-                    style: {
-                      'width': '40px',
-                      'height': '40px',
-                    },
-                    children: [
-                      Components.glyph('glyph', {
-                        glyph: 'repeat',
-                      }),
-                    ],
                   }),
                 ],
               }),
@@ -113,22 +80,25 @@ App.interfaces.member.main = function () {
       App.interfaces.member.single(),
       App.interfaces.member.new(),
     ],
-  }).then(function (_members) {
+  }).then(function (_member) {
 
     // vars
-    var _models = _members.get('all.search.models');
-    var _newButton = _members.get('all.search.buttons.new');
-    var _list = _members.get('all.members');
-    var _input = _list.get('search.container.input');
+    var _models = _member.get('all.search.models');
+    var _members = _member.get('all.members');
+    var _input = _members.get('search.container.input');
 
     // interfaces
-    var _single = _members.get('single');
-    var _new = _members.get('new');
+    var _single = _member.get('single');
+    var _new = _member.get('new');
 
     // members
-    _members.setStates([
+    _member.setStates([
       ui._state('members', {
-        classes: {remove: ['hidden']},
+        fn: {
+          after: function (_this) {
+            return _this.show(300);
+          },
+        },
       }),
     ]);
 
@@ -252,7 +222,7 @@ App.interfaces.member.main = function () {
         return _block;
       });
     }
-    _models.get('search').setStyle({'display': 'none'});
+    _models.get('search').setClasses('hidden');
     _models.get('pagination').setClasses('hidden');
     _models.setStates([
       ui._state('members', {
@@ -264,16 +234,9 @@ App.interfaces.member.main = function () {
       }),
     ]);
 
-    // all.search.buttons.new
-    _newButton.setBindings({
-      'click': function (_this) {
-        return ui.states.call('members.new');
-      },
-    });
-
     // all.list
-    _list.setTargets([
-      _list._target('members', {
+    _members.setTargets([
+      _members._target('members', {
         exclusive: false,
         _source: function (args) {
           args = (args || {});
@@ -283,7 +246,7 @@ App.interfaces.member.main = function () {
         data: function (args) {
           args = (args || {});
           var _target = this;
-          var _query = (args.query || _list.metadata.query);
+          var _query = (args.query || _members.metadata.query);
           var data = [{
             key: 'roles__model__club__id',
             value: api.active.Club._id,
@@ -365,8 +328,9 @@ App.interfaces.member.main = function () {
         },
       }),
     ]);
-    _list.get('search').setStyle({'display': 'none'});
-    _list.data.storage.compare = function (_d1, _d2) { // override
+    _members.get('search').setClasses('hidden');
+    _members.get('pagination').setClasses('hidden');
+    _members.data.storage.compare = function (_d1, _d2) { // override
       if ((_d1.scores.first_name + _d1.scores.last_name) > (_d2.scores.first_name + _d2.scores.last_name)) {
         return -1;
       } else if ((_d1.scores.first_name + _d1.scores.last_name) === (_d2.scores.first_name + _d2.scores.last_name)) {
@@ -381,13 +345,13 @@ App.interfaces.member.main = function () {
         return 1;
       }
     }
-    _list.metadata.query.score = function (_datum) {
+    _members.metadata.query.score = function (_datum) {
       var _query = this;
       var _target = _datum.target;
       return _.p(function () {
         return _.map(_datum.normalised, function (_key, _value) {
           let results = {};
-          let exclusive = (_list.metadata.exclusive || _target.exclusive);
+          let exclusive = (_members.metadata.exclusive || _target.exclusive);
           let noQuery = true;
           let _score = _.map(_query.buffer, function (_index, _partial) {
             noQuery = _partial === '';
@@ -400,21 +364,22 @@ App.interfaces.member.main = function () {
         }, {});
       });
     }
-    _list.data.display.filter.condition = function (_datum) { // override
+    _members.data.display.filter.condition = function (_datum) { // override
       return _.p(function () {
         _datum.accepted = _datum.scores.first_name > 0 || _datum.scores.last_name > 0 || _datum.scores.email > 0;
       });
     }
-    _list.setStates([
+    _members.setStates([
       ui._state('members', {
         fn: {
           after: function () {
-            return _list.data.load.main();
+            return _members.data.load.main();
           },
         },
       }),
     ]);
-    _list.get('pagination').setClasses('hidden');
+
+    // input
     _input.input = function (value, event) {
       return _.pmap(value.split(' '), function (_index, _value) {
         return _list.metadata.query.add(_index, _value);
@@ -423,6 +388,6 @@ App.interfaces.member.main = function () {
       });
     }
 
-    return _members;
+    return _member;
   });
 }

@@ -52,13 +52,17 @@ Components.input = function (name, args) {
       });
     }
 
-    // bound to input event
+    // bindings
     _input.input = function (value, event) {
 
     }
-
-    // bound to keypress event
     _input.keypress = function (value, event) {
+
+    }
+    _input.blur = function (event) {
+
+    }
+    _input.focus = function (event) {
 
     }
 
@@ -109,6 +113,12 @@ Components.input = function (name, args) {
       },
       'keypress': function (_this, event) {
         return _input.keypress(_this.element().value, event);
+      },
+      'blur': function (_this, event) {
+        return _input.blur(event);
+      },
+      'focus': function (_this, event) {
+        return _input.focus(event);
       },
     });
 

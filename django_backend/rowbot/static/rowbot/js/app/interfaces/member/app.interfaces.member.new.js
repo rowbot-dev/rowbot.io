@@ -9,30 +9,24 @@ App.interfaces.member.new = function () {
 
       // title
       Components.text('title', {
-        title: 'Create a new user',
+        title: 'Invite a new member',
       }),
 
       // form
       Components.form('form', {
         children: [
-          // member first name
-          Components.input('first', {
-            placeholder: 'First name...',
-          }),
-
-          // member last name
-          Components.input('last', {
-            placeholder: 'Last name...',
-          }),
-
           // member email
           Components.input('email', {
             placeholder: 'Email...',
             type: 'email',
+            style: {
+              'border-left': '0px',
+              'border-right': '0px',
+            },
           }),
 
           // member role models
-          Components.text('modeltitle', {
+          Components.text('title', {
             title: 'Available roles',
           }),
           Components.list('models', {
@@ -72,6 +66,13 @@ App.interfaces.member.new = function () {
             },
             html: 'Loading...',
           }),
+
+          // member list
+          Components.list('members', {
+            style: {
+              'height': '200px',
+            },
+          }),
         ],
       }),
     ],
@@ -79,8 +80,10 @@ App.interfaces.member.new = function () {
 
     // vars
     var _form = _new.get('form');
-    var _models = _new.get('form.models');
-    var _info = _new.get('form.info');
+    var _email = _form.get('email');
+    var _members = _form.get('members');
+    var _models = _form.get('models');
+    var _info = _form.get('info');
 
     // new
     _new.setStates([
@@ -150,6 +153,97 @@ App.interfaces.member.new = function () {
         }
       });
     }
+
+    // email
+    _email.input = function (value, event) {
+      return _members.metadata.query.add('main', value).then(function () {
+        return _members.data.load.local();
+      });
+    }
+
+    // members
+    _members.setTargets([
+      _members._target('members', {
+        exclusive: true,
+        _source: function (args) {
+          args = (args || {});
+          var _target = this;
+          return api.models.Member.objects.filter({force: args.force, data: (args.data || _target.data())});
+        },
+        data: function (args) {
+          var _target = this;
+          return [
+            {
+              key: 'email__icontains',
+              value: _members.metadata.query.main,
+              q: 'OR',
+            }
+          ];
+        },
+        normalise: function (_instance) {
+          return _.p({
+            _id: _instance._id,
+            first_name: _instance.first_name,
+            last_name: _instance.last_name,
+            main: _instance.email,
+          });
+        },
+        unit: function (name, args) {
+          return ui._component(name, {
+            style: {
+              'width': '100%',
+              'height': 'auto',
+              'border-bottom': '1px solid black',
+              'padding-left': '10px',
+              'padding-right': '10px',
+            },
+            children: [
+              Components.text('text', {
+                classes: ['notouch'],
+              }),
+            ],
+          }).then(function (_unit) {
+
+            _unit.isHidden = false;
+            _unit.update = function (_datum) {
+              _unit.datum = _datum;
+              return _unit.get('text').update({
+                title: `${_datum.normalised.first_name} ${_datum.normalised.last_name}`,
+                value: _datum.normalised.main,
+              }).then(function () {
+                return _unit;
+              });
+            }
+            _unit.hide = function () {
+              _unit.isHidden = true;
+              return _unit.setClasses('hidden');
+            }
+            _unit.show = function () {
+              _unit.isHidden = false;
+              return _unit.removeClass('hidden');
+            }
+            _unit.setBindings({
+              'click': function (_this, event) {
+                _.l('click');
+              },
+            });
+
+            return _unit;
+          });
+        },
+      }),
+    ]);
+    _members.get('search').setClasses('hidden');
+    _members.get('pagination').setClasses('hidden');
+    _members.setStates([
+      ui._state('members.new', {
+        fn: {
+          after: function () {
+            return _members.data.load.main();
+          },
+        },
+      }),
+    ]);
 
     // models
     _models.setTargets([
@@ -271,7 +365,7 @@ App.interfaces.member.new = function () {
         return _block;
       });
     }
-    _models.get('search').setStyle({'display': 'none'});
+    _models.get('search').setClasses('hidden');
     _models.get('pagination').setClasses('hidden');
     _models.setStates([
       ui._state('members', {

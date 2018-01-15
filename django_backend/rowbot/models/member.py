@@ -33,8 +33,8 @@ class Member(AbstractBaseUser, PermissionsMixin, Model):
   # identification
   username = models.CharField(max_length=255, unique=True)
   email = models.EmailField(max_length=255)
-  first_name = models.CharField(max_length=255)
-  last_name = models.CharField(max_length=255)
+  first_name = models.CharField(max_length=255, default='')
+  last_name = models.CharField(max_length=255, default='')
 
   # activation
   is_activated = models.BooleanField(default=False)

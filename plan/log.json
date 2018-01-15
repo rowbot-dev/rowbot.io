@@ -79,7 +79,7 @@
                         }
                       },
                       "try email only with search": {
-                        
+                        "Change title to 'invite'": "DONE"
                       }
                     }
                   },
@@ -102,6 +102,17 @@
                     "Move single logic": "DONE",
                     "Move new logic": "DONE",
                   }
+                }
+              }
+            }
+          },
+          "2.3.2-members-invite-member": {
+            "description": "Instead of putting the burden of naming the member onto the admin, instead rely on the new member to name themselves. Also account for the possibility that the member already exists on the system, but does not have roles with this club.",
+            "children": {
+              "20180115": {
+                "children": {
+                  "add member list unrestricted by club id. Allow site wide search of members."
+                  "add interaction with email input. Only show list when focussed, or when the input is empty"
                 }
               }
             }

@@ -367,7 +367,7 @@ var API = function () {
                         if (_rest == 'contains') {
                           return {q: _filter.q, value: _instance[_first].contains(_filter.value)};
                         } else if (_rest == 'icontains') {
-                          return {q: _filter.q, value: _instance[_first].toLowerCase().contains(_filter.value.toLowerCase())};
+                          return {q: _filter.q, value: (_instance[_first] || '').toLowerCase().contains((_filter.value || '').toLowerCase())};
                         }
                       } else {
                         // simply return the value match
