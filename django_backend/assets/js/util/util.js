@@ -86,8 +86,12 @@ var _ = {
     second = (second || {});
     var changed = {};
     Object.keys(second).forEach(function (key) {
-      if (key in first && _.is.object.all(first[key]) && _.is.object.all(second[key])) {
-        changed[key] = _.changed(first[key], second[key]); // objects go deeper again recursively
+      if (key in first) {
+        if (_.is.object.all(first[key]) && _.is.object.all(second[key])) {
+          changed[key] = _.changed(first[key], second[key]); // objects go deeper again recursively
+        } else if (first[key] !== second[key]) {
+          changed[key] = second[key]; // add if not equal
+        }
       } else {
         changed[key] = second[key]; // add if it does not exist
       }
