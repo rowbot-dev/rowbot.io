@@ -118,6 +118,38 @@
             }
           }
         }
+      },
+      "2.4-account-focussed-interface": {
+        "description": "Start from the point of view of the account-holder, and move through functionality in a natural way.",
+        "children": {
+          "Account details": {
+            "description": "At the top of the page, the user should be able to access their user details, including password changing functions.",
+            "children": {
+              
+            },
+          },
+          "List of clubs": {
+            "description": "Start from list of clubs that the member logged in is a part of.",
+            "children": {
+              "upcoming events"
+              "invitations"
+            }
+          },
+          "Single club": {
+            "description": "",
+            "children": {
+              "List of members": {
+
+              },
+              "List of events": {
+
+              },
+              "List of assets": {
+
+              },
+            }
+          },
+        }
       }
     }
   }
