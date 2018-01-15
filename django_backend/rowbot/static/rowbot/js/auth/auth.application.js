@@ -6,7 +6,7 @@ Auth.application = function () {
       'width': '100%',
       'top': '0%',
       'top': '0%',
-      '.interface': {
+      ' .interface': {
         'position': 'absolute',
         'height': '100%',
         'width': '100%',

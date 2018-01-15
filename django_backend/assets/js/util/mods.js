@@ -17,14 +17,14 @@ String.prototype.contains = function (string) {
   return this.indexOf(string) !== -1;
 }
 
-String.prototype.score = function (query, exclusive) {
+String.prototype.score = function (query) {
   var string = this;
-  if (string === query) {
-    return 1;
+  if (!query) {
+    return 0;
   }
 
-  if (!query) {
-    return exclusive ? 0 : 1;
+  if (string === query) {
+    return 1;
   }
 
   var totalCharacterScore = 0;
@@ -78,11 +78,11 @@ Array.prototype.contains = function (object) {
 Array.prototype.sum = function (object) {
   return this.reduce(function (f, s) {
     return f+s;
-  });
+  }, 0);
 }
 
 Array.prototype.mean = function () {
-  return this.sum() / this.length;
+  return this.sum() / (this.length || 1);
 }
 
 Array.prototype.index = function (property) {

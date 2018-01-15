@@ -15,7 +15,7 @@ Components.form = function (name, args) {
     _form.export = function () {
       // for each child, call export function and return
       return _.pmap(_form._.children.rendered, function (name, child) {
-        if (child.name !== _form.submit) {
+        if (child.name !== _form.submit && child.export) {
           return child.export();
         }
       }).then(function (results) {
@@ -26,13 +26,16 @@ Components.form = function (name, args) {
         });
 
         // reduce for validated data
-        var validated = results.reduce(function (whole, part) {
-          return whole && part.validated;
-        }, true);
+        var validated = results.every(function (result) {
+          return result.validated;
+        });
 
         // only continue if validated
         if (validated) {
-          return _form.send(results);
+          return _form.send(results.reduce(function (whole, part) {
+            whole[part.name] = part.value;
+            return whole;
+          }, {}));
         }
       });
     }
@@ -43,10 +46,10 @@ Components.form = function (name, args) {
     }
 
     // bind enter key in inputs to submit
-    _form._.children.buffer.forEach(function (child) {
-      let input = child.get('input');
-      if (input !== undefined) {
-        child.keypress = function (value, event) {
+    _form._.children.buffer.forEach(function (_child) {
+      let _content = _child.get('content');
+      if (_content !== undefined) {
+        _child.keypress = function (value, event) {
           if (event.which === 13) {
             return _form.export();
           }

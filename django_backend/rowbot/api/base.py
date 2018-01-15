@@ -2,6 +2,7 @@
 # Django
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 # DRF
 from rest_framework import status
@@ -64,11 +65,20 @@ class BaseModelViewSet(viewsets.ViewSet):
   permission_classes = (IsAuthenticated, CustomDjangoPermissions)
 
   def get_queryset(self):
-    return self.queryset
+    filter_q_and = Q()
+    filter_q_or = Q()
+    for index, triplet in self.request.query_params.dict().items():
+      (q, field, value) = tuple(triplet.split('-'))
+      if q == 'AND':
+        filter_q_and = filter_q_and & Q(**{field: value})
+      elif q == 'OR':
+        filter_q_or = filter_q_or | Q(**{field: value})
+
+    return self.queryset.filter(filter_q_and).filter(filter_q_or)
 
   # GET
   def list(self, request):
-    serializer = self.serializer(self.get_queryset().filter(**self.request.query_params.dict()), many=True)
+    serializer = self.serializer(self.get_queryset(), many=True)
     return Response(serializer.data)
 
   # GET

@@ -18,11 +18,13 @@ Auth.interfaces.login = function () {
           Components.form('form', {
             children: [
               Components.input('username', {
+                placeholder: 'username',
                 style: {
                   'border': '1px solid black',
                 },
               }),
               Components.input('password', {
+                placeholder: 'password',
                 style: {
                   'border': '1px solid black',
                 },
@@ -48,11 +50,7 @@ Auth.interfaces.login = function () {
     // send form to login
     var _form = _login.get('container.form');
     _form.send = function (results) {
-      var data = {};
-      results.forEach(function (result) {
-        data[result.name] = result.value;
-      });
-      return _.request('/auth/', 'POST', data).then(function (result) {
+      return api.request('/auth/', 'POST', results).then(function (result) {
         if (result.success) {
           window.location = '/';
         } else {

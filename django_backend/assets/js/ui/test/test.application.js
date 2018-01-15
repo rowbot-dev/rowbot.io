@@ -6,6 +6,9 @@ Test.application = function (args) {
       'width': '100%',
       'top': '0%',
       'top': '0%',
+      ' .hidden': {
+        'display': 'none',
+      },
     },
     children: [
       Test.interfaces.centred({
@@ -27,13 +30,26 @@ Test.application = function (args) {
 
     _list.setTargets([
       _list._target('clubs', {
-        exclusive: false,
-        source: function (force) {
+        exclusive: true,
+        _source: function (args) {
+          args = (args || {});
           var _target = this;
-          return api.models.Club.objects.all();
+          return api.models.Club.objects.filter({force: args.force, data: (args.data || _target.data())});
         },
-        normalise: function (_item) {
-          return {_id: _item._id, main: _item.name};
+        data: function (args) {
+          args = (args || {});
+          var _target = this;
+          var _query = (args.query || _list.metadata.query);
+
+          return [
+            {
+              server: 'name__icontains',
+              value: _query.buffer.main,
+            }
+          ]
+        },
+        normalise: function (_instance) {
+          return _.p({_id: _instance._id, main: _instance.name});
         },
         unit: function (name, args) {
           return ui._component(`${name}`, {
@@ -54,6 +70,7 @@ Test.application = function (args) {
               _unit.datum = _datum;
               return _unit.get('text').update({
                 title: _datum.item.name,
+                value: _datum.item._id,
               }).then(function () {
                 return _unit;
               });
@@ -77,7 +94,7 @@ Test.application = function (args) {
       ui._state('main', {
         fn: {
           after: function () {
-            return _list.data.load();
+            return _list.data.load.main();
           },
         },
       }),

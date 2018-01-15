@@ -72,7 +72,7 @@ Components.panel = function (name, args) {
       raf(function () {
         // Hide scrollbar if no scrolling is possible
         if (_container.scrollRatio >= 1) {
-          return _container.setClasses(['hidden']);
+          return _scroll.setClasses('hidden');
         } else {
           var height = Math.max(_container.scrollRatio * 100, 10);
           var top = (_containerElement.scrollTop / (_contentElement.clientHeight - _containerElement.clientHeight)) * (100 - height);

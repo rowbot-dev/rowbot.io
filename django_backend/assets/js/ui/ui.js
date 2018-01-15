@@ -1,3 +1,4 @@
+
 var UI = function () {
 
   // component object
@@ -66,8 +67,8 @@ var UI = function () {
           // TODO: allow nested styles for active, etc.
           // This sets up a new css rule with a string reduced from the style object
           if (key) {
-            return _.css.create(`${_this._.tag}#${_this.id} ${key}`, _.map(_style, function (_key, _value) {
-              return `${_key}: ${_value};`;
+            return _.css.create(`${_this._.tag}#${_this.id}${key}`, _.map(_style, function (_key, _value) {
+              return `${_key}: ${_value} !important;`;
             }).reduce(function (whole, part) {
               return `${whole}\n${part}`;
             }, '').trim());
@@ -131,7 +132,7 @@ var UI = function () {
       }
     },
     setStates: function (states) {
-      let _this = this;
+      var _this = this;
       states = (states || []);
       return _.all(states.map(function (unresolved) {
         return _.p(unresolved).then(function (state) {
@@ -141,21 +142,23 @@ var UI = function () {
       }));
     },
     setChildren: function (children) {
-      let _this = this;
+      var _this = this;
       children = (children || _this._.children.buffer);
       children = _.is.array(children) ? children : [children];
       return _._all(children.map(function (unresolved) {
         return function () {
-          return _.p(unresolved).then(function (child) {
-            child._.parent = _this;
+          return _.p(unresolved).then(function (_child) {
+            _child._.parent = _this;
             if (_this._.is.rendered) {
-              return _this.renderChild(child);
+              return _this.renderChild(_child);
             } else {
-              return _this.bufferChild(child);
+              return _this.bufferChild(_child);
             }
           });
         }
-      }));
+      })).then(function () {
+        return _this;
+      });
     },
     setHTML: function (html) {
       var _this = this;
@@ -220,6 +223,12 @@ var UI = function () {
         }
       }
     },
+    removeClasses: function (classes) {
+      var _this = this;
+      return _.all(classes.map(function (_class) {
+        return _this.removeClass(_class);
+      }));
+    },
     removeProperty: function (properties) {
 
     },
@@ -234,6 +243,18 @@ var UI = function () {
           element.removeEventListener(key, _binding);
         });
       }
+    },
+    removeChild: function (name) {
+      var _this = this;
+      return _.p(function () {
+        if (_this._.is.rendered) {
+          var _child = _this.get(name);
+          _this.element().removeChild(_child.element());
+          _this._.children.buffer = _this._.children.buffer.filter(function (_any) {
+            return _any.name !== _child.name;
+          });
+        }
+      });
     },
 
     // element
@@ -260,18 +281,16 @@ var UI = function () {
     render: function (root) {
       var _this = this;
       return _this.setID().then(function () {
-        // 1. actually render to DOM
-        var element = _this.element();
+        var _element = _this.element();
         var root = _this._.parent !== undefined ? _this._.parent.element() : _this.hook;
         var before = _this._.before !== undefined ? _this._.parent.child(_this._.before) : undefined;
         if (before !== undefined) {
           var beforeElement = before.element();
-          root.insertBefore(element, beforeElement);
+          root.insertBefore(_element, beforeElement);
         } else {
-          root.appendChild(element);
+          root.appendChild(_element);
         }
 
-        // 2. write styles to DOM
         _this._.is.rendered = true;
         return _.all([
           _this.setStyle(),
@@ -280,11 +299,20 @@ var UI = function () {
           _this.setBindings(),
           _this.setHTML(),
         ]).then(function () {
-          // 3. go down through children
           return _this.setChildren();
         });
-      }).then(function () {
-        return _this;
+      });
+    },
+    hide: function (duration) {
+      var _this = this;
+      return _this.setStyle({'opacity': '0.0'}, duration).then(function () {
+        return _this.setClasses('hidden');
+      });
+    },
+    show: function (duration) {
+      var _this = this;
+      return _this.removeClass('hidden').then(function () {
+        return _this.setStyle({'opacity': '1.0'}, duration);
       });
     },
 
@@ -334,7 +362,8 @@ var UI = function () {
       _this._.duration = args.duration;
       return _.all([
         _this.setStyle(args.style),
-        _this.setClasses(args.classes),
+        _this.setAddClasses(((args.classes || {}).add || args.classes)),
+        _this.setRemoveClasses((args.classes || {}).remove),
         _this.setProperties(args.properties),
         _this.setChildren(args.children),
       ]).then(function () {
@@ -356,10 +385,17 @@ var UI = function () {
       // update style dictionary
       _this._.style = _.merge(_this._.style, style);
     },
-    setClasses: function (classes) {
+    setAddClasses: function (classes) {
       var _this = this;
       classes = (classes || []);
-      _this._.classes = _.map(_.merge(_this._.classes, classes), function (index, value) {
+      _this._.addclasses = _.map(_.merge(_this._.addclasses, classes), function (index, value) {
+        return value;
+      });
+    },
+    setRemoveClasses: function (classes) {
+      var _this = this;
+      classes = (classes || []);
+      _this._.removeclasses = _.map(_.merge(_this._.removeclasses, classes), function (index, value) {
         return value;
       });
     },
@@ -437,7 +473,8 @@ var UI = function () {
       var _this = this;
       var data = {
         style: _this._.style,
-        classes: _this._.classes,
+        addclasses: _this._.addclasses,
+        removeclasses: _this._.removeclasses,
         properties: _this._.properties,
         fn: _this._.fn,
         duration: _this._.duration,
@@ -452,7 +489,8 @@ var UI = function () {
         var _before = ((_data.fn || {}).before || _.p);
         var _after = ((_data.fn || {}).after || _.p);
         var _style = (_data.style || {});
-        var _classes = (_data.classes || {});
+        var _addclasses = (_data.addclasses || {});
+        var _removeclasses = (_data.removeclasses || {});
         var _properties = (_data.properties || {});
         var _duration = durationOverride !== undefined ? durationOverride : (_data.duration || 300);
 
@@ -461,7 +499,8 @@ var UI = function () {
         return _before(_component).then(function (_result) {
           return _.all([
             _component.setStyle(_style, _duration),
-            _component.setClasses(_classes),
+            _component.setClasses(_addclasses),
+            _component.removeClasses(_removeclasses),
             _component.setProperties(_properties),
           ]);
         }).then(function () {

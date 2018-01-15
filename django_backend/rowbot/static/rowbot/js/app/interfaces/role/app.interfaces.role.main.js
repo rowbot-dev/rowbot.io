@@ -11,21 +11,13 @@ What roles to display:
 
 var App = (App || {});
 App.interfaces = (App.interfaces || {});
-App.interfaces.role = function () {
+App.interfaces.role = (App.interfaces.role || {});
+App.interfaces.role.main = function () {
   return ui._component('role', {
     classes: ['interface'],
     children: [
-      Components.list('list', {
-
-      }),
-      ui._component('single', {
-        classes: ['interface'],
-      }),
+      // App.interfaces.role.model.main(),
+      App.interfaces.role.root.main(),
     ],
-  }).then(function (_role) {
-
-    var _list = _role.get('list');
-
-    return _role;
   });
 }

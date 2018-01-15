@@ -77,6 +77,7 @@ urlpatterns += [
 
 # web socket token
 class SocketTokenView(views.APIView):
+  serializer_class = AuthTokenView.serializer_class
   def post(self, request, *args, **kwargs):
     user = None
     if request.user.is_authenticated:

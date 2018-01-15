@@ -6,28 +6,66 @@ List component
 2. Results list
 3. Filter list
 4. Pagination bar
-5.
+
+How to modify query management:
+1. Override _input.input to insert query elements into _list.metadata.query.buffer
+2. Override _list.metadata.query.score if necessary
+3. Override _list.data.storage.compare for sorting
+4. Override _list.data.display.filter.condition for filtering
 
 */
 
 var Components = (Components || {});
 Components.list = function (name, args) {
+  args = (args || {});
   return ui._component(name, {
+    style: _.merge({
+      'height': '100%',
+    }, args.style),
     children: [
       ui._component('search', {
+        style: _.merge({
+          'margin-bottom': '10px',
+        }, args.searchStyle),
         children: [
           // toggle filter
           Components.button('filter', {
-
+            style: {
+              'position': 'absolute',
+            },
           }),
 
-          // search field
-          Components.input('input', {
+          // container
+          ui._component('container', {
+            children: [
+              // search field
+              Components.input('input', {
+                style: {
+                  'width': 'calc(100% - 100px)',
+                  'float': 'left',
+                },
+              }),
 
+              // search button
+              Components.button('button', {
+                style: {
+                  'position': 'relative',
+                  'float': 'left',
+                  'height': '40px',
+                  'width': '90px',
+                  'left': '10px',
+                  'border': '1px solid black',
+                },
+                html: 'Search',
+              }),
+            ],
           }),
         ],
       }),
       ui._component('pagination', {
+        style: {
+          'height': '40px',
+        },
         children: [
 
           // previous set
@@ -47,18 +85,17 @@ Components.list = function (name, args) {
         ],
       }),
       Components.panel('list', {
-        tramline: args.tramline,
         style: {
-          'height': '300px',
-          'div.hidden': {
-            'display': 'none',
-          },
+          'height': '100%',
         },
+        tramline: args.tramline,
         children: [
 
           // contains list items
           ui._component('wrapper', {
-
+            style: {
+              'padding-bottom': '1px',
+            },
           }),
 
           // "load more" and spinner
@@ -67,32 +104,48 @@ Components.list = function (name, args) {
           }),
         ],
       }),
-      Components.panel('filter', {
-        style: {
-          'top': '0px',
-          'position': 'absolute',
-        },
-        children: [
-
-        ],
-      }),
+      // Components.panel('filter', {
+      //   style: {
+      //     'top': `${searchHeight}`,
+      //     'position': 'absolute',
+      //     'height': `${mainHeight}px`,
+      //   },
+      //   children: [
+      //
+      //   ],
+      // }),
     ],
   }).then(function (_list) {
 
     // component variables
-    var _input = _list.get('search.input');
+    var _input = _list.get('search.container.input');
     var _wrapper = _list.get('list.container.content.wrapper');
+
+    // handle combined height of components
+    _list.adjustHeights = function () {
+      if (_list._.is.rendered) {
+        //
+      }
+    }
 
     /*
 
     Input bindings
 
     */
+
     _input.input = function (value, event) {
-      return _.p(function () {
-        _list.metadata.query.buffer.main = value;
-        return _list.data.load();
+      return _list.metadata.query.add('main', value).then(function () {
+        return _list.data.load.local();
       });
+    }
+    _input.keypress = function (value, event) {
+      if (event.keyCode === 13) { // enter
+        return _list.data.load.main();
+      }
+    }
+    _list.submit = function () {
+      return _list.data.load.main();
     }
 
     /*
@@ -105,19 +158,55 @@ Components.list = function (name, args) {
       exclusive: false,
       query: {
         buffer: {},
+        history: {},
+        temp: {},
+        snapshot: function () {
+          var _query = this;
+          return {
+            buffer: _.merge(_query.buffer),
+            hasChanged: function () {
+              // tests whether the query has stayed the same
+              var _snapshot = this;
+              return _.map(_snapshot.buffer, function (_key, _value) {
+                return _query.buffer[_key] === _value;
+              }).reduce(function (whole, part) {
+                return whole || part;
+              }, false);
+            },
+            notInHistory: function () {
+              // tests whether the query already exists in the history
+              var _snapshot = this;
+              return _.map(_snapshot.buffer, function (_key, _value) {
+                return !(_query.history[_key] && _query.history[_key].contains(_value));
+              }).reduce(function (whole, part) {
+                return whole || part;
+              }, false);
+            },
+          }
+        },
+        add: function (key, value) {
+          var _query = this;
+          return _.p(function () {
+            _query.buffer[key] = value;
+            _query.history[key] = (_query.history[key] || []);
+            if (!_query.history[key].contains(_query.temp[key])) {
+              _query.history[key].push(_query.temp[key]);
+            }
+            _query.temp[key] = value;
+          });
+        },
         score: function (_datum) {
           // normalised is an object with categories as keys and corresponding values.
           // for each category, check against query.buffer
           var _query = this;
           var _target = _datum.target;
-          var _normalised = _datum.normalised;
           return _.p(function () {
-            return _.map(_normalised, function (_key, _value) {
+            return _.map(_datum.normalised, function (_key, _value) {
               let results = {};
               let exclusive = (_list.metadata.exclusive || _target.exclusive);
               if (_key in _query.buffer) {
                 let _partial = _query.buffer[_key];
-                results[_key] = _value.score(_partial, exclusive);
+                results[_key] = _value.score(_partial);
               } else {
                 results[_key] = exclusive ? 0 : 1;
               }
@@ -146,55 +235,50 @@ Components.list = function (name, args) {
       _target.update = function (args) {
         return _.p(function () {
           args = (args || {});
-          _target.source = args.source;
-          _target.force = (args.force || _target.force);
+          _target.main = (args.main || _target.main);
+          _target._source = args._source;
+          _target.data = (args.data || _target.data);
           _target.normalise = (args.normalise || _target.normalise);
           _target.exclusive = (args.exclusive || _target.exclusive);
           _target.unit = (args.unit || _target.unit);
           return _target;
         });
       }
-      _target.load = function () {
+      _target.load = function (_data) {
+        /*
 
-        // from here, each individual item makes its way down into the display function, accruing
-        // modifications as it goes. It will eventually have a normalised version,
-        return _target.source().then(function (_data) {
-          return _._all(_data.map(function (_item, i) {
-            return function () {
-              return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
-            }
-          }));
-        }).then(function () {
-          return _target.force().then(function (_data) {
-            return _._all(_data.map(function (_item, i) {
-              return function () {
-                return _list.data.display.main({target: _target, item: _item, normalised: _target.normalise(_item)});
-              }
-            }));
-          });
-        });
+        from here, each individual item makes its way down into the display function, accruing modifications as it goes. It will eventually have a normalised version.
+
+        */
+        _data = (_data || []);
+        return _._all(_data.map(function (_item, i) {
+          return function () {
+            return _target.normalise(_item).then(function (_normalised) {
+              return _list.data.display.main({target: _target, item: _item, normalised: _normalised});
+            });
+          }
+        }));
       }
-      _target.delay = 100;
+      _target.source = function (args) {
+        return _target._source(args).then(_target.load);
+      }
       _target.force = function () {
-        var _query = '';
-        return new Promise(function (resolve, reject) {
-          setTimeout(function () {
-            if (true) {
-              _target.source(true).then(function (_data) {
-                resolve(_data);
-              });
-            }
-          }, _target.delay);
-        });
+        return _target._source(_.merge(args, {force: true})).then(_target.load);
       }
+      _target.data = function (args) {
+        // The queries must be put into a form that both the filter in the browser and the server understand.
+        // This will most likely be simply a list of key-value pairs for each query and each field in the model.
+        // http://www.django-rest-framework.org/api-guide/filtering/
 
-      // normalised objects should contain a list of properties to be compared with the queries
+        return [];
+      }
       _target.normalise = function (_item) {
-        return _item;
+        // normalised objects should contain a list of properties to be compared with the queries
+        return _.p(_item);
       }
       _target.unit = function (name, args) {
         return ui._component(name, {
-          
+
         }).then(function (_block) {
           return _block;
         });
@@ -238,9 +322,9 @@ Components.list = function (name, args) {
               var _unitName = _.id();
               _block.types[_datum.target.name] = _unitName;
               return _datum.target.unit(_unitName).then(function (_unit) {
-                return _block.setChildren(_unit);
-              }).then(function (_unit) {
-                return _unit.update(_datum);
+                return _block.setChildren(_unit).then(function () {
+                  return _unit.update(_datum);
+                });
               });
             }
           }).then(function (_unit) {
@@ -261,7 +345,7 @@ Components.list = function (name, args) {
         _block.release = function () {
           // hide all units except the active one
           _block.isReleased = true;
-          // _.l(9, 'block.release', _block.name);
+          _block.datum = undefined;
           return _.all(_block.children().map(function (_unit) {
             return _unit.hide();
           }));
@@ -270,23 +354,41 @@ Components.list = function (name, args) {
         return _block;
       });
     }
+    _list.active = function () {
+      // return all active units
+      return _wrapper.children().map(function (_block) {
+        return _block.children().filter(function (_unit) {
+          return !_unit.isHidden;
+        })[0];
+      });
+    }
 
     /*
 
     Data contains a series of methods and buffers to handle intermediate processing and storage for incoming data.
 
     */
-    window._list = _list;
     _list.data = {
-      load: function () {
-        // for each target
-        // _list.data.storage.sorted = [];
-        return _list.data.storage.garbage().then(function () {
-          // _.l(0, _list.data.storage.sorted);
-          return _._all(_list.targets.map(function (_target) {
-            return _target.load;
-          }));
-        });
+      load: {
+        main: function () {
+          return _list.data.load.local().then(function () {
+            return _list.data.load.remote();
+          });
+        },
+        local: function () {
+          return _list.data.storage.test().then(function () {
+            return _._all(_list.targets.map(function (_target) {
+              return _target.source;
+            }));
+          });
+        },
+        remote: function () {
+          return _list.data.storage.test().then(function () {
+            return _._all(_list.targets.map(function (_target) {
+              return _target.force;
+            }));
+          });
+        },
       },
       storage: {
         buffer: {}, // needed as an intermediate for sorting
@@ -294,13 +396,13 @@ Components.list = function (name, args) {
         add: function (_datum) { // basic implementation of a binary search function
           var _storage = this;
           return _.p(function () {
+
             // add to buffer
-            _datum.sorted = false;
             _storage.buffer[_datum.item._id] = _datum;
 
             // run sorting
             var direction, previous;
-            var searchLength = Math.floor(_storage.sorted.length / 2); // halving distance moved each time from centre
+            var searchLength = _storage.sorted.length; // halving distance moved each time from end
             var index = searchLength; // start index at centre
             if (!_storage.sorted.contains(_datum.item._id)) {
               while (true) {
@@ -320,6 +422,7 @@ Components.list = function (name, args) {
 
                 // if flip-flop, leave high because of how indexes work
                 if (direction === 1 && previous === -1 || direction === 0) {
+                  index += 1;
                   break;
                 }
 
@@ -332,10 +435,7 @@ Components.list = function (name, args) {
 
               // add to sorted
               _storage.sorted.splice(index, 0, _datum.item._id);
-              _datum.index = index;
-              _datum.sorted = true;
             }
-            // _.l(6, 'storage.add', _datum.item.name, _datum.index);
           });
         },
         compare: function (_d1, _d2) { // override
@@ -353,19 +453,12 @@ Components.list = function (name, args) {
             return 1;
           }
         },
-        garbage: function () {
+        test: function () {
           var _storage = this;
-          return _._all(_wrapper.children().map(function (_child, i) {
-            // for each child, if released, remove from storage list
-            return function () {
-              return _.p(function () {
-                if (_child.isReleased) {
-                  let index = _storage.sorted.indexOf(_child.datum.item._id);
-                  _storage.sorted.splice(index, 1);
-                }
-              });
-            }
-          }));
+          return _._pmap(_storage.buffer, function (_key, _datum) {
+            _storage.sorted.splice(_storage.sorted.indexOf(_datum.item._id), 1);
+            return _list.data.display.main(_datum);
+          });
         },
       },
       display: {
@@ -375,13 +468,11 @@ Components.list = function (name, args) {
 
           // run datum through filter
           _datum.accepted = false;
-          // _.l(2, 'display.main', _datum.item._id);
           return _display.filter.main(_datum).then(function () {
-            // _.l(7, 'display.main', _datum.item._id, _datum.sorted, _datum.accepted);
-            if (_datum.sorted && _datum.accepted) {
-              return _display.render.main(_datum);
-            } else if (!_datum.sorted && !_datum.accepted) {
-              return _display.remove(_datum);
+            if (_datum.accepted) {
+              _display.render.main(_datum);
+            } else {
+              _display.remove(_datum);
             }
           });
         },
@@ -391,7 +482,6 @@ Components.list = function (name, args) {
             var _filter = _list.data.display.filter;
 
             // get query score
-            // _.l(3, 'filter.main', _datum.item._id);
             return _filter.score(_datum).then(function () {
               return _filter.condition(_datum);
             }).then(function () {
@@ -407,20 +497,17 @@ Components.list = function (name, args) {
           // fuzzy sorting
           score: function (_datum) {
             return _list.metadata.query.score(_datum).then(function (_scores) {
-              // _.l(4, 'filter.score', _datum.item._id, _scores);
               _datum.scores = _scores;
             });
           },
           condition: function (_datum) { // override
             return _.p(function () {
-              _datum.accepted = _datum.scores.main > 0;
-              // _.l(4, 'filter.condition', _datum.item._id, _datum.accepted);
+              _datum.accepted = 'main' in _datum.scores ? _datum.scores.main > 0 : true;
             });
           },
           sort: function (_datum) { // override
             return _.p(function () {
               // modify scores here based on current sorting order or other condition
-              // _.l(5, 'filter.sort', _datum.item._id, _datum.accepted);
               if (_datum.accepted) {
                 return _list.data.storage.add(_datum);
               }
@@ -434,38 +521,49 @@ Components.list = function (name, args) {
             // 1. does a unit exist with this index?
             // 2. is the unit at this index hidden?
             // 3. (create and update) or (update and show)
-            // _.l(8, 'render.main', _datum.item._id);
-            return _.p(function () {
-              if (_datum.sorted) {
-                return _render.block(_datum).then(function (_block) {
-                  return _block.unit(_datum);
-                });
-              }
+            return _render.block(_datum).then(function (_block) {
+              _block.isReleased = false;
+              return _block.unit(_datum);
             });
           },
           block: function (_datum) {
             var _render = this;
-            // get or create unit
-            var _current = _wrapper.get(_render.buffer[_datum.index]);
+            var _index = _list.data.storage.sorted.indexOf(_datum.item._id);
+
+            // already bound
+            _current = _wrapper.children().filter(function (_block) {
+              return _block.datum && _block.datum.item._id === _datum.item._id;
+            })[0];
+            if (_current && _current.datum.item._id === _datum.item._id) {
+              return _.p(_current);
+            }
+
+            // released and available
+            var _current = _wrapper.get(_render.buffer[_index]);
             if (_current && _current.isReleased) {
               return _.p(_current);
             }
 
-            var _before = _wrapper.get(_render.buffer[_datum.index+1]);
-
-            var _blockName = _.id();
-            _render.buffer.splice(_datum.index, 0, _blockName);
-            return _list.block(_blockName, {before: (_before || {}).name}).then(function (_block) {
-              return _wrapper.setChildren(_block);
+            // create block
+            var _before = _wrapper.get(_render.buffer[_index+1]);
+            var _name = _.id();
+            _render.buffer.splice(_index, 0, _name);
+            return _list.block(_name, {before: (_before || {}).name}).then(function (_block) {
+              return _wrapper.setChildren(_block).then(function () {
+                return _block;
+              });
             });
           },
         },
         remove: function (_datum) {
+          var _storage = _list.data.storage;
           return _.p(function () {
-            var index = _list.data.storage.sorted.indexOf(_datum.item._id);
-            if (index !== -1) {
-              var _release = _wrapper.get(_list.data.display.render.buffer[index]);
-              // _.l(8, 'remove', _datum.item._id, _list.data.storage.sorted.length, index, _release.name);
+            var _release = _wrapper.children().filter(function (_block) {
+              return _block.datum && _block.datum.item._id === _datum.item._id;
+            })[0];
+            if (_release) {
+              _storage.sorted.splice(_storage.sorted.indexOf(_release.datum.item._id), 1);
+              delete _storage.buffer[_release.datum.item._id];
               return _release.release();
             }
           });
@@ -501,6 +599,13 @@ Components.list = function (name, args) {
 
     // override component methods
 
+
+    // bindings
+    _list.get('search.container.button').setBindings({
+      'click': function (_button) {
+        return _list.submit();
+      },
+    });
 
     return _list;
   });
