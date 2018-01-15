@@ -1,74 +1,109 @@
 {
-  "2.3-members": {
-    "description": "Interface for listing and creating users, as well as assigning roles and event slots.",
+  "master": {
+
+  },
+  "2-frontend": {
     "children": {
-      "20180114": {
+      "root": {
         "children": {
-          "create new member form": {
-            "description": "The new member form has fields for name, email, and avilable roles. It has to validate input and respond with error or success based on the server response when trying to create a new user.",
-            "children": {
-              "_newform.send": {
-                "description": "Submitting the form can only be done when all the fields have been validated. Once validated, the results have to be sent to the server in the correct order. The first and last names and the email are sent to the server to create the user. Once the user is successfully created, an activation email must be sent. Once the email has been sent successfully, the roles can be added to the user, else it is deleted.",
-                "children": {
-                  "check user": "Check if the user exists by fetching records",
-                  "create user": "Send a request with names and email. Username is created temporarily.",
-                  "send activation email": {
-                    "description": "Hit a snag where apparently this isn't a function.",
-                    "children": {
-                      "Member was not accessible by queryset due to 'staff' status": "SOLVED",
-                    }
-                  },
-                  "activation email template": "Simple template to display the key for copying.",
-                  "email connection refused": "Return true from email activation method for now.",
-                  "adding roles": "Role creation not working for some reason",
-                }
-              }
-            }
-          }
+
         }
       },
-      "20180115": {
+      "2.3-members": {
+        "description": "Interface for listing and creating users, as well as assigning roles and event slots.",
         "children": {
-          "create new member form": {
+          "root": {
             "children": {
-              "_newform.send": {
+              "20180114": {
                 "children": {
-                  "adding roles": {
-                    "description": "Picking up from the previous day, role creation not working for some reason. This is likely because it is failing at the serialiser and returning error that I ignore.",
+                  "create new member form": {
+                    "description": "The new member form has fields for name, email, and avilable roles. It has to validate input and respond with error or success based on the server response when trying to create a new user.",
                     "children": {
-                      "added default='' to the nickname field in Role": "SOLVED"
-                    }
-                  },
-                  "all working. Before doing interface effects, there appears to be a problem with the list.": {
-                    "description": "",
-                    "children": {
-                      "likely to do with test prefiltering.": "It was. Added member id filter to filter.condition. SOLVED"
-                    }
-                  },
-                  "error and exception handling": {
-                    "description": "",
-                    "children": {
-                      "names are blank"
-                      "email is blank"
-                      "email no regex match"
-                      "no role selected"
-                      "member already exists": "maybe email input should be a global member search",
-                      "sending activation email"
-                      "activation email failed": "not a real email",
-                    }
-                  },
-                  "interface updates": {
-                    "children": {
-                      "update member list"
-                      "hide new panel"
-                      "show single panel of new member"
+                      "_newform.send": {
+                        "description": "Submitting the form can only be done when all the fields have been validated. Once validated, the results have to be sent to the server in the correct order. The first and last names and the email are sent to the server to create the user. Once the user is successfully created, an activation email must be sent. Once the email has been sent successfully, the roles can be added to the user, else it is deleted.",
+                        "children": {
+                          "check user": "Check if the user exists by fetching records",
+                          "create user": "Send a request with names and email. Username is created temporarily.",
+                          "send activation email": {
+                            "description": "Hit a snag where apparently this isn't a function.",
+                            "children": {
+                              "Member was not accessible by queryset due to 'staff' status": "SOLVED",
+                            }
+                          },
+                          "activation email template": "Simple template to display the key for copying.",
+                          "email connection refused": "Return true from email activation method for now.",
+                          "adding roles": "Role creation not working for some reason",
+                        }
+                      }
                     }
                   }
                 }
               },
-              "try email only with search": {
-                
-              },
+              "20180115": {
+                "children": {
+                  "create new member form": {
+                    "children": {
+                      "_newform.send": {
+                        "children": {
+                          "adding roles": {
+                            "description": "Picking up from the previous day, role creation not working for some reason. This is likely because it is failing at the serialiser and returning error that I ignore.",
+                            "children": {
+                              "added default='' to the nickname field in Role": "SOLVED"
+                            }
+                          },
+                          "all working. Before doing interface effects, there appears to be a problem with the list.": {
+                            "description": "",
+                            "children": {
+                              "likely to do with test prefiltering.": "It was. Added member id filter to filter.condition. SOLVED"
+                            }
+                          },
+                          "error and exception handling": {
+                            "description": "",
+                            "children": {
+                              "names are blank": "",
+                              "email is blank": "",
+                              "email no regex match": "",
+                              "no role selected": "",
+                              "member already exists": "maybe email input should be a global member search",
+                              "sending activation email": "",
+                              "activation email failed": "not a real email"
+                            }
+                          },
+                          "interface updates": {
+                            "children": {
+                              "update member list": "",
+                              "hide new panel": "",
+                              "show single panel of new member": ""
+                            }
+                          }
+                        }
+                      },
+                      "try email only with search": {
+                        
+                      }
+                    }
+                  },
+                  "moving member interfaces to multiple files to simplify definitions": {
+                    "children": {
+                      "create main.js, new.js, single.js and add to html template.": "DONE",
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "2.3.1-members-multi-interface": {
+            "description": "Moving constituent member interfaces to different files to better separate the functions.",
+            "children": {
+              "root": {
+                "20180115": {
+                  "children": {
+                    "Create new files for each interface and add paths to app.html": "DONE",
+                    "Move single logic": "DONE",
+                    "Move new logic": "DONE",
+                  }
+                }
+              }
             }
           }
         }

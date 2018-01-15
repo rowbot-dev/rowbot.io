@@ -96,7 +96,7 @@ App.application = function () {
               'float': 'left',
             },
             children: [
-              App.interfaces.member(),
+              App.interfaces.member.main(),
             ],
           }),
         ],
