@@ -303,16 +303,22 @@ var UI = function () {
         });
       });
     },
-    hide: function (duration) {
+    hide: function (args) {
+      args = (args || {});
+      args.style = _.merge({'opacity': '0.0'}, args.style);
+      args.duration = (args.duration || 300);
       var _this = this;
-      return _this.setStyle({'opacity': '0.0'}, duration).then(function () {
+      return _this.setStyle(args.style, args.duration).then(function () {
         return _this.setClasses('hidden');
       });
     },
-    show: function (duration) {
+    show: function (args) {
+      args = (args || {});
+      args.style = _.merge({'opacity': '1.0'}, args.style);
+      args.duration = (args.duration || 300);
       var _this = this;
       return _this.removeClass('hidden').then(function () {
-        return _this.setStyle({'opacity': '1.0'}, duration);
+        return _this.setStyle(args.style, args.duration);
       });
     },
 

@@ -4,21 +4,22 @@
 The panel component wraps content in two containers. An outer one of fixed size that also houses a scroll bar and an inner one of scaling size.
 The inner holds the content and scrolls within the outer container.
 
+MUST be inside an element that directly constrains its height.
+
 */
 
 var Components = (Components || {});
 Components.panel = function (name, args) {
   return ui._component(name, {
     style: _.merge({
-      'width': '100%',
       'overflow': 'hidden',
       'position': 'relative',
     }, args.style),
     children: [
       ui._component('container', {
         style: {
-          'width': 'calc(100% + 20px)',
           'height': '100%',
+          'width': 'calc(100% + 20px)',
           'overflow-y': 'scroll',
         },
         children: [
@@ -33,8 +34,8 @@ Components.panel = function (name, args) {
       }),
       ui._component('scroll', {
         style: {
-          'position': 'absolute',
           'height': '100%',
+          'position': 'absolute',
           'width': '15px',
           'right': '0px',
           'top': '0px',

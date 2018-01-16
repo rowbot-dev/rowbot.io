@@ -28,6 +28,14 @@ input {
   font-style: normal;
   font-variant: normal;
 }
+h3 {
+  margin: 0px;
+}
+* {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-border-sizing: border-box;
+}
 
 .centred {
   position: relative;
@@ -35,80 +43,6 @@ input {
   left: 50%;
   transform: translate3d(-50%, -50%, 0);
   -webkit-transform: translate3d(-50%, -50%, 0);
-}
-
-/* Remove */
-.ie {
-  position: relative;
-  background-color: transparent;
-  overflow-x: hidden;
-  overflow-y: hidden;
-  box-sizing: border-box;
-  font-size: inherit;
-  line-height: inherit;
-  font-family: monospace;
-  font-style: normal;
-  font-variant: normal;
-  margin: 0px;
-}
-
-.ie.border {
-  border: 1px solid #ccc;
-}
-
-.ie.border-radius {
-  border-radius: 4px;
-}
-
-.ie.abstract {
-  overflow: visible;
-  position: absolute;
-}
-
-.ie.hidden {
-  display: none !important;
-}
-
-.ie.abs {
-  position: absolute;
-}
-
-.ie.title {
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-
-/* Scroll */
-.ie.scroll-wrapper {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.ie.scroll-wrapper .scroll {
-  height: 100%;
-  width: calc(100% + 20px);
-  overflow-y: scroll;
-  padding-right: 20px;
-}
-
-/* centred vertically */
-.ie.centred-vertically {
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* centred horizontally */
-.ie.centred-horizontally {
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* centred both */
-.ie.centred {
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
 }
 
 /*

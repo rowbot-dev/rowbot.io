@@ -111,23 +111,46 @@
             "description": "Open the app with a loading indicator to give the interface time to load all relevant objects into memory.",
             "children": {
               "just a bit of text": "DONE",
-              "something during loading process is causing style to change": "Make sure all elements stay inside boundary, including margins, such as from float."
+              "something during loading process is causing style to change": "Make sure all elements stay inside boundary, including margins, such as from float.",
+              "modified setStyle to only animate changes made to the style, with a snazzy new _.change method.": {
+                "description": "DONE",
+                "date": 20180116,
+              }
+            }
+          },
+          "Make empty object for Components.list": {
+            "description": "A list should display something when empty, and also when loading. This function can be overridden, by modifying _list.empty",
+            "date": 20180116,
+            "children": {
+              "Add _list.empty function"
+              "If there is nothing to display at the end of the load method, this should be displayed."
+            }
+          },
+          "Gradual interface design": {
+            "description": "I have a vision for the way the interface should look, but I don't want to spend time making it look perfect yet, so instead, I will build it gradually. Where I would have a properly coded loading indicator, I will simply have a piece of text that fades when the data has loaded. Later, this loading process can be more closely linked to whatever loading display I decide to build. Right now, the interface works and is intuitive, and notably, nothing is in the way of any further development. Later, bit by bit, I can develop the pieces I think would make the interface better.",
+            "date": 20180116
+          },
+          "Remove style, class, and property definitions from states.": {
+            "description": "The functions are much more versatile, and should honestly just be combined into one.",
+            "date": 20180116,
+          },
+          "Clubs": {
+            "description": "Start from list of clubs that the member logged in is a part of.",
+            "date": 20180116,
+            "children": {
+              "crest": "Club list item should start with the club crest",
+              "club name": "Club list item should contain the full name of the club",
+              "upcoming events": "Club list item should display a list of upcoming events that the member is a part of.",
+              "invitations": "Club list item should display a list of invitations to roles that the member has been offered.",
+              "single": {
+                "description": "Displays a single club. Most obvious thing should be a heads-up display of upcoming events for the active user."
+              }
             }
           },
           "Account": {
             "description": "At the top of the page, the user should be able to access their user details, including password changing functions.",
             "children": {
 
-            }
-          },
-          "Clubs": {
-            "description": "Start from list of clubs that the member logged in is a part of.",
-            "children": {
-              "upcoming events"
-              "invitations"
-              "single": {
-                "description": "Displays a single club. Most obvious thing should be a heads-up display of upcoming events for the active user."
-              }
             }
           },
           "Members": {

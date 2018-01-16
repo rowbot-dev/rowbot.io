@@ -13,6 +13,9 @@ How to modify query management:
 3. Override _list.data.storage.compare for sorting
 4. Override _list.data.display.filter.condition for filtering
 
+Like a panel (because it is one):
+MUST be inside an element that directly constrains its height.
+
 */
 
 var Components = (Components || {});
@@ -20,7 +23,7 @@ Components.list = function (name, args) {
   args = (args || {});
   return ui._component(name, {
     style: _.merge({
-      'height': '100%',
+
     }, args.style),
     children: [
       ui._component('search', {
@@ -94,7 +97,7 @@ Components.list = function (name, args) {
           // contains list items
           ui._component('wrapper', {
             style: {
-              'padding-bottom': '1px',
+
             },
           }),
 
@@ -303,8 +306,7 @@ Components.list = function (name, args) {
     _list.block = function (name, args) {
       return ui._component(`${name}`, _.merge({
         style: {
-          'width': '100%',
-          'height': 'auto',
+
         },
       }, args)).then(function (_block) {
 

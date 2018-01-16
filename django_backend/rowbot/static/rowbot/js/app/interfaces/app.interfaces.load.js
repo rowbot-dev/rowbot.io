@@ -6,8 +6,6 @@ App.interfaces.load = function () {
     style: {
       'height': '100%',
       'width': '100%',
-      'top': '0%',
-      'left': '0%',
     },
     children: [
       // loading display
@@ -47,7 +45,7 @@ App.interfaces.load = function () {
       ui._state('club', {
         fn: {
           after: function (_this) {
-            return _this.hide(300);
+            return _this.hide();
           },
         }
       }),
