@@ -90,17 +90,13 @@ App.interfaces.member.new = function () {
       ui._state('members', {
         children: [
           ui._state('single', {
-            fn: {
-              before: function (_this) {
-                return _this.setClasses('hidden');
-              },
+            fn: function (_this) {
+              return _this.setClasses('hidden');
             },
           }),
           ui._state('new', {
-            fn: {
-              before: function (_this) {
-                return _this.removeClass('hidden');
-              },
+            fn: function (_this) {
+              return _this.removeClass('hidden');
             },
           }),
         ],
@@ -237,10 +233,8 @@ App.interfaces.member.new = function () {
     _members.get('pagination').setClasses('hidden');
     _members.setStates([
       ui._state('members.new', {
-        fn: {
-          after: function () {
-            return _members.data.load.main();
-          },
+        fn: function () {
+          return _members.data.load.main();
         },
       }),
     ]);
@@ -371,10 +365,8 @@ App.interfaces.member.new = function () {
       ui._state('members', {
         children: [
           ui._state('new', {
-            fn: {
-              after: function () {
-                return _models.data.load.main();
-              },
+            fn: function () {
+              return _models.data.load.main();
             },
           }),
         ],

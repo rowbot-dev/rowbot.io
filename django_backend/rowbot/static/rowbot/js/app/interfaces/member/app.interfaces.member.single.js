@@ -62,17 +62,13 @@ App.interfaces.member.single = function () {
       ui._state('members', {
         children: [
           ui._state('single', {
-            fn: {
-              before: function (_this) {
-                return _this.removeClass('hidden');
-              },
+            fn: function (_this) {
+              return _this.removeClass('hidden');
             },
           }),
           ui._state('new', {
-            fn: {
-              before: function (_this) {
-                return _this.setClasses('hidden');
-              },
+            fn: function (_this) {
+              return _this.setClasses('hidden');
             },
           }),
         ],

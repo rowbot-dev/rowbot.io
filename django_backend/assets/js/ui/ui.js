@@ -366,50 +366,11 @@ var UI = function () {
       let _this = this;
       _this._.fn = args.fn;
       _this._.duration = args.duration;
-      return _.all([
-        _this.setStyle(args.style),
-        _this.setAddClasses(((args.classes || {}).add || args.classes)),
-        _this.setRemoveClasses((args.classes || {}).remove),
-        _this.setProperties(args.properties),
-        _this.setChildren(args.children),
-      ]).then(function () {
+      return _this.setChildren(args.children).then(function () {
         return _this;
       });
     },
 
-    setStyle: function (style) {
-      var _this = this;
-      style = (style || {});
-      style = _.merge(style, {'': {}}); // make buffer for self style
-      _.map(style, function (key, value) {
-        if (!_.is.object.all(value)) {
-          delete style[key];
-          style[''][key] = value;
-        }
-      });
-
-      // update style dictionary
-      _this._.style = _.merge(_this._.style, style);
-    },
-    setAddClasses: function (classes) {
-      var _this = this;
-      classes = (classes || []);
-      _this._.addclasses = _.map(_.merge(_this._.addclasses, classes), function (index, value) {
-        return value;
-      });
-    },
-    setRemoveClasses: function (classes) {
-      var _this = this;
-      classes = (classes || []);
-      _this._.removeclasses = _.map(_.merge(_this._.removeclasses, classes), function (index, value) {
-        return value;
-      });
-    },
-    setProperties: function (properties) {
-      var _this = this;
-      properties = (properties || {});
-      _this._.properties = _.merge(_this._.properties, properties);
-    },
     setChildren: function (children) {
       let _this = this;
       children = (children || _.map(_this._.children.buffer, function (key, child) {
@@ -475,43 +436,12 @@ var UI = function () {
     },
 
     // activate
-    ancestry: function () {
-      var _this = this;
-      var data = {
-        style: _this._.style,
-        addclasses: _this._.addclasses,
-        removeclasses: _this._.removeclasses,
-        properties: _this._.properties,
-        fn: _this._.fn,
-        duration: _this._.duration,
-      }
-      return _this._.parent !== undefined ? _.merge(_this._.parent.ancestry(), data) : data;
-    },
-    call: function (durationOverride) {
+    call: function () {
       var _this = this;
       return _.p(function () {
-        var _data = _this.ancestry();
         var _component = _this._.component;
-        var _before = ((_data.fn || {}).before || _.p);
-        var _after = ((_data.fn || {}).after || _.p);
-        var _style = (_data.style || {});
-        var _addclasses = (_data.addclasses || {});
-        var _removeclasses = (_data.removeclasses || {});
-        var _properties = (_data.properties || {});
-        var _duration = durationOverride !== undefined ? durationOverride : (_data.duration || 300);
-
-        // concatenate styles and classes from parent chain
-        // execute before and after functions
-        return _before(_component).then(function (_result) {
-          return _.all([
-            _component.setStyle(_style, _duration),
-            _component.setClasses(_addclasses),
-            _component.removeClasses(_removeclasses),
-            _component.setProperties(_properties),
-          ]);
-        }).then(function () {
-          return _after(_component);
-        });
+        var _fn = (_this._.fn || _.p);
+        return _fn(_component);
       });
     },
   }

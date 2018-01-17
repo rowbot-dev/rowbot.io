@@ -133,6 +133,10 @@
           "Remove style, class, and property definitions from states.": {
             "description": "The functions are much more versatile, and should honestly just be combined into one.",
             "date": 20180116,
+            "children": {
+              "style combination": "the problem with doing this, is it means abandoning the ability to combine styles from different levels of states, although a sync will now only include the style elements that have changed, yielding roughly the same effect.",
+              "Ok burn it.": 
+            }
           },
           "Clubs": {
             "description": "Start from list of clubs that the member logged in is a part of.",

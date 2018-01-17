@@ -42,12 +42,10 @@ App.interfaces.club.main = function () {
     // club
     _club.setStates([
       ui._state('club', {
-        fn: {
-          after: function (_this) {
-            return _.d(300).then(function () {
-              return _this.show();
-            });
-          },
+        fn: function (_this) {
+          return _.d(300).then(function () {
+            return _this.show();
+          });
         },
       }),
     ]);
@@ -57,10 +55,8 @@ App.interfaces.club.main = function () {
       ui._state('club', {
         children: [
           ui._state('single', {
-            fn: {
-              after: function (_this) {
-                return _this.hide({style: {'left': '-100%'}});
-              },
+            fn: function (_this) {
+              return _this.hide({style: {'left': '-100%'}});
             },
           }),
         ],
@@ -202,10 +198,8 @@ App.interfaces.club.main = function () {
     // }
     _clubs.setStates([
       ui._state('club', {
-        fn: {
-          after: function () {
-            return _clubs.data.load.main();
-          },
+        fn: function () {
+          return _clubs.data.load.main();
         },
       }),
     ]);

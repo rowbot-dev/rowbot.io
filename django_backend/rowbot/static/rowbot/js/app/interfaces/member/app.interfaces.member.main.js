@@ -94,10 +94,8 @@ App.interfaces.member.main = function () {
     // members
     _member.setStates([
       ui._state('members', {
-        fn: {
-          after: function (_this) {
-            return _this.show(300);
-          },
+        fn: function (_this) {
+          return _this.show(300);
         },
       }),
     ]);
@@ -226,10 +224,8 @@ App.interfaces.member.main = function () {
     _models.get('pagination').setClasses('hidden');
     _models.setStates([
       ui._state('members', {
-        fn: {
-          after: function () {
-            return _models.data.load.main();
-          },
+        fn: function () {
+          return _models.data.load.main();
         },
       }),
     ]);
@@ -371,10 +367,8 @@ App.interfaces.member.main = function () {
     }
     _members.setStates([
       ui._state('members', {
-        fn: {
-          after: function () {
-            return _members.data.load.main();
-          },
+        fn: function () {
+          return _members.data.load.main();
         },
       }),
     ]);

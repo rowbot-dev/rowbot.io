@@ -92,10 +92,8 @@ Test.application = function (args) {
 
     _test.setStates([
       ui._state('main', {
-        fn: {
-          after: function () {
-            return _list.data.load.main();
-          },
+        fn: function () {
+          return _list.data.load.main();
         },
       }),
     ]);
