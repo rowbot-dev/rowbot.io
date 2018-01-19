@@ -29,6 +29,7 @@ App.interfaces.club.main = function () {
           }),
         ],
       }),
+      App.interfaces.club.single(),
     ],
   }).then(function (_club) {
 

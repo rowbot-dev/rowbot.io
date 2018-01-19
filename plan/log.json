@@ -105,7 +105,8 @@
         "children": {
           "Look at proxies": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
           "Idea of a unified interface": {
-            "description": "A single interface should have a single purpose and move around the screen as a unit. When dismissing an interface, no part of it should still be needed. When recalled, it resets to a natural resting state."
+            "description": "A single interface should have a single purpose and move around the screen as a unit. When dismissing an interface, no part of it should still be needed. When recalled, it resets to a natural resting state.",
+            "date": 20180115,
           },
           "Load": {
             "description": "Open the app with a loading indicator to give the interface time to load all relevant objects into memory.",
@@ -135,7 +136,7 @@
             "date": 20180116,
             "children": {
               "style combination": "the problem with doing this, is it means abandoning the ability to combine styles from different levels of states, although a sync will now only include the style elements that have changed, yielding roughly the same effect.",
-              "Ok burn it.": 
+              "Ok burn it.": "DONE",
             }
           },
           "Clubs": {
@@ -147,8 +148,19 @@
               "upcoming events": "Club list item should display a list of upcoming events that the member is a part of.",
               "invitations": "Club list item should display a list of invitations to roles that the member has been offered.",
               "single": {
-                "description": "Displays a single club. Most obvious thing should be a heads-up display of upcoming events for the active user."
+                "description": "Displays a single club. Most obvious thing should be a heads-up display of upcoming events for the active user.",
+                "date": 20180117,
+                "children": {
+                  "add single club function": "DONE",
+                }
               }
+            }
+          },
+          "Adding sidebar": {
+            "description": "Sidebar menu, including college crest.",
+            "date": 20180117,
+            "children": {
+
             }
           },
           "Account": {

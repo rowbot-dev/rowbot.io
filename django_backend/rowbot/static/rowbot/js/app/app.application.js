@@ -19,7 +19,7 @@ App.application = function () {
     },
     children: [
       // components
-      // App.components.sidebar(),
+      App.components.sidebar(),
 
       // interfaces
       App.interfaces.load(),

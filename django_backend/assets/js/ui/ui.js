@@ -94,7 +94,9 @@ var UI = function () {
         var element = _this.element();
         return _.all(_this._.classes.map(function (className) {
           return _.p(function () {
+            _.l(element.classList);
             element.classList.add(className);
+            _.l(element.classList.contains(className));
           });
         }));
       }
@@ -306,7 +308,7 @@ var UI = function () {
     hide: function (args) {
       args = (args || {});
       args.style = _.merge({'opacity': '0.0'}, args.style);
-      args.duration = (args.duration || 300);
+      args.duration = args.duration !== undefined ? args.duration : 300;
       var _this = this;
       return _this.setStyle(args.style, args.duration).then(function () {
         return _this.setClasses('hidden');
@@ -315,7 +317,7 @@ var UI = function () {
     show: function (args) {
       args = (args || {});
       args.style = _.merge({'opacity': '1.0'}, args.style);
-      args.duration = (args.duration || 300);
+      args.duration = args.duration !== undefined ? args.duration : 300;
       var _this = this;
       return _this.removeClass('hidden').then(function () {
         return _this.setStyle(args.style, args.duration);
