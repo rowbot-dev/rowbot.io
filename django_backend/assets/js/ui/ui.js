@@ -62,7 +62,7 @@ var UI = function () {
 
       // add styles to DOM if rendered
       if (_this._.is.rendered) {
-        var element = _this.element();
+        var _element = _this.element();
         return _.pmap(_this._.style, function (key, _style) {
           // TODO: allow nested styles for active, etc.
           // This sets up a new css rule with a string reduced from the style object
@@ -74,9 +74,9 @@ var UI = function () {
             }, '').trim());
           } else {
             if (duration) {
-              return $(element).animate(_changed, {duration: duration}).promise();
+              return $(_element).animate(_changed, {duration: duration}).promise();
             } else {
-              return $(element).css(_style, {queue: false}).promise();
+              return $(_element).css(_style, {queue: false}).promise();
             }
           }
         });
@@ -91,13 +91,9 @@ var UI = function () {
       });
 
       if (_this._.is.rendered) {
-        var element = _this.element();
-        return _.all(_this._.classes.map(function (className) {
-          return _.p(function () {
-            _.l(element.classList);
-            element.classList.add(className);
-            _.l(element.classList.contains(className));
-          });
+        var _element = _this.element();
+        return _.all(_this._.classes.map(function (_class) {
+          return $(_element).addClass(_class).promise();
         }));
       }
     },
@@ -107,11 +103,9 @@ var UI = function () {
       _this._.properties = _.merge(_this._.properties, properties);
 
       if (_this._.is.rendered) {
-        var element = _this.element();
+        var _element = _this.element();
         return _.pmap(_this._.properties, function (key, property) {
-          return _.p(function () {
-            element.setAttribute(key, property);
-          });
+          return $(_element).attr(key, property).promise();
         });
       }
     },
@@ -121,15 +115,11 @@ var UI = function () {
       _this._.bindings = _.merge(_this._.bindings, bindings);
 
       if (_this._.is.rendered) {
-        var element = _this.element();
+        var _element = _this.element();
         return _.pmap(_this._.bindings, function (key, binding) {
-          return _.p(function () {
-            element.addEventListener(key, function (event) {
-              if (event.target.id == _this.id) {
-                return binding(_this, event);
-              }
-            });
-          });
+          return $(_element).on(key, function (event) {
+            return binding(_this, event);
+          }).promise();
         });
       }
     },
@@ -167,14 +157,14 @@ var UI = function () {
       _this._.html = html !== undefined ? html : _this._.html;
       return _.p(function () {
         if (_this._.html !== undefined && _this._.is.rendered) {
-          _this.element().innerHTML = _this._.html;
+          return $(_this.element()).html(_this._.html).promise();
         }
       });
     },
-    renderChild: function (child) {
+    renderChild: function (_child) {
       // root, before, indices
       var _this = this;
-      return child.render().then(function () {
+      return _child.render().then(function () {
         // remove recently rendered child from buffer
         return _.p(function () {
           _this._.children.buffer.shift();
@@ -184,20 +174,20 @@ var UI = function () {
         // 1. in order to know index, I need to know the index of the thing before it.
         // 2. if the array is currently empty, its index is 0.
         return _.p(function () {
-          var index = child._.before === undefined ? _this._.children.rendered.length : _this._.children.index[child._.before];
-          _this._.children.rendered.splice(index, 0, child);
-          _this._.children.rendered.forEach(function (rendered, index) {
-            _this._.children.index[rendered.name] = index;
+          var _index = _child._.before === undefined ? _this._.children.rendered.length : _this._.children.index[_child._.before];
+          _this._.children.rendered.splice(_index, 0, _child);
+          _this._.children.rendered.forEach(function (_rendered, _index) {
+            _this._.children.index[_rendered.name] = _index;
           });
         });
       }).then(function () {
-        return child;
+        return _child;
       });
     },
-    bufferChild: function (child) {
+    bufferChild: function (_child) {
       var _this = this;
       return _.p(function () {
-        _this._.children.buffer.push(child);
+        _this._.children.buffer.push(_child);
       });
     },
     children: function () {
@@ -219,9 +209,7 @@ var UI = function () {
 
         if (_this._.is.rendered) {
           var element = _this.element();
-          return _.p(function () {
-            element.classList.remove(_class);
-          });
+          return $(element).removeClass(_class).promise();
         }
       }
     },
@@ -236,14 +224,11 @@ var UI = function () {
     },
     removeBinding: function (key) {
       var _this = this;
-      var _binding = _this._.bindings[key];
       delete _this._.bindings[key];
 
       if (_this._.is.rendered) {
         var element = _this.element();
-        return _.p(function () {
-          element.removeEventListener(key, _binding);
-        });
+        return $(element).off(key).promise();
       }
     },
     removeChild: function (name) {
