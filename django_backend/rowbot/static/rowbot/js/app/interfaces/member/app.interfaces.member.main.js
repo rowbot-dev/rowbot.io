@@ -94,8 +94,10 @@ App.interfaces.member.main = function () {
     // members
     _member.setStates([
       ui._state('members', {
-        fn: function (_this) {
-          return _this.show(300);
+        fn: {
+          animate: function (_this) {
+            return _this.show();
+          },
         },
       }),
     ]);

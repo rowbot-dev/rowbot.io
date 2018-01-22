@@ -351,7 +351,10 @@ var UI = function () {
   this.State.prototype = {
     init: function (args) {
       let _this = this;
-      _this._.fn = args.fn;
+      _this._.fn = (args.fn || {});
+      _this._.fn.before = (_this._.fn.before || _.p);
+      _this._.fn.animate = (_this._.fn.animate || _.p);
+      _this._.fn.after = (_this._.fn.after || _.p);
       _this._.duration = args.duration;
       return _this.setChildren(args.children).then(function () {
         return _this;
@@ -421,16 +424,6 @@ var UI = function () {
       var child = this.child(name);
       return newPath && newPath.length && child !== undefined ? child.get(newPath) : child;
     },
-
-    // activate
-    call: function () {
-      var _this = this;
-      return _.p(function () {
-        var _component = _this._.component;
-        var _fn = (_this._.fn || _.p);
-        return _fn(_component);
-      });
-    },
   }
   this._state = function (name, args) {
     var _state = new this.State(name);
@@ -461,9 +454,17 @@ var UI = function () {
     this.call = function (path, durationOverride) {
       this.active = path;
       return this.get(path).then(function (states) {
-        return _.all(states.map(function (state) {
-          return state.call(durationOverride);
-        }));
+        return _.all(states.map(function (_state) {
+          return _state._.fn.before(_state._.component);
+        })).then(function () {
+          return _.all(states.map(function (_state) {
+            return _state._.fn.animate(_state._.component, durationOverride);
+          }));
+        }).then(function () {
+          return _.all(states.map(function (_state) {
+            return _state._.fn.after(_state._.component);
+          }));
+        });
       });
     }
     this.set = function (path, state) {

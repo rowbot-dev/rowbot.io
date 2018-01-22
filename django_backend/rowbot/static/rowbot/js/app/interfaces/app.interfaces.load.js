@@ -36,14 +36,18 @@ App.interfaces.load = function () {
 
     _load.setStates([
       ui._state('load', {
-        fn: function (_this) {
-          return _this.load();
-        }
+        fn: {
+          after: function (_this) {
+            return _this.load();
+          },
+        },
       }),
       ui._state('club', {
-        fn: function (_this) {
-          return _this.hide();
-        }
+        fn: {
+          animate: function (_this) {
+            return _this.hide();
+          },
+        },
       }),
     ]);
 

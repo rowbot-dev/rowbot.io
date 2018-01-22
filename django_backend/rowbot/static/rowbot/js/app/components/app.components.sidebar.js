@@ -20,10 +20,12 @@ App.components.sidebar = function () {
       ui._state('club', {
         children: [
           ui._state('single', {
-            fn: function (_this) {
-              return _.d(0).then(function () {
-                return _this.show({style: {'left': '0%'}});
-              })
+            fn: {
+              animate: function (_this) {
+                return _.d(0).then(function () {
+                  return _this.show({style: {'left': '0%'}});
+                });
+              },
             },
           }),
         ],

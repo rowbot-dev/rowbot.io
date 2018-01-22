@@ -130,6 +130,10 @@ var API = function () {
           }
         });
       },
+      relation: function () {
+        _.l('related, you idiot.');
+        return _.p();
+      },
       many: function (property, force) {
         var _instance = this;
         return _.p(function () {
