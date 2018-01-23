@@ -448,7 +448,7 @@ var UI = function () {
             break;
           }
         }
-        return sub['_'] || [];
+        return (sub['_'] || []);
       });
     }
     this.call = function (path, durationOverride) {

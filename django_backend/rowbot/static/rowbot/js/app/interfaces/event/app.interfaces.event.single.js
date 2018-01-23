@@ -2,7 +2,7 @@
 var App = (App || {});
 App.interfaces = (App.interfaces || {});
 App.interfaces.event = (App.interfaces.event || {});
-App.interfaces.event.main = function () {
+App.interfaces.event.single = function () {
   return ui._component('event', {
     classes: ['interface', 'hidden'],
     style: {
@@ -60,10 +60,7 @@ App.interfaces.event.main = function () {
           args = (args || {});
           var _target = this;
           var _query = (args.query || _events.metadata.query);
-          return [{
-            key: 'event__model__club__id',
-            value: api.active.Club._id,
-          }];
+          return [];
         },
         normalise: function (_instance) {
           return _instance.related('event').then(function (_event) {

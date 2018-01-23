@@ -140,6 +140,10 @@
               "Decided to add three sections to fn": {
                 "date": 20180120,
                 "description": "I needed a way to separate animation from heavy lifting that needs to be done, like loading. This means that the state call should be divided into three sections: before, animate, and after. All matching states will have their before methods called and finished before any animate method is called, using _.all. The same is true for the after method. All after methods (such as for loading) are called after all animate methods have been completed.",
+              },
+              "Maybe merge child states with parents at some point": {
+                "date": 20180123,
+                "description": "Calling a state on a component should run the most specific methods it can. So if 'fn.animate' exists for 'event', and 'fn.before' exists for 'event.single', both should be run."
               }
             }
           },

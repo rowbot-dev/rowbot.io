@@ -50,6 +50,11 @@ App.interfaces.club.single = function () {
         ],
       }),
       ui._state('event', {
+        fn: {
+          before: function (_this) {
+            _.l(_this);
+          },
+        },
         children: [
           ui._state('single', {
             fn: {
@@ -75,7 +80,10 @@ App.interfaces.club.single = function () {
           args = (args || {});
           var _target = this;
           var _query = (args.query || _events.metadata.query);
-          return [];
+          return [{
+            key: 'event__model__club__id',
+            value: api.active.Club._id,
+          }];
         },
         normalise: function (_instance) {
           return _instance.related('event').then(function (_event) {
