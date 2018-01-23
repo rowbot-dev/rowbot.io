@@ -414,15 +414,20 @@ var UI = function () {
       // supports indices
       return this.children[name];
     },
-    get: function (path) {
+    get: function (_path) {
       // flawless
       // supports: dot sep string, string array, integer array
       // with the caveat that, until rendering, the index will refer to the order in the definition.
-      var names = _.is.array(path) ? path : path.split('.');
-      var name = names.shift();
-      var newPath = _.is.array(path) ? names : names.join('.');
-      var child = this.child(name);
-      return newPath && newPath.length && child !== undefined ? child.get(newPath) : child;
+      var names = _.is.array(_path) ? _path : _path.split('.');
+      var _name = names.shift();
+      var _newPath = _.is.array(_path) ? names : names.join('.');
+      var _child = this.child(_name);
+      return newPath && _newPath.length && _child !== undefined ? _child.get(_newPath) : _child;
+    },
+    fetch: function (_path) {
+      // merge child properties with current
+      var _this = this;
+      var _child = _this.get(_path);
     },
   }
   this._state = function (name, args) {
@@ -433,60 +438,42 @@ var UI = function () {
   // state buffer
   this.StateBuffer = function () {
     // TODO: add state map maybe
-    this.active = undefined;
-    this.buffer = {};
-    this.get = function (path) {
-      var _this = this;
-      return _.p(function () {
-        var path_array = path.split('.');
-        sub = _this.buffer;
-        var i;
-        for (i=0; i<path_array.length; i++) {
-          if (path_array[i] in sub) {
-            sub = sub[path_array[i]];
-          } else {
-            break;
-          }
-        }
-        return (sub['_'] || []);
-      });
-    }
-    this.call = function (path, durationOverride) {
-      this.active = path;
-      return this.get(path).then(function (states) {
-        return _.all(states.map(function (_state) {
-          return _state._.fn.before(_state._.component);
+    var _buffer = this;
+    _buffer.active = undefined;
+    _buffer.buffer = {};
+    _buffer.call = function (_path, _duration) {
+
+      // Needs to return the list of top level states matching the first part of the path.
+      // Each state will then be triggered using the rest of the path.
+
+      _buffer.active = _path;
+      var tokens = _path.split('.');
+      var _name = tokens.shift();
+      var _rest = tokens.join('.');
+
+      return _.all((_buffer.buffer[_name] || []).map(function (_state) {
+        return _state.fetch(_rest);
+      })).then(function (fns) {
+        return _.all(fns.map(function (_fn) {
+          return _fn.before(_fn.component);
         })).then(function () {
-          return _.all(states.map(function (_state) {
-            return _state._.fn.animate(_state._.component, durationOverride);
+          return _.all(fns.map(function (_fn) {
+            return _fn.animate(_fn.component, _duration);
           }));
         }).then(function () {
-          return _.all(states.map(function (_state) {
-            return _state._.fn.after(_state._.component);
+          return _.all(fns.map(function (_fn) {
+            return _fn.after(_fn.component);
           }));
         });
       });
     }
-    this.set = function (path, state) {
-      var _this = this;
+    _buffer.register = function (_state) {
       return _.p(function () {
-        var path_array = path.split('.');
-        sub = _this.buffer;
-        var i;
-        for (i=0; i<path_array.length; i++) {
-          if (!(path_array[i] in sub)) {
-            sub[path_array[i]] = {_: []};
-          }
-          sub = sub[path_array[i]];
-
-          if (i+1 === path_array.length) {
-            sub['_'].push(state);
-          }
+        if (!_state._.parent) {
+          _buffer.buffer[_state.name] = (_buffer.buffer[_state.name] || []);
+          _buffer.buffer[_state.name].push(_state);
         }
       });
-    }
-    this.register = function (state) {
-      return this.set(state.path(), state);
     }
   }
   this.states = new this.StateBuffer(),
