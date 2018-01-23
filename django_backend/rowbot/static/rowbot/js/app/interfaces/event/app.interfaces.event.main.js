@@ -1,9 +1,9 @@
 
 var App = (App || {});
 App.interfaces = (App.interfaces || {});
-App.interfaces.club = (App.interfaces.club || {});
-App.interfaces.club.single = function () {
-  return ui._component('single', {
+App.interfaces.event = (App.interfaces.event || {});
+App.interfaces.event.main = function () {
+  return ui._component('event', {
     classes: ['interface', 'hidden'],
     style: {
       'width': 'calc(100% - 240px)',
@@ -29,36 +29,21 @@ App.interfaces.club.single = function () {
 
     // single
     _single.setStates([
-      ui._state('club', {
-        children: [
-          ui._state('single', {
-            fn: {
-              before: function (_this) {
-                return _events.data.load.local();
-              },
-              animate: function (_this) {
-                return _.all([
-                  _this.show({style: {'left': '200px'}}),
-                  _title.update({title: api.active.Club.name}),
-                ]);
-              },
-              after: function (_this) {
-                return _events.data.load.remote();
-              },
-            },
-          }),
-        ],
-      }),
       ui._state('event', {
-        children: [
-          ui._state('single', {
-            fn: {
-              animate: function (_this) {
-                return _this.hide({style: {'left': '-100%'}});
-              },
-            },
-          }),
-        ],
+        fn: {
+          before: function (_this) {
+            return _events.data.load.local();
+          },
+          animate: function (_this) {
+            return _.all([
+              _this.show({style: {'left': '200px'}}),
+              _title.update({title: api.active.Club.name}),
+            ]);
+          },
+          after: function (_this) {
+            return _events.data.load.remote();
+          },
+        },
       }),
     ]);
 

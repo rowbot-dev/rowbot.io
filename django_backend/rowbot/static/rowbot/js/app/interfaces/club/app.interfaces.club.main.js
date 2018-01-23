@@ -204,8 +204,11 @@ App.interfaces.club.main = function () {
     _clubs.setStates([
       ui._state('club', {
         fn: {
+          before: function (_this) {
+            return _this.data.load.local();
+          },
           after: function (_this) {
-            return _this.data.load.main();
+            return _this.data.load.remote();
           },
         },
       }),
