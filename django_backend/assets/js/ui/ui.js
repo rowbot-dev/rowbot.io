@@ -427,7 +427,25 @@ var UI = function () {
     fetch: function (_path) {
       // merge child properties with current
       var _this = this;
-      var _child = _this.get(_path);
+      var fn = {
+        component: _this._.component,
+        before: _this._.fn.before,
+        animate: _this._.fn.animate,
+        after: _this._.fn.after,
+      }
+      return _.p(function () {
+        if (_path) {
+          var tokens = _path.split('.');
+          var _name = tokens.shift();
+          var _rest = tokens.join('.');
+          var _child = _this.get(_name);
+
+          // return
+          return _.merge(fn, _child.fetch(_rest));
+        } else {
+          return fn;
+        }
+      });
     },
   }
   this._state = function (name, args) {
@@ -442,10 +460,8 @@ var UI = function () {
     _buffer.active = undefined;
     _buffer.buffer = {};
     _buffer.call = function (_path, _duration) {
-
       // Needs to return the list of top level states matching the first part of the path.
       // Each state will then be triggered using the rest of the path.
-
       _buffer.active = _path;
       var tokens = _path.split('.');
       var _name = tokens.shift();
