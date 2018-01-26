@@ -56,10 +56,17 @@ App.interfaces.club.main = function () {
     // all
     _all.setStates([
       ui._state('club', {
+        fn: {
+          animate: function (_this) {
+            _.l('hello');
+            return _.p();
+          },
+        },
         children: [
           ui._state('single', {
             fn: {
               animate: function (_this) {
+                _.l('hi');
                 return _this.hide({style: {'left': '-100%'}});
               },
             },

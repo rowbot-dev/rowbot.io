@@ -410,9 +410,9 @@ var UI = function () {
       var _this = this;
       return _this._.parent !== undefined ? `${_this._.parent.path()}.${_this.name}` : _this.name;
     },
-    child: function (name) {
+    child: function (_name) {
       // supports indices
-      return this.children[name];
+      return this._.children.registered[_name];
     },
     get: function (_path) {
       // flawless
@@ -420,32 +420,30 @@ var UI = function () {
       // with the caveat that, until rendering, the index will refer to the order in the definition.
       var names = _.is.array(_path) ? _path : _path.split('.');
       var _name = names.shift();
-      var _newPath = _.is.array(_path) ? names : names.join('.');
+      var _rest = _.is.array(_path) ? names : names.join('.');
       var _child = this.child(_name);
-      return newPath && _newPath.length && _child !== undefined ? _child.get(_newPath) : _child;
+      return _rest && _rest.length && _child !== undefined ? _child.get(_rest) : _child;
     },
     fetch: function (_path) {
       // merge child properties with current
       var _this = this;
-      var fn = {
+      var _fn = {
         component: _this._.component,
         before: _this._.fn.before,
         animate: _this._.fn.animate,
         after: _this._.fn.after,
       }
-      return _.p(function () {
-        if (_path) {
-          var tokens = _path.split('.');
-          var _name = tokens.shift();
-          var _rest = tokens.join('.');
-          var _child = _this.get(_name);
 
-          // return
-          return _.merge(fn, _child.fetch(_rest));
-        } else {
-          return fn;
-        }
-      });
+      var tokens = _path.split('.');
+      var _name = tokens.shift();
+      var _rest = tokens.join('.');
+      var _child = _this.get(_name);
+
+      if (_child) {
+        return _.merge(_fn, _child.fetch(_rest));
+      } else {
+        return _fn;
+      }
     },
   }
   this._state = function (name, args) {

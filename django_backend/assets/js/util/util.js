@@ -66,17 +66,25 @@ var _ = {
     return objects.reduce(function (whole, part) {
       if (_.is.array(part)) {
         whole = (whole || []);
-        whole = [...new Set([...whole, ...part])]; // union
+        if (_.is.array(whole)) {
+          whole = [...new Set([...whole, ...part])]; // union
+        } else {
+          whole = part;
+        }
       } else {
         whole = (whole || {});
         part = (part || {});
-        Object.keys(part).forEach(function (key) {
-          if ((key in whole && _.is.object.all(whole[key]) && _.is.object.all(part[key])) || (_.is.array(whole[key]) && _.is.array(part[key]))) {
-            whole[key] = _.merge(whole[key], part[key]); // objects go deeper again recursively
-          } else {
-            whole[key] = part[key]; // add if it does not exist
-          }
-        });
+        if (_.is.object.all(whole) && _.is.object.all(part)) {
+          Object.keys(part).forEach(function (key) {
+            if (key in whole) {
+              whole[key] = _.merge(whole[key], part[key]); // objects go deeper again recursively
+            } else {
+              whole[key] = part[key]; // add if it does not exist
+            }
+          });
+        } else {
+          whole = part;
+        }
       }
       return whole;
     });
