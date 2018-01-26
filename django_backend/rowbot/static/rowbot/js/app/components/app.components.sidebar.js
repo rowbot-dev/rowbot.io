@@ -62,6 +62,11 @@ App.components.sidebar = function () {
     // sidebar
     _sidebar.setStates([
       ui._state('club', {
+        fn: {
+          before: function (_this) {
+            return _this.hide({style: {'left': '-200px'}});
+          },
+        },
         children: [
           ui._state('single', {
             fn: {
@@ -75,19 +80,14 @@ App.components.sidebar = function () {
         ],
       }),
       ui._state('event', {
-        children: [
-          ui._state('single', {
-            fn: {
-              animate: function (_this) {
-                return _this.hide({style: {'left': '-200px'}}).then(function () {
-                  return _.d(0);
-                }).then(function () {
-                  return _this.show({style: {'left': '0%'}});
-                });
-              },
-            },
-          }),
-        ],
+        fn: {
+          before: function (_this) {
+            return _this.hide({style: {'left': '-200px'}});
+          },
+          animate: function (_this) {
+            return _this.show({style: {'left': '0%'}});
+          },
+        },
       }),
     ]);
 

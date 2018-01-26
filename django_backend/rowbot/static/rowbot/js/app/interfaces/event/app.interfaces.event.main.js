@@ -4,35 +4,47 @@ App.interfaces = (App.interfaces || {});
 App.interfaces.event = (App.interfaces.event || {});
 App.interfaces.event.main = function () {
   return ui._component('event', {
-    classes: ['interface', 'hidden'],
+    classes: ['interface', 'panel', 'hidden'],
     style: {
-      'width': 'calc(100% - 240px)',
       'padding': '20px',
       'left': '-100%',
     },
     children: [
-      // title
-      Components.text('title'),
-
-      // events
-      Components.list('events', {
+      ui._component('all', {
         style: {
-          'height': '500px',
+          'width': '100%',
+          'height': '100%',
         },
+        children: [
+          // title
+          Components.text('title'),
+
+          // events
+          Components.list('events', {
+            style: {
+              'height': '500px',
+            },
+          }),
+        ],
       }),
+      App.interfaces.event.single(),
     ],
-  }).then(function (_single) {
+  }).then(function (_event) {
 
     // vars
-    var _title = _single.get('title');
-    var _events = _single.get('events');
+    var _all = _event.get('all');
+    var _title = _all.get('title');
+    var _events = _all.get('events');
 
     // single
-    _single.setStates([
+    _event.setStates([
       ui._state('event', {
         fn: {
           before: function (_this) {
-            return _events.data.load.local();
+            return _.all([
+              _this.hide({style: {'left': '-100%'}}),
+              _events.data.load.local(),
+            ]);
           },
           animate: function (_this) {
             return _.all([
@@ -125,6 +137,6 @@ App.interfaces.event.main = function () {
     _events.get('search').setClasses('hidden');
     _events.get('pagination').setClasses('hidden');
 
-    return _single;
+    return _event;
   });
 }

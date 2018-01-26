@@ -14,18 +14,23 @@ App.application = function () {
         'pointer-events': 'none',
       },
       ' .interface': {
-        'position': 'relative',
+        'position': 'absolute',
+        'width': '100%',
+        'height': '100%',
       },
+      ' .panel': {
+        'width': 'calc(100% - 200px)',
+      }
     },
     children: [
-      // components
-      App.components.sidebar(),
-
       // interfaces
       App.interfaces.load(),
       // App.interfaces.account(),
       App.interfaces.club.main(),
       App.interfaces.event.main(),
+
+      // components
+      App.components.sidebar(),
     ],
   }).then(function (_app) {
     return _app;

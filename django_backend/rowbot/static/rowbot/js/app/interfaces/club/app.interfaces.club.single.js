@@ -4,9 +4,9 @@ App.interfaces = (App.interfaces || {});
 App.interfaces.club = (App.interfaces.club || {});
 App.interfaces.club.single = function () {
   return ui._component('single', {
-    classes: ['interface', 'hidden'],
+    classes: ['hidden', 'panel'],
     style: {
-      'width': 'calc(100% - 240px)',
+      'position': 'relative',
       'padding': '20px',
       'left': '-100%',
     },
@@ -52,18 +52,9 @@ App.interfaces.club.single = function () {
       ui._state('event', {
         fn: {
           before: function (_this) {
-            _.l(_this);
+            return _this.hide({style: {'left': '-100%'}});
           },
         },
-        children: [
-          ui._state('single', {
-            fn: {
-              animate: function (_this) {
-                return _this.hide({style: {'left': '-100%'}});
-              },
-            },
-          }),
-        ],
       }),
     ]);
 

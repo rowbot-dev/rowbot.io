@@ -4,14 +4,17 @@ App.interfaces = (App.interfaces || {});
 App.interfaces.club = (App.interfaces.club || {});
 App.interfaces.club.main = function () {
   return ui._component('club', {
-    classes: ['hidden'],
+    classes: ['interface', 'hidden'],
     style: {
       'padding': '20px',
       'opacity': '0',
     },
     children: [
       ui._component('all', {
-        classes: ['interface'],
+        style: {
+          'width': '100%',
+          'height': '100%',
+        },
         children: [
           // title
           Components.text('title', {
@@ -51,22 +54,22 @@ App.interfaces.club.main = function () {
           }
         },
       }),
+      ui._state('event', {
+        fn: {
+          animate: function (_this) {
+            return _this.hide();
+          }
+        },
+      }),
     ]);
 
     // all
     _all.setStates([
       ui._state('club', {
-        fn: {
-          animate: function (_this) {
-            _.l('hello');
-            return _.p();
-          },
-        },
         children: [
           ui._state('single', {
             fn: {
               animate: function (_this) {
-                _.l('hi');
                 return _this.hide({style: {'left': '-100%'}});
               },
             },
