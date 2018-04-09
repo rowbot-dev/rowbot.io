@@ -172,45 +172,6 @@ App.interfaces.club.main = function () {
     ]);
     _clubs.get('search').setClasses('hidden');
     _clubs.get('pagination').setClasses('hidden');
-    // _members.data.storage.compare = function (_d1, _d2) { // override
-    //   if ((_d1.scores.first_name + _d1.scores.last_name) > (_d2.scores.first_name + _d2.scores.last_name)) {
-    //     return -1;
-    //   } else if ((_d1.scores.first_name + _d1.scores.last_name) === (_d2.scores.first_name + _d2.scores.last_name)) {
-    //     if (_d1.normalised.email < _d2.normalised.email) {
-    //       return -1;
-    //     } else if (_d1.normalised.email === _d2.normalised.email) {
-    //       return 0;
-    //     } else {
-    //       return 1;
-    //     }
-    //   } else {
-    //     return 1;
-    //   }
-    // }
-    // _members.metadata.query.score = function (_datum) {
-    //   var _query = this;
-    //   var _target = _datum.target;
-    //   return _.p(function () {
-    //     return _.map(_datum.normalised, function (_key, _value) {
-    //       let results = {};
-    //       let exclusive = (_members.metadata.exclusive || _target.exclusive);
-    //       let noQuery = true;
-    //       let _score = _.map(_query.buffer, function (_index, _partial) {
-    //         noQuery = _partial === '';
-    //         return _value.score(_partial);
-    //       }).mean();
-    //       results[_key] = (_score === 0 && !exclusive && noQuery) ? 1 : _score;
-    //       return results;
-    //     }).reduce(function (whole, part) {
-    //       return _.merge(whole, part);
-    //     }, {});
-    //   });
-    // }
-    // _members.data.display.filter.condition = function (_datum) { // override
-    //   return _.p(function () {
-    //     _datum.accepted = _datum.scores.first_name > 0 || _datum.scores.last_name > 0 || _datum.scores.email > 0;
-    //   });
-    // }
     _clubs.setStates([
       ui._state('club', {
         fn: {
