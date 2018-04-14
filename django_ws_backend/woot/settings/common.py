@@ -40,9 +40,7 @@ THIRD_PARTY_APPS = (
 )
 LOCAL_APPS = (
   'apps.base',
-  'apps.access',
-  'apps.authentication',
-  'apps.challenger',
+  'apps.rowbot',
 )
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -79,6 +77,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'wsgi.application'
 
 DATABASES = {}
+
+AUTH_USER_MODEL = 'rowbot.Member'
 
 AUTH_PASSWORD_VALIDATORS = [
   {

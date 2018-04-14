@@ -11,9 +11,9 @@ from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 from rest_framework.decorators import detail_route, list_route
 
 # Local
-from rowbot.api.base import BaseModelViewSet
-from rowbot.models import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
-from rowbot.serializers import EventModelSerializer, EventNotificationModelSerializer, EventSerializer, EventRepeatSerializer, EventInstanceSerializer, EventNotificationSerializer
+from apps.rowbot.api.base import BaseModelViewSet
+from apps.rowbot.models import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
+from apps.rowbot.serializers import EventModelSerializer, EventNotificationModelSerializer, EventSerializer, EventRepeatSerializer, EventInstanceSerializer, EventNotificationSerializer
 
 # API
 class EventModelViewSet(BaseModelViewSet):

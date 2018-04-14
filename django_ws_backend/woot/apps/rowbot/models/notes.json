@@ -1,0 +1,9 @@
+{
+  "Add a new model": [
+    "Modify models/newmodel.py",
+    "Add import to models/__init__.py",
+    "Add serializer to serializers.py",
+    "Add ViewSet to api/newmodel.py",
+    "Add route to api/routes.py"
+  ],
+}

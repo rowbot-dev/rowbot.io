@@ -5,7 +5,8 @@
       "20180414": {
         "description": "Preparing django ws backend in the same manner as the ui application. This will be used to serve the API to the react frontend.",
         "children": {
-          "python dependencies": "django, channels, channels-redis, redis, asgi-redis"
+          "python dependencies": "django, channels, channels-redis, redis, asgi-redis",
+          "models prepared": "DONE",
         }
       }
     }

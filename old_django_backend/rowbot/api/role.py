@@ -11,9 +11,9 @@ from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 from rest_framework.decorators import detail_route, list_route
 
 # Local
-from rowbot.api.base import BaseModelViewSet
-from rowbot.models import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
-from rowbot.serializers import RoleModelSerializer, RolePermissionSerializer, RoleSerializer, RoleInstanceSerializer, RoleRecordSerializer
+from apps.rowbot.api.base import BaseModelViewSet
+from apps.rowbot.models import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
+from apps.rowbot.serializers import RoleModelSerializer, RolePermissionSerializer, RoleSerializer, RoleInstanceSerializer, RoleRecordSerializer
 
 # API
 class RoleModelViewSet(BaseModelViewSet):

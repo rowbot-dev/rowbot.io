@@ -37,7 +37,7 @@ class EventModel(Model):
     permissions = ()
 
   # Connections
-  club = models.ForeignKey('rowbot.Club', related_name='event_models')
+  club = models.ForeignKey('rowbot.Club', related_name='event_models', on_delete=models.CASCADE)
   parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
   # Properties
@@ -51,7 +51,7 @@ class EventNotificationModel(Model):
     permissions = ()
 
   # Connections
-  model = models.ForeignKey('rowbot.EventModel', related_name='notification_models')
+  model = models.ForeignKey('rowbot.EventModel', related_name='notification_models', on_delete=models.CASCADE)
 
   # Properties
   name = models.CharField(max_length=255)
@@ -82,7 +82,7 @@ class Event(Model):
     permissions = ()
 
   # Connections
-  model = models.ForeignKey('rowbot.EventModel', related_name='events')
+  model = models.ForeignKey('rowbot.EventModel', related_name='events', on_delete=models.CASCADE)
   parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
   # Properties
@@ -107,7 +107,7 @@ class EventInstance(Model):
     permissions = ()
 
   # Connections
-  event = models.ForeignKey('rowbot.Event', related_name='instances')
+  event = models.ForeignKey('rowbot.Event', related_name='instances', on_delete=models.CASCADE)
 
   # Properties
   start_time = models.DateTimeField(auto_now_add=False, null=True)
@@ -139,7 +139,7 @@ class EventNotification(Model):
     permissions = ()
 
   # Connections
-  event = models.ForeignKey('rowbot.EventInstance', related_name='notifications')
+  event = models.ForeignKey('rowbot.EventInstance', related_name='notifications', on_delete=models.CASCADE)
 
   # Properties
   name = models.CharField(max_length=255)

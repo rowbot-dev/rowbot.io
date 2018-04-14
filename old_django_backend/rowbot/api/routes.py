@@ -9,13 +9,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
 # Local
-from rowbot.api.router import SchemaRouter
-from rowbot.api.member import MemberViewSet
-from rowbot.api.club import ClubViewSet
-from rowbot.api.event import EventModelViewSet, EventNotificationModelViewSet, EventViewSet, EventInstanceViewSet, EventNotificationViewSet
-from rowbot.api.team import TeamModelViewSet, TeamViewSet, TeamInstanceViewSet, TeamRecordViewSet
-from rowbot.api.role import RoleModelViewSet, RolePermissionViewSet, RoleViewSet, RoleInstanceViewSet, RoleRecordViewSet
-from rowbot.api.asset import AssetModelViewSet, AssetViewSet, AssetInstanceViewSet
+from apps.rowbot.api.router import SchemaRouter
+from apps.rowbot.api.member import MemberViewSet
+from apps.rowbot.api.club import ClubViewSet
+from apps.rowbot.api.event import EventModelViewSet, EventNotificationModelViewSet, EventViewSet, EventInstanceViewSet, EventNotificationViewSet
+from apps.rowbot.api.team import TeamModelViewSet, TeamViewSet, TeamInstanceViewSet, TeamRecordViewSet
+from apps.rowbot.api.role import RoleModelViewSet, RolePermissionViewSet, RoleViewSet, RoleInstanceViewSet, RoleRecordViewSet
+from apps.rowbot.api.asset import AssetModelViewSet, AssetViewSet, AssetInstanceViewSet
 
 # Routes
 router = SchemaRouter()

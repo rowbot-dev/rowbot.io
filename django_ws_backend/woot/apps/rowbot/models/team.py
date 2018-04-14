@@ -14,7 +14,7 @@ class TeamModel(Model):
     permissions = ()
 
   # Connections
-  club = models.ForeignKey('rowbot.Club', related_name='team_models')
+  club = models.ForeignKey('rowbot.Club', related_name='team_models', on_delete=models.CASCADE)
   is_superset_of = models.ManyToManyField('self', symmetrical=False, related_name='is_subset_of')
 
   # Properties
@@ -29,7 +29,7 @@ class Team(Model):
     permissions = ()
 
   # Connections
-  model = models.ForeignKey('rowbot.TeamModel', related_name='teams')
+  model = models.ForeignKey('rowbot.TeamModel', related_name='teams', on_delete=models.CASCADE)
   is_superset_of = models.ManyToManyField('self', symmetrical=False, related_name='is_subset_of')
 
   # Properties
@@ -41,8 +41,8 @@ class TeamInstance(Model):
     permissions = ()
 
 	### Connections
-  team = models.ForeignKey('rowbot.Team', related_name='instances')
-  event = models.ForeignKey('rowbot.EventInstance', related_name='teams', null=True)
+  team = models.ForeignKey('rowbot.Team', related_name='instances', on_delete=models.CASCADE)
+  event = models.ForeignKey('rowbot.EventInstance', related_name='teams', null=True, on_delete=models.CASCADE)
 
 
 class TeamRecord(Model):
@@ -50,8 +50,8 @@ class TeamRecord(Model):
     permissions = ()
 
   # Connections
-  team = models.ForeignKey('rowbot.Team', related_name='team_records')
-  event = models.ForeignKey('rowbot.EventInstance', related_name='team_records', null=True)
+  team = models.ForeignKey('rowbot.Team', related_name='team_records', on_delete=models.CASCADE)
+  event = models.ForeignKey('rowbot.EventInstance', related_name='team_records', null=True, on_delete=models.CASCADE)
 
   # Properties
   metadata = models.TextField() # replace with django.contrib.postgres.fields.JSONField

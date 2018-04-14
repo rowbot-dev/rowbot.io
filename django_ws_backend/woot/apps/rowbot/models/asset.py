@@ -14,7 +14,7 @@ class AssetModel(Model):
     permissions = ()
 
   # Connections
-  club = models.ForeignKey('rowbot.Club', related_name='asset_models')
+  club = models.ForeignKey('rowbot.Club', related_name='asset_models', on_delete=models.CASCADE)
   parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
   # Properties
@@ -29,8 +29,8 @@ class Asset(Model):
     permissions = ()
 
   # Connections
-  club = models.ForeignKey('rowbot.Club', related_name='assets')
-  model = models.ForeignKey('rowbot.AssetModel', related_name='assets')
+  club = models.ForeignKey('rowbot.Club', related_name='assets', on_delete=models.CASCADE)
+  model = models.ForeignKey('rowbot.AssetModel', related_name='assets', on_delete=models.CASCADE)
   parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
   # Properties
@@ -43,10 +43,10 @@ class AssetInstance(Model):
     permissions = ()
 
   # Connections
-  asset = models.ForeignKey('rowbot.Asset', related_name='instances')
-  team = models.ForeignKey('rowbot.Team', related_name='assets')
-  in_possession_of = models.ForeignKey('rowbot.Team', related_name='external_assets', null=True)
-  event = models.ForeignKey('rowbot.EventInstance', related_name='assets', null=True)
+  asset = models.ForeignKey('rowbot.Asset', related_name='instances', on_delete=models.CASCADE)
+  team = models.ForeignKey('rowbot.Team', related_name='assets', on_delete=models.CASCADE)
+  in_possession_of = models.ForeignKey('rowbot.Team', related_name='external_assets', null=True, on_delete=models.CASCADE)
+  event = models.ForeignKey('rowbot.EventInstance', related_name='assets', null=True, on_delete=models.CASCADE)
 
   # Properties
   metadata = models.TextField() # replace with django.contrib.postgres.fields.JSONField

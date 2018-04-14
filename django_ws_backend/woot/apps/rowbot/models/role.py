@@ -14,7 +14,7 @@ class RoleModel(Model):
     permissions = ()
 
   # Connections
-  club = models.ForeignKey('rowbot.Club', related_name='role_models')
+  club = models.ForeignKey('rowbot.Club', related_name='role_models', on_delete=models.CASCADE)
   is_superior_to = models.ManyToManyField('self', symmetrical=False, related_name='is_subordinate_to')
 
   # Properties
@@ -41,9 +41,9 @@ class Role(Model):
     permissions = ()
 
   # Connections
-  team = models.ForeignKey('rowbot.Team', related_name='roles', null=True)
-  model = models.ForeignKey('rowbot.RoleModel', related_name='roles')
-  member = models.ForeignKey('rowbot.Member', related_name='roles')
+  team = models.ForeignKey('rowbot.Team', related_name='roles', null=True, on_delete=models.CASCADE)
+  model = models.ForeignKey('rowbot.RoleModel', related_name='roles', on_delete=models.CASCADE)
+  member = models.ForeignKey('rowbot.Member', related_name='roles', on_delete=models.CASCADE)
   is_superior_to = models.ManyToManyField('self', symmetrical=False, related_name='is_subordinate_to')
 
   # Properties
@@ -57,8 +57,8 @@ class RoleInstance(Model):
     permissions = ()
 
 	# Connections
-  role = models.ForeignKey('rowbot.Role', related_name='instances')
-  event = models.ForeignKey('rowbot.EventInstance', related_name='roles', null=True)
+  role = models.ForeignKey('rowbot.Role', related_name='instances', on_delete=models.CASCADE)
+  event = models.ForeignKey('rowbot.EventInstance', related_name='roles', null=True, on_delete=models.CASCADE)
 
   # Properties
   is_active = models.BooleanField(default=True)
@@ -70,8 +70,8 @@ class RoleRecord(Model):
     permissions = ()
 
   # Connections
-  role = models.ForeignKey('rowbot.Role', related_name='records')
-  event = models.ForeignKey('rowbot.EventInstance', related_name='records', null=True)
+  role = models.ForeignKey('rowbot.Role', related_name='records', on_delete=models.CASCADE)
+  event = models.ForeignKey('rowbot.EventInstance', related_name='records', null=True, on_delete=models.CASCADE)
 
   # Properties
   metadata = models.TextField() # replace with django.contrib.postgres.fields.JSONField

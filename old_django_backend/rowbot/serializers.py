@@ -3,12 +3,12 @@
 from rest_framework import serializers
 
 # Local
-from rowbot.models.asset import AssetModel, Asset, AssetInstance
-from rowbot.models.club import Club
-from rowbot.models.event import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
-from rowbot.models.member import Member
-from rowbot.models.role import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
-from rowbot.models.team import TeamModel, Team, TeamInstance, TeamRecord
+from apps.rowbot.models.asset import AssetModel, Asset, AssetInstance
+from apps.rowbot.models.club import Club
+from apps.rowbot.models.event import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
+from apps.rowbot.models.member import Member
+from apps.rowbot.models.role import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
+from apps.rowbot.models.team import TeamModel, Team, TeamInstance, TeamRecord
 
 class UUIDRelatedField(serializers.PrimaryKeyRelatedField):
   def use_pk_only_optimization(self):

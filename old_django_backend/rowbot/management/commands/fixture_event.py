@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand, CommandError
 
 # Local
-from rowbot.models import Club, Member
+from apps.rowbot.models import Club, Member
 
 # Util
 import time

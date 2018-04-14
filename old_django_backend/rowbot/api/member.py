@@ -13,9 +13,9 @@ from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 from rest_framework.decorators import detail_route, list_route
 
 # Local
-from rowbot.api.base import BaseModelViewSet
-from rowbot.models import Member
-from rowbot.serializers import MemberSerializer
+from apps.rowbot.api.base import BaseModelViewSet
+from apps.rowbot.models import Member
+from apps.rowbot.serializers import MemberSerializer
 
 # API
 class MemberViewSet(BaseModelViewSet):

@@ -11,9 +11,9 @@ from rest_framework.permissions import IsAuthenticated, DjangoObjectPermissions
 from rest_framework.decorators import detail_route, list_route
 
 # Local
-from rowbot.api.base import BaseModelViewSet
-from rowbot.models import TeamModel, Team, TeamInstance, TeamRecord
-from rowbot.serializers import TeamModelSerializer, TeamSerializer, TeamInstanceSerializer, TeamRecordSerializer
+from apps.rowbot.api.base import BaseModelViewSet
+from apps.rowbot.models import TeamModel, Team, TeamInstance, TeamRecord
+from apps.rowbot.serializers import TeamModelSerializer, TeamSerializer, TeamInstanceSerializer, TeamRecordSerializer
 
 # API
 class TeamModelViewSet(BaseModelViewSet):

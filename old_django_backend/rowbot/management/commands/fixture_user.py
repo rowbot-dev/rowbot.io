@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from rest_framework.authtoken.models import Token
 
 # Local
-from rowbot.models import Member
+from apps.rowbot.models import Member
 
 # Command
 class Command(BaseCommand):
