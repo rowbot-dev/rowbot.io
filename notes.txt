@@ -56,3 +56,5 @@ Plan:
 3. quick Android app
 
 API done. Next step is frontend.
+
+Compile muscle c compiler on digital ocean centos instance

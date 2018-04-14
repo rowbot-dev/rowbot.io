@@ -164,6 +164,7 @@ var UI = function () {
     renderChild: function (_child) {
       // root, before, indices
       var _this = this;
+      // _.l('renderChild', _this.id);
       return _child.render().then(function () {
         // remove recently rendered child from buffer
         return _.p(function () {
@@ -265,27 +266,43 @@ var UI = function () {
         return _this.id;
       });
     },
-    render: function (root) {
-      var _this = this;
-      return _this.setID().then(function () {
-        var _element = _this.element();
-        var root = _this._.parent !== undefined ? _this._.parent.element() : _this.hook;
-        var before = _this._.before !== undefined ? _this._.parent.child(_this._.before) : undefined;
-        if (before !== undefined) {
-          var beforeElement = before.element();
-          root.insertBefore(_element, beforeElement);
+    insert: function () {
+      const _this = this;
+      const element = _this.element();
+      const root = _this._.parent ? _this._.parent.element() : _this.hook;
+      const before = _this._.before ? _this._.parent.child(_this._.before).element() : null;
+      // _.l('insert', _this.id);
+
+      return new Promise(function(resolve, reject) {
+        _register(_this.id, function () {
+          resolve();
+        });
+
+        if (before) {
+          root.insertBefore(element, before);
         } else {
-          root.appendChild(_element);
+          // _.l('insert 2', _this.id);
+          root.appendChild(element);
         }
 
         _this._.is.rendered = true;
+      });
+    },
+    render: function (root) {
+      var _this = this;
+      return _this.setID().then(function () {
+        // _.l('after id', _this.id);
+        return _this.insert();
+      }).then(function () {
+
         return _.all([
-          _this.setStyle(),
+          // _this.setStyle(),
           _this.setClasses(),
           _this.setProperties(),
           _this.setBindings(),
           _this.setHTML(),
         ]).then(function () {
+          // _.l(_this.id);
           return _this.setChildren();
         });
       });
