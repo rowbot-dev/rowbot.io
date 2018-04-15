@@ -1,8 +1,8 @@
 
 const constants = {
-  WEBSOCKET_CONNECT: 'websocketConnect',
-  WEBSOCKET_CONNECT_SUCCESS: 'websocketConnectSuccess',
-  WEBSOCKET_CONNECT_FAILURE: 'websocketConnectFailure',
+  WEBSOCKET_OPEN: 'websocketConnect',
+  WEBSOCKET_OPEN_SUCCESS: 'websocketConnectSuccess',
+  WEBSOCKET_OPEN_FAILURE: 'websocketConnectFailure',
   WEBSOCKET_SEND: 'websocketSend',
   WEBSOCKET_SEND_SUCCESS: 'websocketSendSuccess',
   WEBSOCKET_SEND_FAILURE: 'websocketSendFailure',

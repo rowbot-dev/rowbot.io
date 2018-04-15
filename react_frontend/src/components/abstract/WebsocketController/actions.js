@@ -3,49 +3,59 @@ import constants from 'store/constants';
 import websocketControllerConstants from './constants';
 
 const websocketControllerActionCreators = {
-  connectToWebsocket: credentials => ({
-    type: constants.WEBSOCKET_CONNECT,
-    payload: credentials,
+  openWebsocket: (socket, credentials) => ({
+    type: constants.WEBSOCKET_OPEN,
+    payload: { socket, credentials },
   }),
 
-  connectToWebsocketSuccess: response => ({
-    type: constants.WEBSOCKET_CONNECT_SUCCESS,
-    payload: response,
+  openWebsocketSuccess: (socket, response) => ({
+    type: constants.WEBSOCKET_OPEN_SUCCESS,
+    payload: { socket, response },
   }),
 
-  connectToWebsocketFailure: error => ({
-    type: constants.WEBSOCKET_CONNECT_FAILURE,
-    payload: error,
+  openWebsocketFailure: (socket, error) => ({
+    type: constants.WEBSOCKET_OPEN_FAILURE,
+    payload: { socket, error },
   }),
 
-  sendWebsocketMessage: message => ({
+  sendWebsocketMessage: (socket, id, message) => ({
     type: constants.WEBSOCKET_SEND,
-    payload: message,
+    payload: { socket, id, message },
   }),
 
-  sendWebsocketMessageSuccess: message => ({
+  sendWebsocketMessageSuccess: (socket, id, message) => ({
     type: constants.WEBSOCKET_SEND_SUCCESS,
-    payload: message,
+    payload: { socket, id, message },
   }),
 
-  sendWebsocketMessageFailure: message => ({
+  sendWebsocketMessageFailure: (socket, id, error) => ({
     type: constants.WEBSOCKET_SEND_FAILURE,
-    payload: message,
+    payload: { socket, id, error },
   }),
 
-  receiveWebsocketMessage: message => ({
+  receiveWebsocketMessage: (socket, id, data) => ({
     type: constants.WEBSOCKET_RECEIVE,
-    payload: message,
+    payload: { socket, id, data },
   }),
 
-  receiveWebsocketMessageSuccess: response => ({
+  receiveWebsocketMessageSuccess: (socket, id, data) => ({
     type: constants.WEBSOCKET_RECEIVE_SUCCESS,
-    payload: response,
+    payload: { socket, id, data },
   }),
 
-  receiveWebsocketMessageFailure: error => ({
+  receiveWebsocketMessageFailure: (socket, id, error) => ({
     type: constants.WEBSOCKET_RECEIVE_FAILURE,
-    payload: error,
+    payload: { socket, id, error },
+  }),
+
+  closeWebsocket: socket => ({
+    type: constants.WEBSOCKET_CLOSE,
+    payload: socket,
+  }),
+
+  websocketError: (socket, error) => ({
+    type: constants.WEBSOCKET_ERROR,
+    payload: { socket, error },
   }),
 };
 
