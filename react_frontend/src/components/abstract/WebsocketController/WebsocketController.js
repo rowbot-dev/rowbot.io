@@ -21,8 +21,8 @@ class WebsocketController extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    const { active: prevActive } = prevProps;
-    const { id, onConsumeWebsocketMessage, active: nextActive, messages: nextMessages } = this.props;
+    const { active: prevActive, reopen: prevReopen } = prevProps;
+    const { id, onConsumeWebsocketMessage, active: nextActive, messages: nextMessages, open, reopen } = this.props;
 
     const shouldConsume = !isEmpty(nextMessages) && !nextActive;
 
@@ -38,22 +38,34 @@ class WebsocketController extends Component {
     if (shouldSend) {
       this.send();
     }
+
+    const shouldAttemptReopen = !open && reopen && reopen !== prevReopen;
+
+    if (shouldAttemptReopen) {
+      this.attemptReopen();
+    }
   }
 
   componentWillUnmount () {
     this.close();
+    window.clearInterval(this.attempt_reopen_interval);
   }
 
   open () {
     const { target } = this.props;
 
-    if (!this.socket) {
-      this.socket = new WebSocket(target);
-      this.socket.onopen = this.handleOpen.bind(this);
-      this.socket.onmessage = this.handleMessage.bind(this);
-      this.socket.onclose = this.handleClose.bind(this);
-      this.socket.onerror = this.handleError.bind(this);
-    }
+    this.socket = new WebSocket(target);
+    this.socket.onopen = this.handleOpen.bind(this);
+    this.socket.onmessage = this.handleMessage.bind(this);
+    this.socket.onclose = this.handleClose.bind(this);
+    this.socket.onerror = this.handleError.bind(this);
+  }
+
+  attemptReopen () {
+    this.attempt_reopen_interval = window.setInterval(
+      () => !this.props.open && this.open(),
+      1000,
+    );
   }
 
   close () {
@@ -97,13 +109,15 @@ class WebsocketController extends Component {
   handleClose (event) {
     const { id, target, onCloseWebsocket } = this.props;
 
+    let reopen = false;
     if (event.code === 3001) {
       console.log('Closed', target);
     } else {
+      reopen = true;
       console.log('Unable to connected to', target);
     }
 
-    onCloseWebsocket(id);
+    onCloseWebsocket(id, reopen);
   }
 
   handleError (event) {

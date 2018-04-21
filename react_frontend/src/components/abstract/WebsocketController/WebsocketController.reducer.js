@@ -14,9 +14,10 @@ const websocketControllerReducer = (state={}, action) => {
         {
           [socket]: {
             open: true,
+            reopen: false,
             messages: {},
             active: null,
-          }
+          },
         },
       );
     }
@@ -65,6 +66,20 @@ const websocketControllerReducer = (state={}, action) => {
         state,
         {
           [socket]: { error: message },
+        },
+      );
+    }
+    case constants.WEBSOCKET_CLOSE: {
+      const { socket, reopen } = action.payload;
+
+      return merge(
+        {},
+        state,
+        {
+          [socket]: {
+            open: false,
+            reopen,
+          },
         },
       );
     }

@@ -4,13 +4,17 @@ import { connect } from 'react-redux';
 
 import WebsocketController from './WebsocketController'
 import websocketControllerActionCreators from './WebsocketController.actions';
-import { socketSelector, messagesForSocket, activeForSocket } from './WebsocketController.selectors';
+import { socketIsOpen, socketShouldReopen, messagesForSocket, activeForSocket } from './WebsocketController.selectors';
 
 const mapStateToProps = (state, { id: socket }) => {
+  const open = socketIsOpen(socket);
+  const reopen = socketShouldReopen(socket);
   const messages = messagesForSocket(socket);
   const active = activeForSocket(socket);
 
   return {
+    open: open(state),
+    reopen: reopen(state),
     messages: messages(state),
     active: active(state),
   };

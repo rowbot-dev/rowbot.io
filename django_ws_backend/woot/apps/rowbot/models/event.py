@@ -1,20 +1,13 @@
 
-# Django
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
-# DRF
-
-
-# Local
 from apps.rowbot.models.base import Model
+from apps.rowbot.api import send
 
-# Util
 from datetime import timedelta
 import json
-import urllib3
-http = urllib3.PoolManager(retries=False)
 import uuid
 _scheduler = settings.SCHEDULER
 
@@ -31,16 +24,13 @@ _scheduler = settings.SCHEDULER
 # Example: May Bumps 2017 > Day 1 > 12:45 - 13:15
 # Example: Men's training session, Saturday 12th of June, 2017, 19:45 - 20:45
 
-# Event
 class EventModel(Model):
   class Meta:
     permissions = ()
 
-  # Connections
   club = models.ForeignKey('rowbot.Club', related_name='event_models', on_delete=models.CASCADE)
   parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
-  # Properties
   reference = models.CharField(max_length=255)
   verbose_name = models.CharField(max_length=255)
   verbose_name_plural = models.CharField(max_length=255)
@@ -50,10 +40,8 @@ class EventNotificationModel(Model):
   class Meta:
     permissions = ()
 
-  # Connections
   model = models.ForeignKey('rowbot.EventModel', related_name='notification_models', on_delete=models.CASCADE)
 
-  # Properties
   name = models.CharField(max_length=255)
   relative_duration = models.DurationField()
   is_negative = models.BooleanField(default=False)
@@ -81,11 +69,9 @@ class Event(Model):
   class Meta:
     permissions = ()
 
-  # Connections
   model = models.ForeignKey('rowbot.EventModel', related_name='events', on_delete=models.CASCADE)
   parts = models.ManyToManyField('self', symmetrical=False, related_name='is_part_of')
 
-  # Properties
   name = models.CharField(max_length=255)
   description = models.TextField()
   is_active = models.BooleanField(default=True)
@@ -106,17 +92,14 @@ class EventInstance(Model):
   class Meta:
     permissions = ()
 
-  # Connections
   event = models.ForeignKey('rowbot.Event', related_name='instances', on_delete=models.CASCADE)
 
-  # Properties
   start_time = models.DateTimeField(auto_now_add=False, null=True)
   end_time = models.DateTimeField(auto_now_add=False, null=True)
   location = models.CharField(max_length=255)
   description = models.TextField()
   is_active = models.BooleanField(default=True)
 
-  # Methods
   def cancel(self):
     # unschedule all notifications
     pass
@@ -138,10 +121,8 @@ class EventNotification(Model):
   class Meta:
     permissions = ()
 
-  # Connections
   event = models.ForeignKey('rowbot.EventInstance', related_name='notifications', on_delete=models.CASCADE)
 
-  # Properties
   name = models.CharField(max_length=255)
   timestamp = models.DateTimeField(auto_now_add=False, null=True)
   schedule_id = models.UUIDField(default=uuid.uuid4)
@@ -151,14 +132,12 @@ class EventNotification(Model):
   def trigger(self):
     # all subscribers to the event need to be notified.
     # to do this, retrieve the set of websocket id's and make a request to the node.js server.
+    send(self._ref)
+    print(self._ref)
 
-    try:
-      # make request to websocket server
-      http.request('POST', 'http://{}:{}'.format(settings.WEBSOCKET['host'], settings.WEBSOCKET['message']), body=json.dumps({'data': {'ref': self._ref}, 'keys': self.keys()}))
-      self.is_active = False
-      self.save()
-    except urllib3.exceptions.NewConnectionError:
-      print('Connection to websocket server failed.')
+    # http.request('POST', 'http://{}:{}'.format(settings.WEBSOCKET['host'], settings.WEBSOCKET['message']), body=json.dumps({'data': {'ref': self._ref}, 'keys': self.keys()}))
+    # self.is_active = False
+    # self.save()
 
   def schedule(self):
     _scheduler.add_job(

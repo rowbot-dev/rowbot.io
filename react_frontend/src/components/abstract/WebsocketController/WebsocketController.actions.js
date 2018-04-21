@@ -9,9 +9,9 @@ const websocketControllerActionCreators = {
     payload: { socket, credentials },
   }),
 
-  sendWebsocketMessage: (socket, id, message) => ({
+  sendWebsocketMessage: (socket, id, data) => ({
     type: constants.WEBSOCKET_SEND,
-    payload: { socket, id, message },
+    payload: { socket, id, data },
   }),
 
   consumeWebsocketMessage: socket => ({
@@ -29,9 +29,9 @@ const websocketControllerActionCreators = {
     payload: { socket, id, data },
   }),
 
-  closeWebsocket: socket => ({
+  closeWebsocket: (socket, reopen) => ({
     type: constants.WEBSOCKET_CLOSE,
-    payload: socket,
+    payload: { socket, reopen },
   }),
 
   websocketError: (socket, message, error) => ({
