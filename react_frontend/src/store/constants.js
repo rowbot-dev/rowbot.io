@@ -1,14 +1,12 @@
 
 const constants = {
-  WEBSOCKET_OPEN: 'websocketConnect',
-  WEBSOCKET_OPEN_SUCCESS: 'websocketConnectSuccess',
-  WEBSOCKET_OPEN_FAILURE: 'websocketConnectFailure',
+  WEBSOCKET_OPEN: 'websocketOpen',
   WEBSOCKET_SEND: 'websocketSend',
-  WEBSOCKET_SEND_SUCCESS: 'websocketSendSuccess',
-  WEBSOCKET_SEND_FAILURE: 'websocketSendFailure',
+  WEBSOCKET_CONSUME: 'websocketConsume',
+  WEBSOCKET_CONSUME_SUCCESS: 'websocketConsumeSuccess',
   WEBSOCKET_RECEIVE: 'websocketReceive',
-  WEBSOCKET_RECEIVE_SUCCESS: 'websocketReceiveSuccess',
-  WEBSOCKET_RECEIVE_FAILURE: 'websocketReceiveFailure',
+  WEBSOCKET_CLOSE: 'websocketClose',
+  WEBSOCKET_ERROR: 'websocketError',
 };
 
 export default constants;

@@ -1,12 +1,14 @@
 
 import React from 'react';
 
-import WebsocketController, { API } from 'components/abstract/WebsocketController';
+import WebsocketController from 'components/abstract/WebsocketController';
+import MessageButton from 'components/interface/MessageButton';
 
 const App = () => {
   return (
     <main>
-      <WebsocketController id={API} target='ws://localhost:8000/api/' />
+      <WebsocketController id='api' target='ws://localhost:8000/api/' />
+      <MessageButton />
     </main>
   );
 };

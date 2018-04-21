@@ -3,15 +3,23 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 
 import WebsocketController from './WebsocketController'
-import websocketControllerActionCreators from './actions';
+import websocketControllerActionCreators from './WebsocketController.actions';
+import { socketSelector, messagesForSocket, activeForSocket } from './WebsocketController.selectors';
 
-const mapStateToProps = (state, props) => ({
+const mapStateToProps = (state, { id: socket }) => {
+  const messages = messagesForSocket(socket);
+  const active = activeForSocket(socket);
 
-});
+  return {
+    messages: messages(state),
+    active: active(state),
+  };
+};
 
 const mapDispatchToProps = {
   onOpenWebsocket: websocketControllerActionCreators.openWebsocket,
-  onSendWebsocketMessage: websocketControllerActionCreators.sendWebsocketMessage,
+  onConsumeWebsocketMessage: websocketControllerActionCreators.consumeWebsocketMessage,
+  onConsumeWebsocketMessageSuccess: websocketControllerActionCreators.consumeWebsocketMessageSuccess,
   onReceiveWebsocketMessage: websocketControllerActionCreators.receiveWebsocketMessage,
   onCloseWebsocket: websocketControllerActionCreators.closeWebsocket,
   onWebsocketError: websocketControllerActionCreators.websocketError,

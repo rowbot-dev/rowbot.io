@@ -1,18 +1,43 @@
 
+import { isEmpty } from 'lodash';
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import uuid from 'util/uuid';
-import { encode, decode } from './util';
+import { encode, decode } from './WebsocketController.util';
 
 class WebsocketController extends Component {
 
   constructor (props) {
     super();
+
+    this.state = {
+      active: null,
+    };
   }
 
   componentDidMount () {
     this.open();
+  }
+
+  componentDidUpdate (prevProps) {
+    const { active: prevActive } = prevProps;
+    const { id, onConsumeWebsocketMessage, active: nextActive, messages: nextMessages } = this.props;
+
+    const shouldConsume = !isEmpty(nextMessages) && !nextActive;
+
+    if (shouldConsume) {
+      onConsumeWebsocketMessage(id);
+    }
+
+    const shouldSend = (
+      nextActive &&
+      nextActive !== prevActive
+    );
+
+    if (shouldSend) {
+      this.send();
+    }
   }
 
   componentWillUnmount () {
@@ -38,18 +63,20 @@ class WebsocketController extends Component {
     }
   }
 
-  send (message) {
-    const { id, onSendWebsocketMessage } = this.props;
+  send () {
+    const { id, messages, active, onConsumeWebsocketMessageSuccess } = this.props;
 
     if (this.socket) {
-      const messageID = uuid();
-
-      this.socket.send(encode({
-        id: messageID,
-        content: message,
-      }));
-
-      onSendWebsocketMessage(id, messageID, message);
+      try {
+        this.socket.send(encode({
+          socket: id,
+          id: active,
+          content: messages[active].message,
+        }));
+        onConsumeWebsocketMessageSuccess(id, active);
+      } catch (error) {
+        this.handleError(id, active);
+      }
     }
   }
 
@@ -62,7 +89,7 @@ class WebsocketController extends Component {
   handleMessage (message) {
     const { id, onReceiveWebsocketMessage } = this.props;
 
-    const { id: messageID, data } = message;
+    const { id: messageID, data } = decode(message.data);
 
     onReceiveWebsocketMessage(id, messageID, data);
   }
@@ -80,13 +107,13 @@ class WebsocketController extends Component {
   }
 
   handleError (event) {
-    const { id, onWebsocketError } = this.props;
+    const { id, active, onWebsocketError } = this.props;
 
     if (this.socket && this.socket.readyState === 1) {
 
     }
 
-    onWebsocketError(id);
+    onWebsocketError(id, active);
   }
 
   render () {
@@ -94,5 +121,15 @@ class WebsocketController extends Component {
   }
 
 }
+
+WebsocketController.defaultProps = {
+  active: null,
+  messages: null,
+};
+
+WebsocketController.propTypes = {
+  active: PropTypes.string,
+  messages: PropTypes.object,
+};
 
 export default WebsocketController;

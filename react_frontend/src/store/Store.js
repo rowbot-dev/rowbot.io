@@ -1,17 +1,21 @@
 
 import { createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
+import { createLogger } from 'redux-logger'
 
+import websocketControllerSaga from 'components/abstract/WebsocketController/WebsocketController.saga';
 import Reducer from './Reducer';
-import websocketControllerReducer from 'components/abstract/WebsocketController/Reducer';
 
-import websocketControllerSaga from 'components/abstract/WebsocketController/Saga';
+const logger = createLogger({
+
+});
 
 const sagaMiddleware = createSagaMiddleware();
 
 const Store = createStore(
   Reducer,
   applyMiddleware(
+    logger,
     sagaMiddleware,
   ),
 );
