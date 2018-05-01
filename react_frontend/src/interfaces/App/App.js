@@ -1,14 +1,30 @@
 
 import React from 'react';
 
-import WebsocketController from 'components/abstract/WebsocketController';
-import MessageButton from 'components/interface/MessageButton';
+import Home from 'interfaces/Home';
+
+import WebsocketManager from 'components/abstract/WebsocketManager';
+import APIManager from 'components/abstract/APIManager';
+
+// <ActionManager />
+// <SceneManager />
+// <RouteManager />
+
+// <Authentication />
+// <Dashboard />
+// <Events />
+// <Members />
+// <Clubs />
+// <Teams />
+// <Assets />
 
 const App = () => {
   return (
     <main>
-      <WebsocketController id='api' target='ws://localhost:8000/api/' />
-      <MessageButton />
+      <WebsocketManager />
+      <APIManager />
+
+      <Home />
     </main>
   );
 };

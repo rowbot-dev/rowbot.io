@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from apps.rowbot.models.base import Model
-from apps.rowbot.api import send
+from apps.rowbot.util import send
 
 from datetime import timedelta
 import json
@@ -135,9 +135,8 @@ class EventNotification(Model):
     send(self._ref)
     print(self._ref)
 
-    # http.request('POST', 'http://{}:{}'.format(settings.WEBSOCKET['host'], settings.WEBSOCKET['message']), body=json.dumps({'data': {'ref': self._ref}, 'keys': self.keys()}))
-    # self.is_active = False
-    # self.save()
+    self.is_active = False
+    self.save()
 
   def schedule(self):
     _scheduler.add_job(

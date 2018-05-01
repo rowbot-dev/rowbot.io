@@ -1,10 +1,12 @@
 
 import { combineReducers } from 'redux';
 
-import websocketControllerReducer from 'components/abstract/WebsocketController/WebsocketController.reducer';
+import { combinedWebsocketReducer } from 'components/abstract/WebsocketManager';
+import { combinedAPIReducer } from 'components/abstract/APIManager';
 
 const Reducer = combineReducers({
-  websockets: websocketControllerReducer,
+  api: combinedAPIReducer,
+  websockets: combinedWebsocketReducer,
 });
 
 export default Reducer;

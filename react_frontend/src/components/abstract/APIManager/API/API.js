@@ -4,36 +4,30 @@ import { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import uuid from 'util/uuid';
-import { encode, decode } from './WebsocketController.util';
+import { encode, decode } from './Websocket.util';
 
-class WebsocketController extends Component {
-
-  constructor (props) {
-    super();
-
-    this.state = {
-      active: null,
-    };
-  }
+class Websocket extends Component {
 
   componentDidMount () {
     this.open();
   }
 
   componentDidUpdate (prevProps) {
-    const { active: prevActive, reopen: prevReopen } = prevProps;
-    const { id, onConsumeWebsocketMessage, active: nextActive, messages: nextMessages, open, reopen } = this.props;
+    const { status: { reopen: prevReopen } = {}, data: { active: prevActive } = {} } = prevProps;
+    const {
+      id,
+      onWebsocketConsume,
+      status: { open, reopen },
+      data: { active: nextActive, messages: nextMessages },
+    } = this.props;
 
     const shouldConsume = !isEmpty(nextMessages) && !nextActive;
 
     if (shouldConsume) {
-      onConsumeWebsocketMessage(id);
+      onWebsocketConsume(id);
     }
 
-    const shouldSend = (
-      nextActive &&
-      nextActive !== prevActive
-    );
+    const shouldSend = nextActive && nextActive !== prevActive;
 
     if (shouldSend) {
       this.send();
@@ -48,7 +42,7 @@ class WebsocketController extends Component {
 
   componentWillUnmount () {
     this.close();
-    window.clearInterval(this.attempt_reopen_interval);
+    clearInterval(this.attempt_reopen_interval);
   }
 
   open () {
@@ -76,58 +70,58 @@ class WebsocketController extends Component {
   }
 
   send () {
-    const { id, messages, active, onConsumeWebsocketMessageSuccess } = this.props;
+    const { id, data: { messages, active }, authentication } = this.props;
 
     if (this.socket) {
       try {
         this.socket.send(encode({
-          socket: id,
-          id: active,
-          content: messages[active].message,
+          context: {
+            socket: id,
+            message: active,
+            ...authentication,
+          },
+          data: messages[active].message,
         }));
-        onConsumeWebsocketMessageSuccess(id, active);
       } catch (error) {
-        this.handleError(id, active);
+        this.handleError();
       }
     }
   }
 
   handleOpen () {
-    const { id, onOpenWebsocket } = this.props;
+    const { id, onWebsocketOpen } = this.props;
 
-    onOpenWebsocket(id);
+    onWebsocketOpen(id);
   }
 
   handleMessage (message) {
-    const { id, onReceiveWebsocketMessage } = this.props;
+    const { id, onWebsocketReceive } = this.props;
 
     const { id: messageID, data } = decode(message.data);
 
-    onReceiveWebsocketMessage(id, messageID, data);
+    onWebsocketReceive(id, messageID, data);
   }
 
   handleClose (event) {
-    const { id, target, onCloseWebsocket } = this.props;
+    const { id, target, onWebsocketClose } = this.props;
 
     let reopen = false;
     if (event.code === 3001) {
-      console.log('Closed', target);
+      console.warn('Closed', target);
     } else {
       reopen = true;
-      console.log('Unable to connected to', target);
+      console.warn('Unable to connected to', target);
     }
 
-    onCloseWebsocket(id, reopen);
+    onWebsocketClose(id, reopen);
   }
 
   handleError (event) {
     const { id, active, onWebsocketError } = this.props;
 
     if (this.socket && this.socket.readyState === 1) {
-
+      onWebsocketError(id, active);
     }
-
-    onWebsocketError(id, active);
   }
 
   render () {
@@ -136,14 +130,14 @@ class WebsocketController extends Component {
 
 }
 
-WebsocketController.defaultProps = {
+Websocket.defaultProps = {
   active: null,
   messages: null,
 };
 
-WebsocketController.propTypes = {
+Websocket.propTypes = {
   active: PropTypes.string,
   messages: PropTypes.object,
 };
 
-export default WebsocketController;
+export default Websocket;

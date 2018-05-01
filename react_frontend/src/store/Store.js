@@ -3,7 +3,6 @@ import { createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger'
 
-import websocketControllerSaga from 'components/abstract/WebsocketController/WebsocketController.saga';
 import Reducer from './Reducer';
 
 const logger = createLogger({
@@ -20,6 +19,6 @@ const Store = createStore(
   ),
 );
 
-sagaMiddleware.run(websocketControllerSaga);
+// sagaMiddleware.run();
 
 export default Store;

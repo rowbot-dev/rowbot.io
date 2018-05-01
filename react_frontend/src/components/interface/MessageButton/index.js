@@ -4,8 +4,7 @@ import React, { Component } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
-import websocketControllerActionCreators from 'components/abstract/WebsocketController/WebsocketController.actions';
-import { messagesForSocket, activeForSocket } from 'components/abstract/WebsocketController/WebsocketController.selectors';
+import { websocketDataSelector, websocketActionCreators } from 'components/abstract/WebsocketManager';
 import uuid from 'util/uuid';
 
 class MessageButton extends Component {
@@ -17,9 +16,9 @@ class MessageButton extends Component {
   }
 
   handleClick () {
-    const { onSendWebsocketMessage } = this.props;
+    const { registerWebsocketMessage } = this.props;
 
-    onSendWebsocketMessage('api', uuid(), { hello: 'hello back' });
+    registerWebsocketMessage('api', uuid(), { key: 'hello' });
   }
 
   render () {
@@ -30,19 +29,11 @@ class MessageButton extends Component {
 }
 
 const mapStateToProps = (state) => {
-
-  const messages = messagesForSocket('api');
-  const active = activeForSocket('api');
-
-  return {
-    messages: messages(state),
-    active: active(state),
-  };
+  return {};
 };
 
 const mapDispatchToProps = {
-  onSendWebsocketMessage: websocketControllerActionCreators.sendWebsocketMessage,
-  onReceiveWebsocketMessage: websocketControllerActionCreators.receiveWebsocketMessage,
+  registerWebsocketMessage: websocketActionCreators.onWebsocketRegister,
 };
 
 export default compose(

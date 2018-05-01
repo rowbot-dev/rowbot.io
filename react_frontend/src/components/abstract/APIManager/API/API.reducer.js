@@ -3,9 +3,9 @@ import { merge } from 'lodash';
 
 import constants from 'store/constants';
 
-const websocketControllerReducer = (state={}, action) => {
+const websocketReducer = (state={}, action) => {
   switch (action.type) {
-    case constants.WEBSOCKET_OPEN: {
+    case constants.WEBSOCKET_OPENED: {
       const { socket } = action.payload;
 
       return merge(
@@ -13,16 +13,14 @@ const websocketControllerReducer = (state={}, action) => {
         state,
         {
           [socket]: {
-            open: true,
-            reopen: false,
             messages: {},
             active: null,
           },
         },
       );
     }
-    case constants.WEBSOCKET_SEND: {
-      const { socket, id, message } = action.payload;
+    case constants.WEBSOCKET_REGISTER: {
+      const { socket, message, data } = action.payload;
 
       return merge(
         {},
@@ -30,7 +28,7 @@ const websocketControllerReducer = (state={}, action) => {
         {
           [socket]: {
             messages: {
-              [id]: { message },
+              [message]: { data },
             },
           },
         },
@@ -39,21 +37,21 @@ const websocketControllerReducer = (state={}, action) => {
     case constants.WEBSOCKET_CONSUME: {
       const { socket } = action.payload;
       const { messages = {} } = (state[socket] || {});
-      const [ id, ...rest ] = Object.keys(messages);
+      const [message, ...rest] = Object.keys(messages);
 
       return merge(
         {},
         state,
         {
-          [socket]: { active: id },
+          [socket]: { active: message },
         },
       );
     }
-    case constants.WEBSOCKET_CONSUME_SUCCESS: {
-      const { socket, id } = action.payload;
+    case constants.WEBSOCKET_RECEIVE: {
+      const { socket, message } = action.payload;
 
       let newState = merge({}, state);
-      delete newState[socket].messages[id];
+      delete newState[socket].messages[message];
       delete newState[socket].active;
 
       return newState;
@@ -69,23 +67,9 @@ const websocketControllerReducer = (state={}, action) => {
         },
       );
     }
-    case constants.WEBSOCKET_CLOSE: {
-      const { socket, reopen } = action.payload;
-
-      return merge(
-        {},
-        state,
-        {
-          [socket]: {
-            open: false,
-            reopen,
-          },
-        },
-      );
-    }
     default:
       return state;
   }
 }
 
-export default websocketControllerReducer;
+export default websocketReducer;
