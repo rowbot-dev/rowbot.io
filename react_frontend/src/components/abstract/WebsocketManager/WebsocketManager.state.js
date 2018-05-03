@@ -10,7 +10,6 @@ import { websocketStatusSelector } from './WebsocketManager.selectors';
 const mapStateToProps = (state, props) => {
   const status = websocketStatusSelector(state);
   const websockets = Object.keys(status)
-    .filter(socket => status[socket].opening || status[socket].open)
     .map(socket => ({ socket, target: status[socket].target }));
 
   return {

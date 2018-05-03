@@ -14,7 +14,6 @@ const websocketManagerReducer = (state={}, action) => {
         {
           [socket]: {
             target,
-            open: false,
             reopen: false,
             opening: true,
             closing: false,
@@ -48,7 +47,6 @@ const websocketManagerReducer = (state={}, action) => {
         state,
         {
           [socket]: {
-            open: true,
             reopen: false,
             opening: false,
             closing: true,

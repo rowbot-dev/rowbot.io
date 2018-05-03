@@ -17,8 +17,8 @@ class Websocket extends Component {
     const {
       id,
       onWebsocketConsume,
-      status: { open, reopen },
-      data: { active: nextActive, messages: { length: numberOfMessages } },
+      status: { reopen, closed },
+      data: { active: nextActive, messages: { length: numberOfMessages } = [] } = {},
     } = this.props;
 
     const shouldConsume = numberOfMessages > 0;
@@ -33,7 +33,7 @@ class Websocket extends Component {
       this.send();
     }
 
-    const shouldAttemptReopen = !open && reopen && reopen !== prevReopen;
+    const shouldAttemptReopen = closed && reopen && reopen !== prevReopen;
 
     if (shouldAttemptReopen) {
       this.attemptReopen();
@@ -57,7 +57,7 @@ class Websocket extends Component {
 
   attemptReopen () {
     this.attempt_reopen_interval = window.setInterval(
-      () => !this.props.open && this.open(),
+      () => this.props.status.reopen && this.open(),
       1000,
     );
   }
@@ -130,14 +130,14 @@ class Websocket extends Component {
 
 }
 
-Websocket.defaultProps = {
-  active: null,
-  messages: null,
-};
-
-Websocket.propTypes = {
-  active: PropTypes.object,
-  messages: PropTypes.object,
-};
+// Websocket.defaultProps = {
+//   active: null,
+//   messages: null,
+// };
+//
+// Websocket.propTypes = {
+//   active: PropTypes.object,
+//   messages: PropTypes.object,
+// };
 
 export default Websocket;
