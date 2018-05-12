@@ -46,6 +46,10 @@ class Websocket extends Component {
   open () {
     const { target } = this.props;
 
+    if (this.socket) {
+      this.close();
+    }
+
     this.socket = new WebSocket(target);
     this.socket.onopen = this.handleOpen.bind(this);
     this.socket.onmessage = this.handleMessage.bind(this);
