@@ -14,6 +14,7 @@ const websocketManagerReducer = (state={}, action) => {
         {
           [socket]: {
             target,
+            open: false,
             reopen: false,
             opening: true,
             closing: false,

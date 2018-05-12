@@ -2,8 +2,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import uuid from 'util/uuid';
-
 import Websocket from './Websocket';
 
 class WebsocketManager extends Component {
@@ -37,12 +35,8 @@ class WebsocketManager extends Component {
 
 }
 
-WebsocketManager.defaultProps = {
-
-};
-
 WebsocketManager.propTypes = {
-
+  websockets: PropTypes.array.isRequired,
 };
 
 export default WebsocketManager;

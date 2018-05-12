@@ -37,6 +37,7 @@ DEFAULT_APPS = (
 )
 THIRD_PARTY_APPS = (
   'channels',
+  'django_nose',
 )
 LOCAL_APPS = (
   'apps.base',
@@ -100,7 +101,7 @@ FILE_UPLOAD_HANDLERS = (
   'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 )
 
-TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'

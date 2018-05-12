@@ -6,7 +6,7 @@ from django.db import models
 
 
 # Local
-from apps.rowbot.models.base import Model
+from apps.base.models import Model
 
 # Asset
 class AssetModel(Model):

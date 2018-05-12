@@ -64,7 +64,7 @@ const websocketReducer = (state={}, action) => {
       );
     }
     case constants.WEBSOCKET_RECEIVE: {
-      const { socket, message, data } = action.payload;
+      const { message } = action.payload;
 
       return mergeWith(
         {},

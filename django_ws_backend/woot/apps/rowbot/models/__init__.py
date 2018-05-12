@@ -3,7 +3,7 @@
 from apps.rowbot.models.asset import AssetModel, Asset, AssetInstance
 from apps.rowbot.models.club import Club
 from apps.rowbot.models.event import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
-from apps.rowbot.models.member import Member
+from apps.rowbot.models.member import Member, AuthenticationToken
 from apps.rowbot.models.role import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
 from apps.rowbot.models.team import TeamModel, Team, TeamInstance, TeamRecord
 

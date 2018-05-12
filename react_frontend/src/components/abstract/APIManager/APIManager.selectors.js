@@ -1,5 +1,5 @@
 
-import { createSelector } from 'reselect';
+// import { createSelector } from 'reselect';
 
 export const APIStatusSelector = state => state.api.status;
 

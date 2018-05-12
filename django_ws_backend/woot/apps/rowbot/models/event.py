@@ -3,8 +3,8 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
-from apps.rowbot.models.base import Model
-from apps.rowbot.util import send
+from util.api.send import send
+from apps.base.models import Model
 
 from datetime import timedelta
 import json

@@ -1,9 +1,7 @@
 
-import { isEmpty } from 'lodash';
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import uuid from 'util/uuid';
 import { encode, decode } from './Websocket.util';
 
 class Websocket extends Component {
@@ -70,7 +68,7 @@ class Websocket extends Component {
   }
 
   send () {
-    const { id, data: { active, consumed }, authentication } = this.props;
+    const { id, data: { active, consumed }, authorization } = this.props;
 
     if (this.socket) {
       try {
@@ -78,7 +76,7 @@ class Websocket extends Component {
           context: {
             socket: id,
             message: active,
-            ...authentication,
+            ...authorization,
           },
           data: consumed[active],
         }));
@@ -97,7 +95,7 @@ class Websocket extends Component {
   handleMessage (message) {
     const { id, onWebsocketReceive } = this.props;
 
-    const { id: messageID, data } = decode(message.data);
+    const { context: { message: messageID }, data } = decode(message.data);
 
     onWebsocketReceive(id, messageID, data);
   }
@@ -130,14 +128,32 @@ class Websocket extends Component {
 
 }
 
-// Websocket.defaultProps = {
-//   active: null,
-//   messages: null,
-// };
-//
-// Websocket.propTypes = {
-//   active: PropTypes.object,
-//   messages: PropTypes.object,
-// };
+Websocket.defaultProps = {
+  authorization: undefined,
+  status: undefined,
+  data: undefined,
+}
+
+Websocket.propTypes = {
+  id: PropTypes.string.isRequired,
+  authorization: PropTypes.object,
+  status: PropTypes.shape({
+    open: PropTypes.bool.isRequired,
+    opening: PropTypes.bool.isRequired,
+    reopen: PropTypes.bool.isRequired,
+    closed: PropTypes.bool.isRequired,
+    closing: PropTypes.bool.isRequired,
+    target: PropTypes.string.isRequired,
+  }),
+  data: PropTypes.shape({
+    active: PropTypes.string,
+    messages: PropTypes.array,
+  }),
+  onWebsocketOpen: PropTypes.func.isRequired,
+  onWebsocketConsume: PropTypes.func.isRequired,
+  onWebsocketReceive: PropTypes.func.isRequired,
+  onWebsocketClose: PropTypes.func.isRequired,
+  onWebsocketError: PropTypes.func.isRequired,
+};
 
 export default Websocket;

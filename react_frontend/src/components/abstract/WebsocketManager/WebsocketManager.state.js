@@ -1,10 +1,8 @@
 
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { merge } from 'lodash';
 
 import WebsocketManager from './WebsocketManager';
-import websocketManagerActionCreators from './WebsocketManager.actions';
 import { websocketStatusSelector } from './WebsocketManager.selectors';
 
 const mapStateToProps = (state, props) => {

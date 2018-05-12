@@ -5,13 +5,32 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.db import models
-from apps.base.models import Model, random_key
-import uuid
-import urllib3
-http = urllib3.PoolManager(retries=False)
 
-class MemberManager(BaseUserManager):
-  pass
+from apps.base.models import Model, Manager, random_key
+from util.merge import merge
+
+import uuid
+
+class MemberManager(BaseUserManager, Manager):
+  def schema(self, authorization=None):
+    schema = super().schema(authorization=authorization)
+
+    # add methods
+    schema = merge(
+      schema,
+      {
+        'methods': {
+          'activate': {
+            'activation_key': 'string',
+          },
+          'send_activation_email': {},
+        },
+      },
+    )
+
+    # make modifications based on authorization
+
+    return schema
 
 # m = Member.objects.create(username='npiano', email='nicholas.d.piano@gmail.com', first_name='Nicholas', last_name='Piano')
 class Member(AbstractBaseUser, PermissionsMixin, Model):
@@ -41,7 +60,7 @@ class Member(AbstractBaseUser, PermissionsMixin, Model):
   is_staff = models.BooleanField(default=False)
 
   # Methods
-  def activate(self, activation_key):
+  def activate(self, activation_key=None):
     if not self.is_activated:
       self.is_activated = activation_key == self.activation_key.hex if activation_key is not None else self.is_activated
       self.save()
@@ -65,3 +84,11 @@ class Member(AbstractBaseUser, PermissionsMixin, Model):
     # return number_of_messages_sent > 0 # success?
 
     return True
+
+
+class AuthenticationToken(Model):
+
+  # Connections
+  member = models.ForeignKey('rowbot.Member', related_name='tokens', on_delete=models.CASCADE)
+
+  # Properties

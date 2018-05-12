@@ -2,6 +2,8 @@
 from django.db import models
 from django.db.models import Q
 
+from util.merge import merge
+
 import uuid
 from uuid import UUID
 import string
@@ -28,6 +30,52 @@ class Manager(models.Manager):
       return super().get(**kwargs)
     return None
 
+  def query(self, query, authorization=None):
+    filter = query.get('filter', {})
+
+    instances = {}
+    for instance in self.filter(**filter):
+      instances = merge(
+        instances,
+        {
+          instance._id: instance.serialize(),
+        }
+      )
+
+    return {
+      'data': {
+        'models': {
+          self.model.__name__: {
+            'instances': instances,
+          },
+        },
+      },
+    }
+
+  def schema(self, authorization=None):
+    schema = {}
+    for field in self.model._meta.get_fields():
+      if field.is_relation:
+        schema = merge(
+          schema,
+          {
+            'relationships': {
+              field.name: field.related_model.__name__,
+            },
+          },
+        )
+      else:
+        schema = merge(
+          schema,
+          {
+            'attributes': {
+              field.name: field.get_internal_type(),
+            },
+          },
+        )
+
+    return schema
+
 class Model(models.Model):
 
   objects = Manager()
@@ -45,3 +93,6 @@ class Model(models.Model):
   @property
   def _ref(self):
     return '{}.{}'.format(self.__class__.__name__, self._id)
+
+  def serialize(self):
+    return str(self.date_created)

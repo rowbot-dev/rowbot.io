@@ -1,5 +1,4 @@
 
-import uuid from 'util/uuid';
 import constants from 'store/constants';
 
 const websocketManagerActionCreators = {

@@ -3,7 +3,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 
 import APIManager from './APIManager';
-import APIManagerActionCreators from './APIManager.actions';
+// import APIManagerActionCreators from './APIManager.actions';
 import { APIStatusSelector } from './APIManager.selectors';
 
 const mapStateToProps = (state, props) => {

@@ -219,7 +219,7 @@ DATABASES = {}
 THIRD_PARTY_APPS = (
   # util
   'rest_framework',
-  'rest_framework.authtoken',
+  'rest_framework.token',
 )
 
 LOCAL_APPS = (

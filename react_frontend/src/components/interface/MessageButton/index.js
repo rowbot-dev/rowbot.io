@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
-import { websocketDataSelector, websocketActionCreators } from 'components/abstract/WebsocketManager';
+import { websocketActionCreators } from 'components/abstract/WebsocketManager';
 import uuid from 'util/uuid';
 
 class MessageButton extends Component {
@@ -18,7 +18,18 @@ class MessageButton extends Component {
   handleClick () {
     const { registerWebsocketMessage } = this.props;
 
-    registerWebsocketMessage('api', uuid(), { key: 'hello' });
+    registerWebsocketMessage(
+      'api',
+      uuid(),
+      {
+        schema: true,
+        request: {
+          Member: {
+            filter: {},
+          },
+        },
+      },
+    );
   }
 
   render () {
