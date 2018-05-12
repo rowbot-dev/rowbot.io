@@ -8,6 +8,17 @@
           "python dependencies": "django, channels, channels-redis, redis, asgi-redis",
           "models prepared": "DONE",
         }
+      },
+      "20180512": {
+        "description": "Got basic api stuff working. Solving a couple problems with opening websockets",
+        "children": {
+          "R-1": {
+            "description": "Multiple websockets being opened when reconnecting. Need to ensure that only one is.",
+            "children": {
+              "Look at how Websocket responds to events": "Added socket defined check when opening websocket."
+            },
+          }
+        }
       }
     }
   },
