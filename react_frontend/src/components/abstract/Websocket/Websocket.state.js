@@ -4,15 +4,12 @@ import { connect } from 'react-redux';
 
 import Websocket from './Websocket';
 import websocketActionCreators from './Websocket.actions';
-import { websocketStatusSocketSelector } from '../WebsocketManager.selectors';
-import { websocketDataSelector } from './Websocket.selectors';
+import { websocketSelector } from './Websocket.selectors';
 
 const mapStateToProps = (state, { id: socket }) => {
-  const status = websocketStatusSocketSelector(socket);
-  const data = websocketDataSelector(socket);
+  const data = websocketSelector(socket);
 
   return {
-    status: status(state),
     data: data(state),
     // authentication: authenticationSelector(state),
   };

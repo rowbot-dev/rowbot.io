@@ -1,10 +1,9 @@
 
 import React, { Component } from 'react';
-
+import { merge } from 'lodash';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
-import { websocketActionCreators } from 'components/abstract/WebsocketManager';
 import uuid from 'util/uuid';
 
 class MessageButton extends Component {
@@ -16,20 +15,9 @@ class MessageButton extends Component {
   }
 
   handleClick () {
-    const { registerWebsocketMessage } = this.props;
+    const { models: { Member } } = this.props;
 
-    registerWebsocketMessage(
-      'api',
-      uuid(),
-      {
-        schema: true,
-        request: {
-          Member: {
-            filter: {},
-          },
-        },
-      },
-    );
+    Member.remote.filter();
   }
 
   render () {
@@ -39,14 +27,17 @@ class MessageButton extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {};
+const mapStateToProps = state => {
+  return {
+    // models,
+  };
 };
 
 const mapDispatchToProps = {
-  registerWebsocketMessage: websocketActionCreators.onWebsocketRegister,
+
 };
 
 export default compose(
+  // withAPI('api', uiud()),
   connect(mapStateToProps, mapDispatchToProps),
 )(MessageButton);

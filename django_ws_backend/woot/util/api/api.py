@@ -12,11 +12,11 @@ class API():
     data = payload.get('data', {})
     message_id = context.get('message')
 
-    response = Response(message_id)
+    response = Response(message_id=message_id)
 
     authentication = data.get('authentication')
     if authentication:
-      schema_authentication = this.schema.authenticate(authentication)
+      schema_authentication = self.schema.authenticate(authentication=authentication)
       response.add_authentication(schema_authentication)
 
     authorization = context.get('authorization')
@@ -29,6 +29,14 @@ class API():
 
     should_add_schema = data.get('schema', False)
     if should_add_schema:
-      response.add_schema(self.schema.render(authorization))
+      response.add_schema(self.schema.render(authorization=authorization))
+
+    return response
+
+  def greeting(self):
+    response = Response()
+
+    response.add_authentication(self.schema.authenticate())
+    response.add_schema(self.schema.render())
 
     return response

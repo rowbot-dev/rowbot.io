@@ -14,17 +14,17 @@ const websocketActionCreators = {
     type: constants.WEBSOCKET_CONSUME,
     payload: { socket },
   }),
-  onWebsocketReceive: (socket, message, data) => ({
+  onWebsocketReceive: (socket, data, context) => ({
     type: constants.WEBSOCKET_RECEIVE,
-    payload: { socket, message, data },
+    payload: { socket, data, context },
   }),
   onWebsocketClose: (socket, reopen) => ({
     type: constants.WEBSOCKET_CLOSED,
     payload: { socket, reopen },
   }),
-  onWebsocketError: (socket, message, error) => ({
+  onWebsocketError: (socket, error) => ({
     type: constants.WEBSOCKET_ERROR,
-    payload: { socket, message, error },
+    payload: { socket, error },
   }),
 };
 

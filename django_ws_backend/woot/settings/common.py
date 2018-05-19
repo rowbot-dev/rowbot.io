@@ -80,6 +80,7 @@ WSGI_APPLICATION = 'wsgi.application'
 DATABASES = {}
 
 AUTH_USER_MODEL = 'rowbot.Member'
+AUTH_TOKEN_MODEL = 'rowbot.AuthenticationToken'
 
 AUTH_PASSWORD_VALIDATORS = [
   {

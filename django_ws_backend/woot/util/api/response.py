@@ -4,20 +4,13 @@ from util.merge import merge
 
 class Response():
 
-  def __init__(self, message_id):
+  def __init__(self, message_id=None):
     self.id = message_id
     self.payload = {}
 
   def add_authentication(self, authentication):
     if authentication:
-      self.payload = merge(
-        self.payload,
-        {
-          'context': {
-            'authentication': authentication,
-          },
-        },
-      )
+      self.payload = merge(self.payload, authentication)
 
   def add_schema(self, schema):
     if schema:

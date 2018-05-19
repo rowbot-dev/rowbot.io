@@ -6,9 +6,9 @@ import MessageButton from 'components/interface/MessageButton';
 class Home extends Component {
 
   componentDidMount () {
-    const { openWebsocket } = this.props;
+    const { createAPI } = this.props;
 
-    openWebsocket('api', 'ws://localhost:8000/api/');
+    createAPI('rowbot', 'ws://localhost:8000/api/');
   }
 
   render () {

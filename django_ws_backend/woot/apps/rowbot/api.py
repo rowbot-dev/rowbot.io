@@ -33,6 +33,9 @@ class Consumer(JsonWebsocketConsumer):
     async_to_sync(self.channel_layer.group_add)(ROWBOT, self.channel_name)
     self.accept()
 
+    response = api.greeting()
+    self.send_json(response.render())
+
     # SocketLogger.objects.connect()
 
   def receive_json(self, payload):

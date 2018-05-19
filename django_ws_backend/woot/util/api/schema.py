@@ -10,8 +10,24 @@ class Schema():
   def get_model(self, model_name):
     return self.models.get(model_name)
 
-  def authenticate(self, authentication):
-    pass
+  def authenticate(self, authentication=None):
+    if authentication:
+      return {}
+
+    return {
+      'context': {
+        'authentication': {
+          'methods': {
+            'username_password': [
+              ''
+            ],
+            'key_pair': [
+              ''
+            ],
+          },
+        },
+      },
+    }
     # 1. request to be authenticated
     # 2. request to be re-authenticated
     # 3. return of challenge
@@ -24,7 +40,7 @@ class Schema():
 
     return Model.objects.query(query, authorization=authorization)
 
-  def render(self, authorization):
+  def render(self, authorization=None):
     schema = {}
     for model_name, Model in self.models.items():
       schema = merge(

@@ -3,8 +3,7 @@ import React from 'react';
 
 import Home from 'interfaces/Home';
 
-import WebsocketManager from 'components/abstract/WebsocketManager';
-import APIManager from 'components/abstract/APIManager';
+import { APIManager } from 'components/abstract/API';
 
 // <ActionManager />
 // <SceneManager />
@@ -21,7 +20,6 @@ import APIManager from 'components/abstract/APIManager';
 const App = () => {
   return (
     <main>
-      <WebsocketManager />
       <APIManager />
 
       <Home />

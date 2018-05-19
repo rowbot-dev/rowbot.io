@@ -3,6 +3,7 @@ import { createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger'
 
+import { APISaga } from 'components/abstract/API';
 import Reducer from './Reducer';
 
 const logger = createLogger({
@@ -19,6 +20,6 @@ const Store = createStore(
   ),
 );
 
-// sagaMiddleware.run();
+sagaMiddleware.run(APISaga);
 
 export default Store;

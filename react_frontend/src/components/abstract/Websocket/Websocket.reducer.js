@@ -13,6 +13,13 @@ const websocketReducer = (state={}, action) => {
         state,
         {
           [socket]: {
+            status: {
+              open: true,
+              reopen: false,
+              opening: false,
+              closing: false,
+              closed: false,
+            },
             messages: [],
             active: null,
             consumed: {},
@@ -64,7 +71,7 @@ const websocketReducer = (state={}, action) => {
       );
     }
     case constants.WEBSOCKET_RECEIVE: {
-      const { message } = action.payload;
+      const { context: { message } } = action.payload;
 
       return mergeWith(
         {},
@@ -75,6 +82,25 @@ const websocketReducer = (state={}, action) => {
             return srcValue;
           }
         }
+      );
+    }
+    case constants.WEBSOCKET_CLOSED: {
+      const { socket, reopen } = action.payload;
+
+      return merge(
+        {},
+        state,
+        {
+          [socket]: {
+            status: {
+              open: false,
+              reopen,
+              opening: false,
+              closing: false,
+              closed: true,
+            },
+          },
+        },
       );
     }
     case constants.WEBSOCKET_ERROR: {

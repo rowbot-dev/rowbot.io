@@ -17,7 +17,43 @@
             "children": {
               "Look at how Websocket responds to events": "Added socket defined check when opening websocket."
             },
+          },
+          "R-4": {
+            "description": "Move API and schema management to new APIManager",
+            "children": {
+              "Take code from MessageButton component": "Not very much, but the same calls need to be made in a more general form",
+              "Struggling to think of a way to do queries properly": "The query must originate from a component, but the response must come back to it in some way, or at least, components should have a way of listening to the answers that they need.",
+              "Flattening directory structure": "API and Websocket",
+            }
+          },
+          "REMINDER: readystate": "It's likely I can do something more intelligent with the readystate of the websocket. I might have the opportunity to integrate this later, but it might not be necessary.",
+        }
+      },
+      "20180513": {
+        "description": "Shuffling some stuff around.",
+        "children": {
+          "API": "Moving to flat directory structure and adding withAPI HOC for components that need to access data.",
+          "Models": "Thinking about models in their dual role as selector and action creator, since data needs to be funnelled in through the mapStateToProps function, but also fetched from the server.",
+          "WebsocketManager": "Since the websocket is spawned from the API directly based on the protocol, it doesn't make much sense to have a WebsocketManager, so I am removing this.",
+          "Websocket": "Combining reducers, etc for Websocket and WebsocketManager",
+
+        }
+      },
+      "20180515": {
+        "description": "Thinking about models and their dual role as selector and action creator.",
+        "children": {
+          "API saga": {
+            "description": "Adding saga to convert websocket receive action into different api actions",
+            "children": {
+
+            }
           }
+        }
+      },
+      "20180516": {
+        "description": "I really like this API saga idea to split up the response from the websocket or even an http connection.",
+        "children": {
+          ""
         }
       }
     }

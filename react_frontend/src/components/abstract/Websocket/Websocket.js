@@ -1,9 +1,7 @@
 
-import { isEmpty } from 'lodash';
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import uuid from 'util/uuid';
 import { encode, decode } from './Websocket.util';
 
 class Websocket extends Component {
@@ -13,15 +11,17 @@ class Websocket extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    const { status: { reopen: prevReopen } = {}, data: { active: prevActive } = {} } = prevProps;
+    const { data: { status: { reopen: prevReopen } = {}, active: prevActive } = {} } = prevProps;
     const {
       id,
       onWebsocketConsume,
-      status: { open, reopen },
-      data: { active: nextActive, messages: nextMessages },
+      data: {
+        status: { reopen, closed },
+        active: nextActive, messages: { length: numberOfMessages } = []
+      } = {},
     } = this.props;
 
-    const shouldConsume = !isEmpty(nextMessages) && !nextActive;
+    const shouldConsume = numberOfMessages > 0;
 
     if (shouldConsume) {
       onWebsocketConsume(id);
@@ -33,7 +33,7 @@ class Websocket extends Component {
       this.send();
     }
 
-    const shouldAttemptReopen = !open && reopen && reopen !== prevReopen;
+    const shouldAttemptReopen = closed && reopen && reopen !== prevReopen;
 
     if (shouldAttemptReopen) {
       this.attemptReopen();
@@ -48,6 +48,10 @@ class Websocket extends Component {
   open () {
     const { target } = this.props;
 
+    if (this.socket) {
+      this.close();
+    }
+
     this.socket = new WebSocket(target);
     this.socket.onopen = this.handleOpen.bind(this);
     this.socket.onmessage = this.handleMessage.bind(this);
@@ -57,7 +61,7 @@ class Websocket extends Component {
 
   attemptReopen () {
     this.attempt_reopen_interval = window.setInterval(
-      () => !this.props.open && this.open(),
+      () => this.props.data.status.reopen && this.open(),
       1000,
     );
   }
@@ -70,7 +74,7 @@ class Websocket extends Component {
   }
 
   send () {
-    const { id, data: { messages, active }, authentication } = this.props;
+    const { id, data: { active, consumed }, authorization } = this.props;
 
     if (this.socket) {
       try {
@@ -78,9 +82,9 @@ class Websocket extends Component {
           context: {
             socket: id,
             message: active,
-            ...authentication,
+            ...authorization,
           },
-          data: messages[active].message,
+          data: consumed[active],
         }));
       } catch (error) {
         this.handleError();
@@ -97,9 +101,9 @@ class Websocket extends Component {
   handleMessage (message) {
     const { id, onWebsocketReceive } = this.props;
 
-    const { id: messageID, data } = decode(message.data);
+    const { context, context: { message: messageID }, data } = decode(message.data);
 
-    onWebsocketReceive(id, messageID, data);
+    onWebsocketReceive(id, messageID, data, context);
   }
 
   handleClose (event) {
@@ -131,13 +135,30 @@ class Websocket extends Component {
 }
 
 Websocket.defaultProps = {
-  active: null,
-  messages: null,
-};
+  authorization: undefined,
+  data: undefined,
+}
 
 Websocket.propTypes = {
-  active: PropTypes.string,
-  messages: PropTypes.object,
+  id: PropTypes.string.isRequired,
+  authorization: PropTypes.object,
+  data: PropTypes.shape({
+    status: PropTypes.shape({
+      open: PropTypes.bool,
+      opening: PropTypes.bool,
+      reopen: PropTypes.bool,
+      closed: PropTypes.bool,
+      closing: PropTypes.bool,
+      target: PropTypes.string,
+    }),
+    active: PropTypes.string,
+    messages: PropTypes.array,
+  }),
+  onWebsocketOpen: PropTypes.func.isRequired,
+  onWebsocketConsume: PropTypes.func.isRequired,
+  onWebsocketReceive: PropTypes.func.isRequired,
+  onWebsocketClose: PropTypes.func.isRequired,
+  onWebsocketError: PropTypes.func.isRequired,
 };
 
 export default Websocket;
