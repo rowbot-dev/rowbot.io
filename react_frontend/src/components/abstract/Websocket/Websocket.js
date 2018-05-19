@@ -101,9 +101,9 @@ class Websocket extends Component {
   handleMessage (message) {
     const { id, onWebsocketReceive } = this.props;
 
-    const { context, context: { message: messageID }, data } = decode(message.data);
+    const { data, context } = decode(message.data);
 
-    onWebsocketReceive(id, messageID, data, context);
+    onWebsocketReceive(id, data, context);
   }
 
   handleClose (event) {

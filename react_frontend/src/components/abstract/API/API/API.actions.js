@@ -6,13 +6,13 @@ const APIActionCreators = {
     type: constants.API_CREATED,
     payload: { api },
   }),
-  onAPISchemaReceived: (api, schema) => ({
-    type: constants.API_SCHEMA_RECEIVED,
-    payload: { api, schema },
+  onAPIAuthorizationReceived: (api, message, authorization) => ({
+    type: constants.API_AUTHORIZATION_RECEIVED,
+    payload: { api, message, authorization },
   }),
-  onAPIAuthenticationReceived: (api, authentication) => ({
+  onAPIAuthenticationReceived: (api, message, authentication) => ({
     type: constants.API_AUTHENTICATION_RECEIVED,
-    payload: { api, authentication },
+    payload: { api, message, authentication },
   }),
   onAPIAuthenticationBegin: api => ({
     type: constants.API_AUTHENTICATION_BEGIN,
@@ -25,6 +25,10 @@ const APIActionCreators = {
   onAPIAuthenticationFailed: api => ({
     type: constants.API_AUTHENTICATION_FAILED,
     payload: { api },
+  }),
+  onAPISchemaReceived: (api, message, schema) => ({
+    type: constants.API_SCHEMA_RECEIVED,
+    payload: { api, message, schema },
   }),
   onAPIQuery: (api, model, query) => ({
     type: constants.API_QUERY,

@@ -8,20 +8,26 @@ import APIActionCreators from './API.actions';
 export function* websocketToAPI (action) {
   const {
     socket,
-    data: { schema, models },
-    context: { authentication },
+    context: { authentication, authorization, message },
+    data: { schema, models, reference },
   } = action.payload;
 
-  if (schema) {
-    yield put(APIActionCreators.onAPISchemaReceived(socket, schema));
-  }
-
   if (authentication) {
-    yield put(APIActionCreators.onAPIAuthenticationReceived(socket, authentication));
+    yield put(APIActionCreators.onAPIAuthenticationReceived(socket, message, authentication));
   }
 
-  // authentication completed
-  // authentication failed
+  if (authorization) {
+    yield put(APIActionCreators.onAPIAuthorizationReceived(socket, message, authorization));
+  }
+
+  if (schema) {
+    yield put(APIActionCreators.onAPISchemaReceived(socket, message, schema));
+  }
+
+  if (models) {
+
+  }
+
   // websocket closed from server
 
   // yield put(APIActionCreators.onAPIReceive(socket, ));
@@ -29,7 +35,8 @@ export function* websocketToAPI (action) {
 
 export function* APIAuthentication (action) {
   const { api, authentication } = action.payload;
-
+  // authentication completed
+  // authentication failed
 
 }
 
