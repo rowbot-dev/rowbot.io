@@ -1,5 +1,5 @@
 
-import { mapObject } from 'lodash';
+import { mapValues } from 'lodash';
 
 export const types = {
 
@@ -7,10 +7,10 @@ export const types = {
 
 export class APIConnector {
 
-  constructor (state, actions) {
-    const { data: { schema } } = state;
+  constructor (state = {}, actions) {
+    const { data: { schema } = {} } = state;
 
-    this.models = mapObject(schema, (modelName, model) => new Model(modelName, model));
+    this.models = mapValues(schema, (modelName, model) => (new Model(modelName, model)));
   }
 }
 

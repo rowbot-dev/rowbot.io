@@ -6,6 +6,7 @@ import API, {
   APIReducer,
   APIActionCreators,
   APISelector,
+  APIConnection,
   APISaga,
 } from './API';
 import withAPI from './withAPI';
@@ -20,6 +21,7 @@ export {
   APIReducer,
   APIActionCreators,
   APISelector,
+  APIConnection,
   APISaga,
 };
 

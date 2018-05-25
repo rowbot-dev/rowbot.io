@@ -16,7 +16,7 @@ class APIConnectedList extends Component {
     const { value } = data;
 
     Member.filter({
-      
+
     });
   }
 
@@ -31,7 +31,7 @@ class APIConnectedList extends Component {
 }
 
 APIConnectedList.propTypes = {
-  onAPIConsumerSetParameters: PropTypes.func.isRequired,
+
 };
 
 export default APIConnectedList;
