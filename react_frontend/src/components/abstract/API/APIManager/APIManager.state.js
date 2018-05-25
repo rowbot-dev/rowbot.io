@@ -3,13 +3,11 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 
 import APIManager from './APIManager';
-import { APIsSelector } from '../API/API.selectors';
+import { APIsSelector } from '../API.selectors';
 
-const mapStateToProps = (state, props) => {
-  return {
-    apis: APIsSelector(state),
-  };
-};
+const mapStateToProps = state => ({
+  apis: APIsSelector(state),
+});
 
 const mapDispatchToProps = {
 

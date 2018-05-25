@@ -1,0 +1,29 @@
+Arguments: 
+  /usr/local/Cellar/node/9.8.0/bin/node /usr/local/bin/yarn list
+
+PATH: 
+  /Users/nicholaspiano/.rvm/gems/ruby-2.4.1/bin:/Users/nicholaspiano/.rvm/gems/ruby-2.4.1@global/bin:/Users/nicholaspiano/.rvm/rubies/ruby-2.4.1/bin:/Users/nicholaspiano/perl5/bin:/usr/local/git/bin:/sw/bin:/usr/local/bin:/usr/local:/usr/local/sbin:/usr/local/mysql/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/Users/nicholaspiano/.rvm/bin
+
+Yarn version: 
+  1.5.1
+
+Node version: 
+  9.8.0
+
+Platform: 
+  darwin x64
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: No lockfile in this directory. Run `yarn install` to generate one.
+      at new MessageError (/usr/local/lib/node_modules/yarn/lib/cli.js:186:110)
+      at /usr/local/lib/node_modules/yarn/lib/cli.js:89389:13
+      at <anonymous>

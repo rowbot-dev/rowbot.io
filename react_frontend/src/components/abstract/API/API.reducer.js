@@ -116,15 +116,15 @@ const APIReducer = (state = {}, action) => {
           [api]: {
             consumers: {
               [consumer]: {
-                messages: {},
+                references: {},
               },
             },
           },
         },
       );
     }
-    case constants.API_CONSUMER_SET_PARAMETERS: {
-      const { api, consumer, parameters } = action.payload;
+    case constants.API_CONSUMER_REFERENCE_ADD: {
+      const { api, consumer, identifier, args } = action.payload;
 
       return merge(
         {},
@@ -132,7 +132,9 @@ const APIReducer = (state = {}, action) => {
         {
           [api]: {
             consumers: {
-              [consumer]: { parameters },
+              [consumer]: {
+                [identifier]: args,
+              },
             },
           },
         },

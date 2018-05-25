@@ -13,7 +13,8 @@ const constants = {
   API_DESTROY: 'apiDestroy',
   API_DESTROYED: 'apiDestroyed',
   API_CONSUMER_REGISTER: 'apiConsumerRegister',
-  API_CONSUMER_SET_PARAMETERS: 'apiConsumerSetParameters',
+  API_CONSUMER_REFERENCE_ADD: 'apiConsumerReferenceAdd',
+  API_CONSUMER_REFERENCE_REMOVE: 'apiConsumerReferenceRemove',
 
   // Websocket
   WEBSOCKET_OPEN: 'websocketOpen',

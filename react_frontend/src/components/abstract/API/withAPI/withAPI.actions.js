@@ -6,9 +6,9 @@ const withAPIActionCreators = {
     type: constants.API_CONSUMER_REGISTER,
     payload: { api, consumer },
   }),
-  onAPIConsumerSetParameters: (api, consumer, parameters) => ({
-    type: constants.API_CONSUMER_SET_PARAMETERS,
-    payload: { api, consumer, parameters },
+  onAPIConsumerReferenceAdd: (api, consumer, identifier, args) => ({
+    type: constants.API_CONSUMER_REFERENCE_ADD,
+    payload: { api, consumer, identifier, args },
   }),
 };
 
