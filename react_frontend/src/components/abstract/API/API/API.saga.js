@@ -9,7 +9,7 @@ export function* websocketToAPI (action) {
   const {
     socket,
     context: { authentication, authorization, message },
-    data: { schema, models, reference },
+    data: { schema, models, references },
   } = action.payload;
 
   if (authentication) {
@@ -25,12 +25,12 @@ export function* websocketToAPI (action) {
   }
 
   if (models) {
-
+    yield put(APIActionCreators.onAPIModelsReceived(socket, message, models));
   }
 
-  // websocket closed from server
-
-  // yield put(APIActionCreators.onAPIReceive(socket, ));
+  if (references) {
+    yield put(APIActionCreators.onAPIReferencesReceived(socket, message, references));
+  }
 }
 
 export function* APIAuthentication (action) {

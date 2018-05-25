@@ -61,6 +61,14 @@
         "children": {
 
         }
+      },
+      "20180525": {
+        "description": "Thinking about how data gets in and out of a component",
+        "children": {
+          "Out": "The only way for data to get out is to create an action and use dispatch. In a way, I think mapDispatchToProps is limiting since current props cannot be passed to a more complex method before dispatching the action. I would prefer simply calling the dispatch method on an action creator passed through mapStateToProps.",
+          "API 'middleware'": "If a standard set of action creators are passed to the component, they can be passed from there to an instance of a general API class. These action creators will be simple low-level interactions with the API, rather than object specific actions. Once instantiated, the API object can spawn Model objects, and hence Instance objects of specific named classes from the schema. Calling a method on an Instance object such as .save() would dispatch an action containing the correct information.",
+          "filtering": "Calling Model.filter(args) must do several things. Firstly, a request will go out to filter both the objects in the store and the server. These can be returned at different times, so must be referred to differently. Once new objects have been added to the store, there will be no way to tell which are the part of the group requested using the filter, unless the response that comes back contains a unique identifier for that specific filter combination."
+        }
       }
     }
   },

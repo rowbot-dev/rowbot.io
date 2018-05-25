@@ -14,21 +14,17 @@ const APIActionCreators = {
     type: constants.API_AUTHENTICATION_RECEIVED,
     payload: { api, message, authentication },
   }),
-  onAPIAuthenticationBegin: api => ({
-    type: constants.API_AUTHENTICATION_BEGIN,
-    payload: { api },
-  }),
-  onAPIAuthenticationCompleted: api => ({
-    type: constants.API_AUTHENTICATION_COMPLETED,
-    payload: { api },
-  }),
-  onAPIAuthenticationFailed: api => ({
-    type: constants.API_AUTHENTICATION_FAILED,
-    payload: { api },
-  }),
   onAPISchemaReceived: (api, message, schema) => ({
     type: constants.API_SCHEMA_RECEIVED,
     payload: { api, message, schema },
+  }),
+  onAPIModelsReceived: (api, message, models) => ({
+    type: constants.API_MODELS_RECEIVED,
+    payload: { api, message, models },
+  }),
+  onAPIReferencesReceived: (api, message, references) => ({
+    type: constants.API_REFERENCES_RECEIVED,
+    payload: { api, message, references },
   }),
   onAPIQuery: (api, model, query) => ({
     type: constants.API_QUERY,

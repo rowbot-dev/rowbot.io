@@ -1,7 +1,8 @@
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-import MessageButton from 'components/interface/MessageButton';
+import APIConnectedList from 'components/interface/APIConnectedList';
 
 class Home extends Component {
 
@@ -13,13 +14,14 @@ class Home extends Component {
 
   render () {
     return (
-      <MessageButton />
+      <APIConnectedList />
     );
   }
+
 }
 
 Home.propTypes = {
-
+  createAPI: PropTypes.func.isRequired,
 };
 
 export default Home;

@@ -15,7 +15,7 @@ class MessageButton extends Component {
   }
 
   handleClick () {
-    const { models: { Member } } = this.props;
+    const { api: { Member } } = this.props;
 
     Member.remote.filter();
   }

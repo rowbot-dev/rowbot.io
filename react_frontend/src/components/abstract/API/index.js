@@ -8,6 +8,7 @@ import API, {
   APISelector,
   APISaga,
 } from './API';
+import withAPI from './withAPI';
 
 export {
   APIManager,
@@ -20,4 +21,8 @@ export {
   APIActionCreators,
   APISelector,
   APISaga,
+};
+
+export {
+  withAPI,
 };

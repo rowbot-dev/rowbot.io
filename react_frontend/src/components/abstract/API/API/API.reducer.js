@@ -3,7 +3,7 @@ import { merge } from 'lodash';
 
 import constants from 'store/constants';
 
-const APIReducer = (state={}, action) => {
+const APIReducer = (state = {}, action) => {
   switch (action.type) {
     case constants.API_CREATE: {
       const { api, target } = action.payload;
@@ -32,12 +32,9 @@ const APIReducer = (state={}, action) => {
         state,
         {
           [api]: {
-            data: {
-              schema: {},
-              authentication: {
-                pending: true,
-                completed: false,
-              },
+            authentication: {
+              pending: true,
+              completed: false,
             },
             status: {
               created: true,
@@ -61,21 +58,6 @@ const APIReducer = (state={}, action) => {
           },
         },
       );
-    }
-    case constants.API_AUTHENTICATION_BEGIN: {
-      const { api } = action.payload;
-
-      return state;
-    }
-    case constants.API_AUTHENTICATION_COMPLETED: {
-      const { api } = action.payload;
-
-      return state;
-    }
-    case constants.API_AUTHENTICATION_FAILED: {
-      const { api } = action.payload;
-
-      return state;
     }
     case constants.API_QUERY: {
       const { api } = action.payload;
@@ -124,9 +106,41 @@ const APIReducer = (state={}, action) => {
         },
       );
     }
+    case constants.API_CONSUMER_REGISTER: {
+      const { api, consumer } = action.payload;
+
+      return merge(
+        {},
+        state,
+        {
+          [api]: {
+            consumers: {
+              [consumer]: {
+                messages: {},
+              },
+            },
+          },
+        },
+      );
+    }
+    case constants.API_CONSUMER_SET_PARAMETERS: {
+      const { api, consumer, parameters } = action.payload;
+
+      return merge(
+        {},
+        state,
+        {
+          [api]: {
+            consumers: {
+              [consumer]: { parameters },
+            },
+          },
+        },
+      );
+    }
     default:
       return state;
   }
-}
+};
 
 export default APIReducer;

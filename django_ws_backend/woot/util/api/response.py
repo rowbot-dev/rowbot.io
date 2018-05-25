@@ -13,7 +13,7 @@ class Response():
       self.payload = merge(self.payload, authentication)
 
   def add_schema(self, schema):
-    if schema:
+    if schema is not None:
       self.payload = merge(self.payload, schema)
 
   def add_query(self, query):
