@@ -15,7 +15,6 @@ pip-selfcheck.json
 env.json
 
 *.rdb
-package.json
 
 # nose
 man/
