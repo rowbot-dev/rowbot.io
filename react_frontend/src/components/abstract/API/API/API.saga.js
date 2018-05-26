@@ -1,8 +1,8 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 
-import constants from 'store/constants';
-import { websocketActionCreators } from 'components/abstract/Websocket';
+import { websocketActionCreators, websocketConstants } from 'components/abstract/Websocket';
+import APIConstants from '../constants';
 import APIActionCreators from './API.actions';
 
 export function* websocketToAPI (action) {
@@ -41,8 +41,8 @@ export function* APIAuthentication (action) {
 }
 
 function* APISaga () {
-  yield takeLatest(constants.WEBSOCKET_RECEIVE, websocketToAPI);
-  yield takeLatest(constants.API_AUTHENTICATION_RECEIVED, APIAuthentication);
+  yield takeLatest(websocketConstants.WEBSOCKET_RECEIVE, websocketToAPI);
+  yield takeLatest(APIConstants.API_AUTHENTICATION_RECEIVED, APIAuthentication);
 }
 
 export default APISaga;

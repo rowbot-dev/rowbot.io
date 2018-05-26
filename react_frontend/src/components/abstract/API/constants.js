@@ -1,6 +1,5 @@
 
 const constants = {
-  // API
   API_CREATE: 'apiCreate',
   API_CREATED: 'apiCreated',
   API_AUTHORIZATION_RECEIVED: 'apiAuthorizationReceived',
@@ -15,16 +14,6 @@ const constants = {
   API_CONSUMER_REGISTER: 'apiConsumerRegister',
   API_CONSUMER_REFERENCE_ADD: 'apiConsumerReferenceAdd',
   API_CONSUMER_REFERENCE_REMOVE: 'apiConsumerReferenceRemove',
-
-  // Websocket
-  WEBSOCKET_OPEN: 'websocketOpen',
-  WEBSOCKET_OPENED: 'websocketOpened',
-  WEBSOCKET_REGISTER: 'websocketRegister',
-  WEBSOCKET_CONSUME: 'websocketConsume',
-  WEBSOCKET_RECEIVE: 'websocketReceive',
-  WEBSOCKET_CLOSE: 'websocketClose',
-  WEBSOCKET_CLOSED: 'websocketClosed',
-  WEBSOCKET_ERROR: 'websocketError',
 };
 
 export default constants;

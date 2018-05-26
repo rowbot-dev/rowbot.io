@@ -3,8 +3,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
-import App from 'interfaces/App';
 import Store from 'store/Store';
+import App from 'rowbot/interfaces/App';
 import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(

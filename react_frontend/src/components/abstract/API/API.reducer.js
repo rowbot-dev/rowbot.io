@@ -1,7 +1,7 @@
 
 import { merge } from 'lodash';
 
-import constants from 'store/constants';
+import constants from './constants';
 
 const APIReducer = (state = {}, action) => {
   switch (action.type) {

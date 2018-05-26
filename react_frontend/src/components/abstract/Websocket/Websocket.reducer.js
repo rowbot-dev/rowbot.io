@@ -1,7 +1,7 @@
 
 import { merge, mergeWith, isArray, isObject } from 'lodash';
 
-import constants from 'store/constants';
+import constants from './constants';
 
 const websocketReducer = (state={}, action) => {
   switch (action.type) {

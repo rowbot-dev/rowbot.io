@@ -3,9 +3,8 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Input } from 'semantic-ui-react';
 
+import constants from 'rowbot/constants';
 import { withAPI } from 'components/abstract/API';
-
-const ROWBOT = 'rowbot';
 
 class APIConnectedList extends Component {
 
@@ -16,8 +15,8 @@ class APIConnectedList extends Component {
   }
 
   handleInput (event, data) {
-    const { api } = this.props;
-    const { models: { Member } } = api[ROWBOT];
+    const { api: { [constants.ROWBOT]: rowbot } } = this.props;
+    const { models: { Member } } = rowbot;
 
     const { value } = data;
 
@@ -27,7 +26,8 @@ class APIConnectedList extends Component {
   }
 
   render () {
-    const { api } = this.props;
+    const { api: { [constants.ROWBOT]: rowbot } } = this.props;
+    const { models: { Member } } = rowbot;
 
     return (
       <Fragment>

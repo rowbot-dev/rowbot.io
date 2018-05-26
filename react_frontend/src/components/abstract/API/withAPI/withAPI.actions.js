@@ -1,5 +1,5 @@
 
-import constants from 'store/constants';
+import constants from '../constants';
 
 const withAPIActionCreators = {
   onAPIConsumerRegister: (api, consumer) => ({

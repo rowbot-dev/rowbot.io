@@ -10,6 +10,7 @@ import API, {
 import withAPI from './withAPI';
 import { APISelector } from './API.selectors';
 import APIReducer from './API.reducer';
+import APIConstants from './constants';
 
 export {
   APIManager,
@@ -30,4 +31,5 @@ export {
 export {
   APISelector,
   APIReducer,
+  APIConstants,
 };

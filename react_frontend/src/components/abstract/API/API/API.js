@@ -1,9 +1,7 @@
 
-import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import uuid from 'util/uuid';
 import Websocket from 'components/abstract/Websocket';
 
 class API extends Component {
@@ -14,16 +12,10 @@ class API extends Component {
     onAPICreated(id, target);
   }
 
-  componentDidUpdate (prevProps) {
-    const {
-      api: { schema: prevSchema } = {},
-    } = prevProps;
-    const {
-      id,
-      api: { schema },
-    } = this.props;
+  componentWillUnmount () {
+    const { id, onAPIDestroyed } = this.props;
 
-    
+    onAPIDestroyed(id);
   }
 
   render () {
@@ -39,12 +31,6 @@ class API extends Component {
     return null;
   }
 
-  componentWillUnmount () {
-    const { id, onAPIDestroyed } = this.props;
-
-    onAPIDestroyed(id);
-  }
-
 }
 
 API.defaultProps = {
@@ -52,7 +38,10 @@ API.defaultProps = {
 };
 
 API.propTypes = {
-
+  id: PropTypes.string.isRequired,
+  target: PropTypes.string.isRequired,
+  onAPICreated: PropTypes.func.isRequired,
+  onAPIDestroyed: PropTypes.func.isRequired,
 };
 
 export default API;
