@@ -8,9 +8,9 @@ import API, {
   APISaga,
 } from './API';
 import withAPI from './withAPI';
-import { APISelector } from './API.selectors';
+import { APISelector, APIFilteredSelector } from './API.selectors';
 import APIReducer from './API.reducer';
-import APIConstants from './constants';
+import APIConstants from './API.constants';
 
 export {
   APIManager,
@@ -30,6 +30,7 @@ export {
 
 export {
   APISelector,
+  APIFilteredSelector,
   APIReducer,
   APIConstants,
 };

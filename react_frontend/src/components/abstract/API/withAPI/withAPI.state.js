@@ -3,29 +3,23 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { merge } from 'lodash';
 
-import { APISelector } from '../API.selectors';
+import { APIConnector } from './withAPI.connector';
 import withAPI from './withAPI';
-import withAPIActionCreators from './withAPI.actions';
 
-const mapStateToProps = api => (state, props) => {
-  const API = APISelector(api);
-
-  return merge(
-    {},
-    props,
-    {
-      api: {
-        [api]: API(state),
-      },
+const mapStateToProps = connector => (state, props) => merge(
+  {},
+  props,
+  {
+    api: {
+      ...connector.select(state),
     },
+  },
+);
+
+export default options => {
+  const connector = new APIConnector(options);
+  return compose(
+    connect(mapStateToProps(connector)),
+    withAPI(connector),
   );
 };
-
-const mapDispatchToProps = {
-  ...withAPIActionCreators,
-};
-
-export default (api, consumer) => compose(
-  connect(mapStateToProps(api), mapDispatchToProps),
-  withAPI(api, consumer),
-);

@@ -1,6 +1,10 @@
 
-import { mapValues, merge, pick, omit } from 'lodash';
+import { mapValues } from 'lodash';
+import { bindActionCreators } from 'redux';
 import uuid from 'util/uuid';
+
+import { APIFilteredSelector } from 'components/abstract/API';
+import withAPIActionCreators from './withAPI.actions';
 
 export const types = {
 
@@ -8,7 +12,7 @@ export const types = {
 
 class Instance {
 
-  constructor () {
+  constructor (model, data) {
 
   }
 
@@ -28,37 +32,21 @@ class Instance {
 
 class Model {
 
-  constructor (api, modelName, model) {
+  constructor (api, modelName, modelSchema, modelData) {
     this.api = api;
     this.name = modelName;
 
-    const { attributes, methods, relationships } = model;
+    const { attributes, methods, relationships } = modelSchema;
+
+    this.attributes = attributes;
+    this.methods = methods;
+    this.relationships = relationships;
+
+    this.instances = mapValues(modelData, value => new Instance(this, value));
   }
 
   create (args) {
 
-  }
-
-  filter (args) {
-    // 1. Make new unique identifier
-    const identifier = uuid();
-
-    // 2. dispatch action registering unique identifier with args and consumer
-    const { api, consumer, actions: { add } } = this.api;
-
-    add(
-      api,
-      consumer,
-      identifier,
-      {
-        models: {
-          [this.name]: {
-            filter: args,
-          },
-        },
-      },
-    );
-    // withAPIActionCreators.onAPIConsumerReferenceAdd(api, consumer, identifier, args);
   }
 
   get () {
@@ -69,38 +57,141 @@ class Model {
 
   }
 
+  filter (fn) {
+
+  }
+
 }
 
 export class APIConnector {
 
-  constructor (api, consumer, state = {}, actions) {
-    this.api = api;
-    this.consumer = consumer;
-    this.actions = actions;
-
-    const { data: { schema } = {} } = state;
-
-    this.models = mapValues(schema, (model, modelName) => new Model(this, modelName, model));
+  constructor ({ name, sender, consumer, senders, models }) {
+    this.name = name;
+    this.senderName = sender;
+    this.consumerName = consumer;
+    this.senderNames = senders;
+    this.modelNames = models;
   }
 
-  destroy () {
+  select (state) {
+    const api = APIFilteredSelector(
+      this.name,
+      this.senderName,
+      this.consumerName,
+      this.senderNames,
+      this.modelNames,
+    );
+    const { status, authentication, senders, consumers, data } = api(state);
+    this.status = status;
+    this.authentication = authentication;
+    this.senders = senders;
+    this.consumers = consumers;
+    this.data = data;
 
+    this.isSender = this.senderName !== undefined;
+
+    return {
+      [this.name]: {
+        status,
+        authentication,
+        senders,
+        data,
+      },
+    };
   }
 
-}
+  connect (props) {
+    const { api: { [this.name]: api, ...otherAPIs }, ...otherProps } = props;
+    const { data: { schema, models } } = api;
 
-export function connectAPI (api, consumer, props, actions) {
-  const { api: APIs, ...rest } = props;
-  const { [api]: singleAPI, ...otherAPIs } = APIs;
+    this.models = mapValues(
+      schema,
+      (modelSchema, modelName) => new Model(
+        this,
+        modelName,
+        modelSchema,
+        models[modelName],
+      ),
+    );
 
-  return merge(
-    {},
-    rest,
-    {
+    return {
       api: {
-        [api]: new APIConnector(api, consumer, singleAPI, actions),
+        [this.name]: this,
         ...otherAPIs,
       },
-    },
-  );
+      ...otherProps,
+    };
+  }
+
+  register (props) {
+    const { dispatch } = props;
+    this.actions = bindActionCreators(withAPIActionCreators, dispatch);
+
+    if (this.consumerName) {
+      this.actions.onAPIConsumerRegister(this.name, this.consumerName, this.senderNames);
+    }
+
+    if (this.senderName) {
+      this.actions.onAPISenderRegister(this.name, this.senderName);
+    }
+  }
+
+  update () {
+    const hasNewSenderValues = this.confirmNewSenderValues();
+
+    if (hasNewSenderValues) {
+      this.addConsumerReference();
+      this.updateConsumerReference();
+    }
+  }
+
+  confirmNewSenderValues () {
+    let hasNewSenderValues = false;
+    if (!this.isSender) {
+      const { onAPIConsumerConfirmSenderValue } = this.actions;
+
+      Object.entries(this.senders).forEach(([sender, { consumers = {} }]) => {
+        if (!(this.consumerName in consumers)) {
+          hasNewSenderValues = true;
+          onAPIConsumerConfirmSenderValue(this.name, this.consumerName, sender);
+        }
+      });
+    }
+
+    return hasNewSenderValues;
+  }
+
+  addConsumerReference () {
+    if (!this.isSender) {
+      const { onAPIConsumerAddReference } = this.actions;
+
+      const identifier = uuid();
+      const query = this.constructConsumerQuery();
+
+      onAPIConsumerAddReference(this.name, this.consumerName, identifier, query);
+    }
+  }
+
+  setSenderValue (value) {
+    if (this.isSender) {
+      const { onAPISenderSetValue } = this.actions;
+
+      onAPISenderSetValue(this.name, this.senderName, value);
+    }
+  }
+
+  mergeConsumerValue (value) {
+    if (!this.isSender) {
+      this.consumerValue = {};
+    }
+  }
+
+  constructConsumerQuery () {
+    if (!this.isSender) {
+      return {};
+    }
+
+    return null;
+  }
+
 }

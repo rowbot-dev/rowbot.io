@@ -2,7 +2,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 
 import { websocketActionCreators, websocketConstants } from 'components/abstract/Websocket';
-import APIConstants from '../constants';
+import APIConstants from '../API.constants';
 import APIActionCreators from './API.actions';
 
 export function* websocketToAPI (action) {

@@ -6,7 +6,7 @@ import Websocket from 'components/abstract/Websocket';
 
 class API extends Component {
 
-  componentDidMount () {
+  componentWillMount () {
     const { id, target, onAPICreated } = this.props;
 
     onAPICreated(id, target);

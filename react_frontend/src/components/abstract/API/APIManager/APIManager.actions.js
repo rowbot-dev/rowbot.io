@@ -1,5 +1,5 @@
 
-import constants from '../constants';
+import constants from '../API.constants';
 
 const APIManagerActionCreators = {
   createAPI: (api, target) => ({

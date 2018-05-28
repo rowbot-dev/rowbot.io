@@ -1,7 +1,7 @@
 
 import { merge } from 'lodash';
 
-import constants from './constants';
+import constants from './API.constants';
 
 const APIReducer = (state = {}, action) => {
   switch (action.type) {
@@ -123,8 +123,27 @@ const APIReducer = (state = {}, action) => {
         },
       );
     }
-    case constants.API_CONSUMER_REFERENCE_ADD: {
-      const { api, consumer, identifier, args } = action.payload;
+    case constants.API_CONSUMER_CONFIRM_SENDER_VALUE: {
+      const { api, consumer, sender } = action.payload;
+
+      return merge(
+        {},
+        state,
+        {
+          [api]: {
+            senders: {
+              [sender]: {
+                consumers: {
+                  [consumer]: true,
+                },
+              },
+            },
+          },
+        },
+      );
+    }
+    case constants.API_CONSUMER_ADD_REFERENCE: {
+      const { api, consumer, identifier, query } = action.payload;
 
       return merge(
         {},
@@ -133,12 +152,95 @@ const APIReducer = (state = {}, action) => {
           [api]: {
             consumers: {
               [consumer]: {
-                [identifier]: args,
+                references: {
+                  [identifier]: {
+                    query,
+                    local: false,
+                    remote: false,
+                  },
+                },
               },
             },
           },
         },
       );
+    }
+    case constants.API_CONSUMER_CONSUME_REFERENCE: {
+      const { api, consumer, identifier } = action.payload;
+      const {
+        [api]: {
+          consumers: {
+            [consumer]: {
+              references: {
+                [identifier]: discardedReference,
+                ...otherReferences
+              },
+              ...restOfConsumer
+            },
+            ...otherConsumers
+          },
+          ...restOfAPI
+        },
+        ...otherAPIs
+      } = state;
+
+      return {
+        [api]: {
+          consumers: {
+            [consumer]: {
+              references: otherReferences,
+              ...restOfConsumer,
+            },
+            ...otherConsumers,
+          },
+          ...restOfAPI,
+        },
+        ...otherAPIs,
+      };
+    }
+    case constants.API_SENDER_REGISTER: {
+      const { api, sender } = action.payload;
+
+      return merge(
+        {},
+        state,
+        {
+          [api]: {
+            senders: {
+              [sender]: {
+                value: null,
+              },
+            },
+          },
+        },
+      );
+    }
+    case constants.API_SENDER_SET_VALUE: {
+      const { api, sender, value } = action.payload;
+
+      const {
+        [api]: {
+          senders: {
+            [sender]: discardedSender,
+            ...otherSenders
+          },
+          ...restOfAPI
+        },
+        ...otherAPIs
+      } = state;
+
+      return {
+        [api]: {
+          senders: {
+            [sender]: {
+              value,
+            },
+            ...otherSenders,
+          },
+          ...restOfAPI,
+        },
+        ...otherAPIs,
+      };
     }
     default:
       return state;

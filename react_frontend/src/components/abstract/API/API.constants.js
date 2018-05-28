@@ -12,8 +12,11 @@ const constants = {
   API_DESTROY: 'apiDestroy',
   API_DESTROYED: 'apiDestroyed',
   API_CONSUMER_REGISTER: 'apiConsumerRegister',
-  API_CONSUMER_REFERENCE_ADD: 'apiConsumerReferenceAdd',
-  API_CONSUMER_REFERENCE_REMOVE: 'apiConsumerReferenceRemove',
+  API_CONSUMER_ADD_REFERENCE: 'apiConsumerAddReference',
+  API_CONSUMER_CONSUME_REFERENCE: 'apiConsumerConsumeReference',
+  API_CONSUMER_CONFIRM_SENDER_VALUE: 'apiConsumerConfirmSenderValue',
+  API_SENDER_REGISTER: 'apiSenderRegister',
+  API_SENDER_SET_VALUE: 'apiSenderSetValue',
 };
 
 export default constants;

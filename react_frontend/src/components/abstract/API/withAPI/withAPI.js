@@ -1,41 +1,26 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connectAPI } from './withAPI.connector';
 
-const withAPI = (api, consumer) => WrappedComponent => {
+const withAPI = connector => WrappedComponent => {
   class WithAPI extends Component {
 
-    componentDidMount () {
-      const { onAPIConsumerRegister } = this.props;
+    componentWillMount () {
+      connector.register(this.props);
+    }
 
-      onAPIConsumerRegister(api, consumer);
+    componentDidUpdate () {
+      connector.update();
     }
 
     render () {
-      const {
-        onAPIConsumerRegister,
-        onAPIConsumerReferenceAdd,
-      } = this.props;
-      const connectedProps = connectAPI(
-        api,
-        consumer,
-        this.props,
-        {
-          register: onAPIConsumerRegister,
-          add: onAPIConsumerReferenceAdd,
-        },
-      );
-
-      return <WrappedComponent {...connectedProps} />;
+      return <WrappedComponent {...connector.connect(this.props)} />;
     }
 
   }
 
   WithAPI.propTypes = {
-    api: PropTypes.object.isRequired,
-    onAPIConsumerRegister: PropTypes.func.isRequired,
-    onAPIConsumerReferenceAdd: PropTypes.func.isRequired,
+
   };
 
   return WithAPI;
