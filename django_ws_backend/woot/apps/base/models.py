@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Q
 
 from util.merge import merge
+from util.api.errors import Errors
 
 import uuid
 from uuid import UUID
@@ -32,6 +33,7 @@ class Manager(models.Manager):
 
   def query(self, query, authorization=None):
     filter = query.get('filter', {})
+    methods = query.get('methods', {})
 
     instances = {}
     for instance in self.filter(**filter):
@@ -42,11 +44,34 @@ class Manager(models.Manager):
         }
       )
 
+    method_results = {}
+    for method_name, method_args in methods.items():
+      if hasattr(self, method_name):
+        method = getattr(self, method_name)
+        method_results = merge(
+          method_results,
+          {
+            'results': {
+              method_name: method(method_args),
+            },
+          },
+        )
+      else:
+        method_results = merge(
+          method_results,
+          {
+            'errors': {
+              method_name: Errors.no_such_model_method(self.model.__name__, method_name),
+            },
+          },
+        )
+
     return {
       'data': {
         'models': {
           self.model.__name__: {
             'instances': instances,
+            'methods': method_results,
           },
         },
       },
@@ -95,4 +120,40 @@ class Model(models.Model):
     return '{}.{}'.format(self.__class__.__name__, self._id)
 
   def serialize(self):
-    return str(self.date_created)
+    # 1. attributes
+    # 2. run methods
+    serialised_object = {}
+    for field in self._meta.get_fields():
+      if hasattr(self, field.name):
+        attr = getattr(self, field.name)
+
+        if field.is_relation:
+          if hasattr(attr, '_ref'):
+            serialised_object = merge(
+              serialised_object,
+              {
+                'relationships': {
+                  field.name: attr._ref,
+                },
+              },
+            )
+          else:
+            serialised_object = merge(
+              serialised_object,
+              {
+                'relationships': {
+                  field.name: field.related_model.__name__,
+                },
+              },
+            )
+        else:
+          serialised_object = merge(
+            serialised_object,
+            {
+              'attributes': {
+                field.name: str(attr),
+              },
+            },
+          )
+
+    return serialised_object

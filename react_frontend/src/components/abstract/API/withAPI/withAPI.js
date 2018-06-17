@@ -10,7 +10,7 @@ const withAPI = connector => WrappedComponent => {
     }
 
     componentDidUpdate () {
-      connector.update();
+      connector.didUpdate();
     }
 
     render () {

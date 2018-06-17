@@ -9,7 +9,7 @@ export function* websocketToAPI (action) {
   const {
     socket,
     context: { authentication, authorization, message },
-    data: { schema, models, references },
+    data: { schema, models, references } = {},
   } = action.payload;
 
   if (authentication) {
@@ -33,6 +33,14 @@ export function* websocketToAPI (action) {
   }
 }
 
+export function* APIConsumerToWebsocket (action) {
+  const { api, identifier, query } = action.payload;
+
+  yield put(websocketActionCreators.onWebsocketRegister(api, identifier, {
+    request: query,
+  }));
+}
+
 export function* APIAuthentication (action) {
   const { api, authentication } = action.payload;
   // authentication completed
@@ -42,6 +50,7 @@ export function* APIAuthentication (action) {
 
 function* APISaga () {
   yield takeLatest(websocketConstants.WEBSOCKET_RECEIVE, websocketToAPI);
+  yield takeLatest(APIConstants.API_CONSUMER_ADD_REFERENCE, APIConsumerToWebsocket);
   yield takeLatest(APIConstants.API_AUTHENTICATION_RECEIVED, APIAuthentication);
 }
 

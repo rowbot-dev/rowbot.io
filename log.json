@@ -69,6 +69,18 @@
           "API 'middleware'": "If a standard set of action creators are passed to the component, they can be passed from there to an instance of a general API class. These action creators will be simple low-level interactions with the API, rather than object specific actions. Once instantiated, the API object can spawn Model objects, and hence Instance objects of specific named classes from the schema. Calling a method on an Instance object such as .save() would dispatch an action containing the correct information.",
           "filtering": "Calling Model.filter(args) must do several things. Firstly, a request will go out to filter both the objects in the store and the server. These can be returned at different times, so must be referred to differently. Once new objects have been added to the store, there will be no way to tell which are the part of the group requested using the filter, unless the response that comes back contains a unique identifier for that specific filter combination."
         }
+      },
+      "20180529": {
+        "description": "We've been working quite hard on the API connector to use with the withAPI component. The main breakthrough is the separation of senders and consumers. The senders do nothing other than set their own value for the consumers to incorporate into their packages that ultimately get sent to the server as a request.",
+        "children": {
+
+        }
+      },
+      "20180612": {
+        "description": "Collecting my thoughts about how to do the schema properly with the request to the system and the output.",
+        "children": {
+          "schema": "The three inputs to the generation of a new schema are the mode of the schema, the models on the system, and the authorization available to the requesting identity. This should perhaps be generalised so that a request is always required to generate a schema, even if blank, and a response is always generated. In fact, the only meaningful representation of the schema should be the response, such that the response is simply a manifestation of a valid schema. In this design, the schema is a method that takes a response, system information, and models to yield a response. This implies that the schema is re-generated for inclusion in the response upon each request, or whenever an outgoing message is required.",
+        }
       }
     }
   },

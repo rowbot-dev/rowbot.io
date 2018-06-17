@@ -59,15 +59,18 @@ const APIReducer = (state = {}, action) => {
         },
       );
     }
-    case constants.API_QUERY: {
-      const { api } = action.payload;
+    case constants.API_MODELS_RECEIVED: {
+      const { api, models } = action.payload;
 
-      return state;
-    }
-    case constants.API_RECEIVE: {
-      const { api } = action.payload;
-
-      return state;
+      return merge(
+        {},
+        state,
+        {
+          [api]: {
+            data: { models },
+          },
+        },
+      );
     }
     case constants.API_DESTROY: {
       const { api } = action.payload;
@@ -153,11 +156,7 @@ const APIReducer = (state = {}, action) => {
             consumers: {
               [consumer]: {
                 references: {
-                  [identifier]: {
-                    query,
-                    local: false,
-                    remote: false,
-                  },
+                  [identifier]: query,
                 },
               },
             },

@@ -1,0 +1,454 @@
+{
+  "_description": "This schema is a summary of the capabilities of the API. Parts of it are meant to be read by a client built to consume the API, and have a more consistent structure. Any key beginning with '__' is human-readable, and is not meant to be parsed. These keys can be removed by changing the mode in the context. If they are included in the response, they will be ignored.",
+  "_glossary": {
+    "_description": "Any 'description' key is assumed to be a verbose, human-readable description of the parent key and the structure it contains. If the value of a key is a string, this string is treated as its description.",
+    "type": "Type of data expected to be received or set on the parent key, for purposes of validation.",
+    "values": "In the case of an enum, the different values that the parent key can take.",
+    "system": "The remote server that the API is served from.",
+    "request": "The data structure sent to the system.",
+    "query": "The part of the request concerned with specific data from the system.",
+    "response": "The data structure received from the system.",
+    "structure": "A JSON object consisting of keys, values, arrays, and nested objects.",
+    "object": "A database model or its representation",
+    "client": "The application consuming the API",
+    "server": "The physical machine where the API is running",
+    "model": "The name of the database model on the system",
+    "ref": "A combination of database model name and the UUID of a specific instance, in the form __model.__uuid, to allow it to be unique identified on the system.",
+  },
+  "_types": {
+    "_description": "A simple set of high level validation types to prevent basic errors. These should be implemented by any client application.",
+    "__model": "A database object model name on the system",
+    "__structure": "A JSON object",
+    "__array": "A JSON array",
+    "__boolean": "A true or false value",
+    "__number": "An integer or a floating point value",
+    "__string": "String, but not a uuid, ref, or timestamp",
+    "__uuid": "A valid UUID",
+    "__time": "A valid timestamp",
+    "__ref": "__model.__uuid, a reference to a specific object on the system"
+  },
+  "context": {
+    "_description": "The context of the request or response contains query-specific identifiers such as UUIDs, timestamps, and hashes.",
+    "authorization": {
+      "_description": "An authorization token to be included with each request. It is the primary key of an authorization token object on the system.",
+      "_type": "__uuid",
+    },
+    "mode": {
+      "_description": "The level of detail in the schema",
+      "_type": "__string",
+      "_values": {
+        "full": "Returns this entire schema including the top-level info key and all description keys, even if the keys are not relevant to the current request or response.",
+        "verbose": "Keeps the description keys, but not the info keys.",
+        "normal": "Removes all description keys and keys not relevant to the request, and moves keys inside request or response to the top level.",
+        "tiny": "Removes all structure including the context when possible. This should only be used to return simple information such as a single value when the endpoint of the response is known."
+      }
+    },
+  },
+  "query": {
+    "_description": "All queries made to the API must be of this form. Only keys relevant to the query should be included. Any request that does not contain a valid subset of this structure will be rejected with an explicit error.",
+    "time": {
+      "_description": "The timestamp of the request from the client side",
+      "location": {
+        "_description": "The location of the sender. Optional.",
+        "_type": "__string"
+      },
+      "locale": {
+        "_description": "The locale of the sender. Optional.",
+        "_type": "__string"
+      },
+      "timestamp": {
+        "_description": "The time the request left the client.",
+        "_type": "__time"
+      }
+    },
+    "system": {
+      "_description": "A set of information about the system that the server is running, including version information. A true value indicates that the value should be included in the response.",
+      "id": {
+        "_description": "The uuid of the API",
+        "_type": "__boolean"
+      },
+      "name": {
+        "_description": "The name of the API. This should match all machine messages.",
+        "_type": "__boolean",
+      },
+      "verbose_name": {
+        "_description": "The verbose name of the API",
+        "_type": "__boolean"
+      },
+      "api_version": {
+        "_description": "The version number of the API",
+        "_type": "__boolean"
+      },
+      "release_hash": {
+        "_description": "The release hash of the API",
+        "_type": "__boolean"
+      },
+      "models": {
+        "_description": "System models reserved for key functions such as authentication.",
+        "reference": {
+          "_description": "A combination of object name and UUID allowing a reference to a single object on the system.",
+          "_type": "__boolean"
+        },
+        "user": {
+          "_description": "A unique identity on the system",
+          "_type": "__boolean"
+        },
+        "authentication": {
+          "_description": "A model used to mediate the authentication process",
+          "_type": "__boolean"
+        },
+        "authorization": {
+          "_description": "An authorization token for persistent access control",
+          "_type": "__boolean"
+        }
+      },
+    },
+    "models": {
+      "_description": "A list of models available on the system",
+      "_template": {
+        "attributes": {
+          "_description": "Non-related object properties of an object. Types and values will be set from the system. During any request, the specified attributes will be included with the response.",
+          "_template": "Values and types on an attribute will be set by the system",
+        },
+        "relationships": {
+          "_description": "Related objects. During a filter request, the specified relationships will be included.",
+          "_template": {
+            "_type": {
+              "__boolean": "includes the object reference or class name depending on plurality",
+              "__structure": "adds a level of recursion starting again from the '_model' key.",
+            },
+          }
+        },
+        "methods": {
+          "_description": "Methods that can be called on the object class, often yielding a set of objects, but sometimes a single value.",
+          "_template": {
+            "description": {
+              "_description": "Description of the purpose of a method",
+              "_type": "__boolean"
+            },
+            "_description": "A single method can be called by naming it here",
+            "_argument": "Values and types on a method argument will be set by the system"
+          }
+        },
+        "instances": {
+          "_description": "Keys are UUIDs of instances of this model class.",
+          "_template": {
+            "_description": "Stores the data pertaining to a single instance of the class. The instance can be fetched or updated.",
+            "update": {
+              "_description": "Set this key to explicitly update the instance rather than fetching them",
+              "_type": "__boolean"
+            },
+            "attributes": {
+              "_description": "Non-related object attributes of an instance",
+              "_template": "Values and types on an attribute will be set by the system",
+            },
+            "methods": {
+              "_description": "Call methods on a single instance",
+              "_template": {
+                "_description": "A single method can be called by naming it here",
+                "_argument": "Values and types on a method argument will be set by the system"
+              }
+            },
+            "relationships": {
+              "_description": "Related objects for a single instance",
+              "_template": {
+                "_type": {
+                  "__boolean": "includes the object reference or class name depending on plurality",
+                  "__array": "sets the related objects on the instance"
+                },
+              }
+            }
+          }
+        },
+        "filter": {
+          "_description": "Impose a filter on a set of objects",
+          "_template": {
+            "_description": "An object containing the information necessary to compose a filter",
+            "composite": {
+              "_description": "A string of the form A & B | C, or any combination of unitary operators to combine the named components, conforming to Django query notation.",
+              "_type": "__string"
+            },
+            "components": {
+              "_description": "A series of named components in the form related__attributed__directive, conforming to Django query notation.",
+              "_template": {
+                "_type": "__string"
+              }
+            }
+          }
+        },
+        "sort": {
+          "_description": "Sort objects",
+          "_template": {
+            "_description": "A string of the form (-)relationship__attribute conforming to Django query notation.",
+            "_type": "__string"
+          }
+        },
+        "paginate": {
+          "_description": "Paginate objects",
+          "page": {
+            "_description": "The value of the current page",
+            "_type": {
+              "__boolean": "fetch the current value",
+              "__number": "set the current value"
+            }
+          },
+          "pages": {
+            "_description": "Include the number of pages available",
+            "_type": "__boolean"
+          },
+          "size": {
+            "_description": "The size of each page",
+            "_type": {
+              "__boolean": "fetch the current value",
+              "__number": "set the current value"
+            }
+          },
+        },
+        "create": {
+          "_description": "Specify information used to create objects",
+          "_template": {
+            "_description": "An uncreated object",
+            "identifier": {
+              "_description": "Each prototype is given a temporary identifier to match it with the newly created object",
+              "_type": "__uuid"
+            },
+            "attributes": {
+              "_description": "The non-related object attributes of the new instance",
+              "_template": "Must match those available on the model"
+            },
+            "relationships": {
+              "_description": "Related object attributes of the new instance",
+              "_template": {
+                "_description": "Must match those available on the model",
+                "_type": {
+                  "__ref": "Sets the related object on the new instance",
+                  "__array": "Set the list of related objects on the new instance"
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "_description": "Delete specific instances of a model",
+          "_template": {
+            "_description": "A UUID of an instance marked for deletion",
+            "_type": "__uuid"
+          }
+        }
+      }
+    },
+    "references": {
+      "_description": "Collection references refer to unique sets of objects. The object do not have to be of the same type.",
+      "_template": {
+        "_description": "UUIDs of collection references. The value can be a boolean to say that the whole collection should be fetched.",
+        "_type": {
+          "__structure": "Fetch the values of reference keys under this reference collection",
+          "__array": "Create a new reference collection with a set of object references",
+        },
+        "_template": {
+          "_description": "A UUID referring to an object reference. This is not the object UUID or reference.",
+          "_type": "__boolean"
+        }
+      }
+    },
+    "authentication": {
+      "_description": "Information pertaining to the authentication process",
+      "protocol": {
+        "_description": "Specify a protocol to use",
+        "_values": {
+          "keypair": "Public key authentication protocol",
+          "userpass": "Username and password authentication protocol",
+        }
+      },
+      "keypair": {
+        "_description": "The keypair authentication process must happen in several steps. Behind the process is a database model upon which methods are called to step through each section. Each index must be requested in order including a token sent with the previous response to chain the interaction.",
+        "0": {
+          "_description": "Introduction. This step is the same whether or not the keypair is known to the system.",
+          "public": "A valid public key",
+          "username": "A username or other system identifier"
+        },
+        "1": {
+          "_description": "Once the system has been notified of the identity, it must verify that it is controlled by the client.",
+          "solution": "A signature of the challenge sent by the system",
+          "authorization": "An authorization key given by a current user to allow access. This may be optional.",
+          "chain": "A key sent with the previous response.",
+        }
+      },
+      "userpass": {
+        "_description": "The username and password authentication protocol only requires one step, but can be chained with the keypair authentication process to associate an identity with a public key.",
+        "0": {
+          "_description": "Send the username and password to the system.",
+          "username": "The username of the identity",
+          "password": "The password of the identity",
+        }
+      }
+    }
+  },
+  "response": {
+    "_description": "The structure of every response from the server. The types indicated are the types of the data that will be returned.",
+    "errors": {
+      "_description": "General errors in the response. Keys are ids of errors included. Only included if a relevant error occurs.",
+      "_error": "Errors will be defined by the system"
+    },
+    "sent": {
+      "_description": "The time the response left the server.",
+      "_type": "__time"
+    },
+    "received": {
+      "_description": "The time the request arrived at the server.",
+      "_type": "__time"
+    },
+    "system": {
+      "_description": "Information about the state of the system.",
+      "errors": {
+        "_description": "Errors in the system reporting.",
+        "_error": "Errors will be defined by the system"
+      },
+      "id": "__uuid",
+      "name": "__string",
+      "verbose_name": "__string",
+      "api_version": "__string",
+      "release_hash": "__string",
+      "models": {
+        "_description": "System specific models",
+        "reference": "__model",
+        "user": "__model",
+        "authentication": "__model",
+        "authorization": "__model"
+      }
+    },
+    "models": {
+      "_model": {
+        "errors": {
+          "_description": "Errors specific to the query of a single model"
+        },
+        "attributes": {
+          "_attribute": {
+            "type": "__string",
+            "errors": {
+              "_description": "Errors for attributes, such as an incorrect name or type"
+            }
+          }
+        },
+        "methods": {
+          "_method": {
+            "errors": {
+              "_description": "Errors occurring for a single method"
+            },
+            "description": "__string",
+            "arguments": {
+              "_argument": {
+                "type": "__string",
+                "errors": {
+                  "_description": "Errors for a single argument, for example incorrect type or name"
+                }
+              }
+            }
+          }
+        },
+        "relationships": {
+          "_relationship": {
+            "type": {
+              "__ref": "A single related object",
+              "__model": "A model referring to multiple related objects that need to be queried separately"
+            },
+            "errors": {
+              "_description": "Errors for a single relationship"
+            },
+          }
+        },
+        "instances": {
+          "_instance": {
+            "errors": {
+              "_description": "Errors for a single model instance"
+            },
+            "attributes": {
+              "_attribute": {
+                "_type": "__any",
+                "errors": {
+                  "_description": "Errors for a single attribute"
+                }
+              }
+            },
+            "methods": {
+              "_method": {
+                "description": "__string",
+                "errors": {
+                  "_description": "Errors for a single method"
+                },
+                "arguments": {
+                  "_argument": {
+                    "type": "__any",
+                    "errors": {
+                      "_description": "Errors for a single method argument"
+                    }
+                  }
+                }
+              }
+            },
+            "relationships": {
+              "_relationship": {
+                "type": {
+                  "__ref": "A single related object",
+                  "__model": "A model referring to multiple related objects that need to be queried separately"
+                },
+                "errors": {
+                  "_description": "Errors for a single relationship"
+                },
+              }
+            }
+          }
+        },
+      }
+    },
+    "reference": {
+      "_description": "ID of the reference for the associated query",
+      "_type": "__uuid"
+    },
+    "references": {
+      "_reference": {
+        "errors": {
+          "_description": "Errors in a reference group"
+        },
+        "_single": {
+          "_type": "__ref",
+          "errors": {
+            "_description": "Errors for a single reference",
+          }
+        }
+      }
+    },
+    "authentication": {
+      "protocol": "__string",
+      "keypair": {
+        "0": {
+          "errors": {
+            "_description": "Invalid public key",
+          },
+          "challenge": "__string",
+          "chain": "__uuid"
+        },
+        "1": {
+          "errors": {
+            "_description": "Incorrect solution, chain, or authorization"
+          },
+          "authorization": {
+            "_description": "This authorization key should be included in the context of each subsequent request.",
+            "_type": "__uuid",
+          }
+        }
+      },
+      "userpass": {
+        "0": {
+          "errors": {
+            "_description": "Incorrect solution, chain, or authorization"
+          },
+          "authorization": {
+            "_description": "This authorization key should be included in the context of each subsequent request.",
+            "_type": "__uuid",
+          }
+        }
+      }
+    }
+  },
+}
