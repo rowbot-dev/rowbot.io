@@ -3,7 +3,6 @@ from django.db import models
 from django.db.models import Q
 
 from util.merge import merge
-from util.api.errors import Errors
 
 import uuid
 from uuid import UUID

@@ -81,6 +81,9 @@
         "children": {
           "schema": "The three inputs to the generation of a new schema are the mode of the schema, the models on the system, and the authorization available to the requesting identity. This should perhaps be generalised so that a request is always required to generate a schema, even if blank, and a response is always generated. In fact, the only meaningful representation of the schema should be the response, such that the response is simply a manifestation of a valid schema. In this design, the schema is a method that takes a response, system information, and models to yield a response. This implies that the schema is re-generated for inclusion in the response upon each request, or whenever an outgoing message is required.",
         }
+      },
+      "20180617": {
+        "description": "Thinking more about the schema. I want to build it out of more formal objects to include options and errors.",
       }
     }
   },
