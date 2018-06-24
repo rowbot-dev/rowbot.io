@@ -1,61 +1,60 @@
 
 class Type():
-  def __init__(self, description):
+  def __init__(self, description=None):
     self.description = description
 
   def validate(self, value):
     return False
 
+  def render(self):
+    return self._type
+
+  @classmethod
+  def test(cls, type):
+    return type._type == cls._type
+
 class Boolean(Type):
-  def validate(self):
-    return False
+  _type = '__boolean'
+
+  def validate(self, value):
+    return isinstance(value, bool)
 
 class Model(Type):
-  def validate(self):
-    return False
+  pass
 
 class Structure(Type):
-  def validate(self):
-    return False
+  _type = '__structure'
+
+  def validate(self, value):
+    return isinstance(value, dict)
 
 class Array(Type):
-  def validate(self):
-    return False
+  pass
 
 class Integer(Type):
-  def validate(self):
-    return False
+  pass
 
 class Float(Type):
-  def validate(self):
-    return False
+  pass
 
 class String(Type):
-  def validate(self):
-    return False
+  pass
 
 class UUID(Type):
-  def validate(self):
-    return False
+  pass
 
 class Time(Type):
-  def validate(self):
-    return False
+  pass
 
 class Ref(Type):
-  def validate(self):
-    return False
+  pass
 
 class Enum(Type):
   def __init__(self, *options):
     self.options = options
 
-  def validate(self):
-    return False
-
 class Immutable(Type):
-  def validate(self):
-    return False
+  pass
 
 class types:
   BOOLEAN = Boolean
