@@ -13,7 +13,7 @@ class MockSchema(Schema):
   checked_key = 'checked'
 
   def query(self, payload):
-    if types.STRUCTURE.test(self.active_server_type):
+    if self.active_server_type == types.STRUCTURE():
       return merge(
         payload,
         {
@@ -22,9 +22,6 @@ class MockSchema(Schema):
       )
 
     return self.true_value if payload else self.false_value
-
-class SchemaQueryTestCase(TestCase):
-  pass
 
 class SchemaRespondTestCase(TestCase):
   def setUp(self):
@@ -58,9 +55,28 @@ class SchemaRespondTestCase(TestCase):
     self.assertEqual(server_types_error.description, test_key_1_response.errors[0].description)
 
   def test_no_children(self):
-    
+    schema = MockSchema()
+    payload = {}
 
-  def test_schema_is_valid_with_boolean_payload(self):
+    response = schema.respond(payload)
+    rendered_response = response.render()
+
+    self.assertIn(MockSchema.checked_key, rendered_response)
+
+  def test_unrecognised_key(self):
+    unrecognised_key = 'unrecognised_key'
+    payload = {
+      self.test_key_1: True,
+      unrecognised_key: False,
+    }
+
+    response = self.schema.respond(payload)
+    self.assertTrue(response.errors)
+
+    unrecognised_keys_error = errors.UNRECOGNISED_KEYS([unrecognised_key])
+    self.assertEqual(unrecognised_keys_error.description, response.errors[0].description)
+
+  def test_children_boolean_payload(self):
     payload = {
       self.test_key_1: True,
       self.test_key_2: False,
@@ -70,10 +86,10 @@ class SchemaRespondTestCase(TestCase):
     self.assertFalse(response.errors)
 
     rendered_response = response.render()
-    self.assertEquals(rendered_response.get(self.test_key_1), MockSchema.true_value)
-    self.assertEquals(rendered_response.get(self.test_key_2), MockSchema.false_value)
+    self.assertEqual(rendered_response.get(self.test_key_1), MockSchema.true_value)
+    self.assertEqual(rendered_response.get(self.test_key_2), MockSchema.false_value)
 
-  def test_schema_is_valid_with_structure_payload(self):
+  def test_children_structure_payload(self):
     test_key_3 = 'test3'
     test_value_3 = 'test_value_3'
     payload = {
@@ -89,17 +105,24 @@ class SchemaRespondTestCase(TestCase):
     rendered_response = response.render()
     self.assertIn(test_key_3, rendered_response.get(self.test_key_1))
     self.assertIn(MockSchema.checked_key, rendered_response.get(self.test_key_1))
-    self.assertEquals(rendered_response.get(self.test_key_2), MockSchema.false_value)
+    self.assertEqual(rendered_response.get(self.test_key_2), MockSchema.false_value)
 
-  def test_schema_is_invalid_with_unrecognised_key(self):
-    unrecognised_key = 'unrecognised_key'
-    payload = {
-      self.test_key_1: True,
-      unrecognised_key: False,
-    }
+class SchemaValidateSystemTypesTestCase(TestCase):
+  def setUp(self):
+    self.schema = MockSchema(server_types=types.BOOLEAN())
 
-    response = self.schema.respond(payload)
-    self.assertTrue(response.errors)
+  def test_validates(self):
+    payload = True
 
-    unrecognised_keys_error = errors.UNRECOGNISED_KEYS([unrecognised_key])
-    self.assertEqual(unrecognised_keys_error.description, response.errors[0].description)
+    type_validated = self.schema.validate_server_type(payload)
+
+    self.assertTrue(type_validated)
+    self.assertEqual(self.schema.active_server_type, types.BOOLEAN())
+
+  def test_does_not_validate(self):
+    payload = 'string'
+
+    type_validated = self.schema.validate_server_type(payload)
+
+    self.assertFalse(type_validated)
+    self.assertIsNone(self.schema.active_server_type)

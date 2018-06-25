@@ -3,15 +3,14 @@ class Type():
   def __init__(self, description=None):
     self.description = description
 
+  def __eq__(self, other):
+    return self._type == other._type
+
   def validate(self, value):
     return False
 
   def render(self):
     return self._type
-
-  @classmethod
-  def test(cls, type):
-    return type._type == cls._type
 
 class Boolean(Type):
   _type = '__boolean'

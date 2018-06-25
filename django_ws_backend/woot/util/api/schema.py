@@ -7,11 +7,13 @@ from .errors import errors
 from .types import types
 
 class Schema():
+  default_server_types = types.STRUCTURE()
 
   def __init__(self, description=None, server_types=None, children=None):
     self.description = description
-    self.server_types = force_array(server_types or types.STRUCTURE())
+    self.server_types = force_array(server_types or self.default_server_types)
     self.children = children
+    self.active_server_type = None
 
   def query(self, payload):
     return None
@@ -23,8 +25,8 @@ class Schema():
       server_types=self.server_types,
     )
 
-    validated_type = self.validate_server_type(payload)
-    if not validated_type:
+    type_validated = self.validate_server_type(payload)
+    if not type_validated:
       response.add_error(errors.SERVER_TYPES(self.server_types))
       return response
 
@@ -48,3 +50,6 @@ class Schema():
       if server_type.validate(payload):
         self.active_server_type = server_type
         return True
+
+class DefaultSchema(Schema):
+  

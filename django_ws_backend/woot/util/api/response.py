@@ -2,6 +2,9 @@
 from util.merge import merge
 
 class Response():
+  _errors = '_errors'
+  _value = '_value'
+
   def __init__(self, description=None, server_types=None):
     self.description = description
     self.server_types = server_types
@@ -23,15 +26,15 @@ class Response():
 
     if rendered_response:
       if self.errors:
-        rendered_response.update({'_errors': self.render_errors()})
+        rendered_response.update({self._errors: self.render_errors()})
 
       if self.value or self.children:
-        rendered_response.update({'_value': self.render_value()})
+        rendered_response.update({self._value: self.render_value()})
 
       return rendered_response
 
     if self.errors:
-      return {'_errors': self.render_errors()}
+      return {self._errors: self.render_errors()}
 
     if self.value or self.children:
       return self.render_value()
