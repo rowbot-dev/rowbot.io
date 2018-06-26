@@ -107,6 +107,36 @@ class SchemaRespondTestCase(TestCase):
     self.assertIn(MockSchema.checked_key, rendered_response.get(self.test_key_1))
     self.assertEqual(rendered_response.get(self.test_key_2), MockSchema.false_value)
 
+class SchemaEmptyTestCase(TestCase):
+  def setUp(self):
+    self.test_key_1 = 'test1'
+    self.test_key_2 = 'test2'
+    self.schema = Schema(
+      description='Testing the empty schema',
+      children={
+        self.test_key_1: MockSchema(
+          description='The first test entry',
+          server_types=[
+            types.BOOLEAN('Return the whole entry'),
+            types.STRUCTURE('Choose parts of the entry to return')
+          ],
+          children={
+            self.test_key_2: MockSchema(
+              description='The second test entry',
+              server_types=types.BOOLEAN('Return the whole entry'),
+            ),
+          }
+        ),
+        self.test_key_2: MockSchema(
+          description='The second test entry',
+          server_types=types.BOOLEAN('Return the whole entry'),
+        ),
+      },
+    )
+
+  def test_empty(self):
+    empty_response = self.schema.empty()
+
 class SchemaValidateSystemTypesTestCase(TestCase):
   def setUp(self):
     self.schema = MockSchema(server_types=types.BOOLEAN())

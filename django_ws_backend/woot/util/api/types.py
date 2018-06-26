@@ -1,7 +1,9 @@
 
 class Type():
+  description = None
+
   def __init__(self, description=None):
-    self.description = description
+    self.description = description or self.description
 
   def __eq__(self, other):
     return self._type == other._type
@@ -13,6 +15,7 @@ class Type():
     return self._type
 
 class Boolean(Type):
+  description = 'A true or false value'
   _type = '__boolean'
 
   def validate(self, value):
@@ -22,6 +25,7 @@ class Model(Type):
   pass
 
 class Structure(Type):
+  description = 'A JSON object'
   _type = '__structure'
 
   def validate(self, value):
@@ -37,13 +41,16 @@ class Float(Type):
   pass
 
 class String(Type):
-  pass
+  description = 'A string of characters'
+  _type = '__string'
 
 class UUID(Type):
-  pass
+  description = 'A valid UUID'
+  _type = '__uuid'
 
 class Time(Type):
-  pass
+  description = 'A valid timestamp'
+  _type = '__time'
 
 class Ref(Type):
   pass
@@ -71,3 +78,13 @@ class types:
 
   def as_entries():
     pass
+
+def map_type(type_to_map):
+  type_map = {
+    'CharField': types.STRING(),
+    'DateTimeField': types.TIME(),
+    'BooleanField': types.BOOLEAN(),
+    'UUIDField': types.UUID(),
+  }
+
+  return type_map.get(type_to_map)

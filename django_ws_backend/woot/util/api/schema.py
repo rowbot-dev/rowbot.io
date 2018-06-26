@@ -41,7 +41,21 @@ class Schema():
 
     for child_key, child in self.children.items():
       child_payload = payload.get(child_key)
-      response.add_child(child_key, child.respond(child_payload))
+      if child_payload is not None:
+        response.add_child(child_key, child.respond(child_payload))
+
+    return response
+
+  def empty(self):
+
+    response = Response(
+      description=self.description,
+      server_types=self.server_types,
+    )
+
+    if self.children:
+      for child_key, child in self.children.items():
+        response.add_child(child_key, child.empty())
 
     return response
 
@@ -52,4 +66,4 @@ class Schema():
         return True
 
 class DefaultSchema(Schema):
-  
+  pass
