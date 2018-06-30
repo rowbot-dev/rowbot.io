@@ -6,8 +6,10 @@ from django.utils.html import strip_tags
 from django.conf import settings
 from django.db import models
 
-from apps.base.models import Model, Manager, random_key
 from util.merge import merge
+from util.api import Schema, types, map_type, errors, constants
+from apps.base.models import Model, Manager, random_key
+from apps.base.schema import model_schema_constants
 
 import uuid
 
@@ -15,22 +17,34 @@ class MemberManager(BaseUserManager, Manager):
   def schema(self, authorization=None):
     schema = super().schema(authorization=authorization)
 
-    # add methods
-    schema = merge(
-      schema,
-      {
-        'methods': {
-          'activate': {
-            'activation_key': 'string',
-          },
-          'send_activation_email': {},
-        },
-      },
-    )
-
     # make modifications based on authorization
 
     return schema
+
+  def schema_instance_methods(self, authorization=None):
+    return Schema(
+      description='Methods for the {} model',
+      children={
+        self.model.send_activation_email.__name__: Schema(
+          description='Send the activation email to the member',
+          server_types=types.BOOLEAN('A value of true will trigger this method'),
+        ),
+        self.model.activate.__name__: Schema(
+          description='Send the activation email to the member',
+          children={
+            model_schema_constants.ARGUMENTS: Schema(
+              description='',
+              children={
+                'activation_key': Schema(
+                  description='',
+                  server_types=types.UUID(),
+                ),
+              },
+            ),
+          },
+        ),
+      },
+    )
 
 # m = Member.objects.create(username='npiano', email='nicholas.d.piano@gmail.com', first_name='Nicholas', last_name='Piano')
 class Member(AbstractBaseUser, PermissionsMixin, Model):

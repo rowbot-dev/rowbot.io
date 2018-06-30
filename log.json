@@ -84,6 +84,13 @@
       },
       "20180617": {
         "description": "Thinking more about the schema. I want to build it out of more formal objects to include options and errors.",
+      },
+      "20180630": {
+        "description": "This schema might have the English language problem. I was trying to make a recursive format that would have the same behaviour at every level, but this appears to have more exceptions than rules.",
+        "children": {
+          "filter and instances": "The filter schema should receive an input describing how to filter the data, but should provide no output. The filter key should not even be visible in the output even if the mode is set to verbose. This behaviour is not controllable from within the schema, but must be judged from its parent, unless the way a schema renders itself is changed. Further, while input is sent to the filter schema, its values will affect the output of the instances schema. The instances output must contain every instance referred to during the query process, including instances from model methods, creation, and filtering. The model schema must act as a whole, since each part interacts with many others. They also must be done as a cascade, starting with filtering and creation and ending with the exclusion of certain attributes or relationships.",
+          "models and references": "The original idea of references is that they could be used as a shorthand for a group of objects given as the output of a function or a filter. Perhaps create, filter, delete, paginate, and sort should be demoted to the level of any other model method. After all, their output is a set of model instances. In effect, a reference is generated for the output of any function, including deletion, since these values can be used to remove local storage.",
+        }
       }
     }
   },

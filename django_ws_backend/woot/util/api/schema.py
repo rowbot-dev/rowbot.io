@@ -5,14 +5,16 @@ from util.force_array import force_array
 from .response import Response
 from .errors import errors
 from .types import types
+from .constants import constants
 
 class Schema():
-  default_server_types = types.STRUCTURE()
+  default_server_types = types.STRUCTURE('Fine control of content')
 
-  def __init__(self, description=None, server_types=None, children=None):
+  def __init__(self, description=None, server_types=None, template=None, children=None):
     self.description = description
     self.server_types = force_array(server_types or self.default_server_types)
     self.children = children
+    self.template = template
     self.active_server_type = None
 
   def query(self, payload):
@@ -41,7 +43,7 @@ class Schema():
 
     for child_key, child in self.children.items():
       child_payload = payload.get(child_key)
-      if child_payload is not None:
+      if child_payload is not None and child is not None:
         response.add_child(child_key, child.respond(child_payload))
 
     return response
@@ -53,9 +55,13 @@ class Schema():
       server_types=self.server_types,
     )
 
+    if self.template:
+      response.template = self.template.empty()
+
     if self.children:
       for child_key, child in self.children.items():
-        response.add_child(child_key, child.empty())
+        if child is not None:
+          response.add_child(child_key, child.empty())
 
     return response
 

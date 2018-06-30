@@ -2,13 +2,9 @@
 from util.merge import merge
 
 from .modes import modes
+from .constants import constants
 
 class Response():
-  _errors = '_errors'
-  _value = '_value'
-  _description = '_description'
-  _server_types = '_server_types'
-
   def __init__(self, description=None, server_types=None, mode=modes.NORMAL):
     self.description = description
     self.server_types = server_types
@@ -16,6 +12,7 @@ class Response():
     self.value = None
     self.errors = []
     self.children = {}
+    self.template = None
 
   def add_error(self, error):
     self.errors.append(error)
@@ -32,25 +29,32 @@ class Response():
     if mode.value >= self.mode.value:
       if rendered_response:
         if self.errors:
-          rendered_response.update({self._errors: self.render_errors()})
+          rendered_response.update({constants.ERRORS: self.render_errors()})
 
         if self.value or self.children:
-          rendered_response.update({self._value: self.render_value(mode)})
+          rendered_response.update({constants.VALUE: self.render_value(mode)})
 
         return rendered_response
 
       if self.errors:
-        return {self._errors: self.render_errors()}
+        return {constants.ERRORS: self.render_errors()}
 
       if self.value or self.children:
         return self.render_value(mode)
 
   def render_description_and_types(self, mode):
     if mode.value >= modes.VERBOSE.value:
-      return {
-        self._description: self.description,
-        self._server_types: {_type._type: _type.description for _type in self.server_types},
-      }
+      rendered = {}
+      if self.description:
+        rendered.update({constants.DESCRIPTION: self.description})
+
+      if self.server_types:
+        rendered.update({constants.SERVER_TYPES: {_type._type: _type.description for _type in self.server_types}})
+
+      if self.template:
+        rendered.update({constants.TEMPLATE: self.template.render(mode=mode)})
+
+      return rendered
 
   def render_errors(self):
     rendered_errors = {}

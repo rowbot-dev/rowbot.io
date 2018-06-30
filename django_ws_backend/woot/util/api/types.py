@@ -62,6 +62,13 @@ class Enum(Type):
 class Immutable(Type):
   pass
 
+class Any(Type):
+  description = 'Any value'
+  _type = '__any'
+
+  def validate(self, value):
+    return True
+
 class types:
   BOOLEAN = Boolean
   MODEL = Model
@@ -75,6 +82,7 @@ class types:
   REF = Ref
   ENUM = Enum
   IMMUTABLE = Immutable
+  ANY = Any
 
   def as_entries():
     pass

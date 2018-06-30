@@ -2,7 +2,9 @@
 from django.db import models
 from django.db.models import Q
 
-from util.merge import merge
+from util.api import Schema
+
+from .schema import ModelSchema, AttributeSchema, RelationshipSchema, InstancesSchema
 
 import uuid
 from uuid import UUID
@@ -25,6 +27,7 @@ def is_valid_uuid(uuid_string):
 
 class Manager(models.Manager):
   use_for_related_fields = True
+
   def get(self, **kwargs):
     if self.filter(**kwargs).exists():
       return super().get(**kwargs)
@@ -77,28 +80,22 @@ class Manager(models.Manager):
     }
 
   def schema(self, authorization=None):
-    schema = {}
-    for field in self.model._meta.get_fields():
-      if field.is_relation:
-        schema = merge(
-          schema,
-          {
-            'relationships': {
-              field.name: field.related_model.__name__,
-            },
-          },
-        )
-      else:
-        schema = merge(
-          schema,
-          {
-            'attributes': {
-              field.name: field.get_internal_type(),
-            },
-          },
-        )
+    return ModelSchema(self.model, authorization=authorization)
 
-    return schema
+  def schema_attributes(self, authorization=None):
+    return AttributeSchema(self.model, authorization=authorization)
+
+  def schema_relationships(self, authorization=None):
+    return RelationshipSchema(self.model, authorization=authorization)
+
+  def schema_instance_methods(self, authorization=None):
+    return Schema(description='No available instance methods')
+
+  def schema_model_methods(self, authorization=None):
+    return Schema(description='No available model methods')
+
+  def schema_instances(self, authorization=None):
+    return InstancesSchema(self.model, authorization=authorization)
 
 class Model(models.Model):
 
@@ -117,42 +114,3 @@ class Model(models.Model):
   @property
   def _ref(self):
     return '{}.{}'.format(self.__class__.__name__, self._id)
-
-  def serialize(self):
-    # 1. attributes
-    # 2. run methods
-    serialised_object = {}
-    for field in self._meta.get_fields():
-      if hasattr(self, field.name):
-        attr = getattr(self, field.name)
-
-        if field.is_relation:
-          if hasattr(attr, '_ref'):
-            serialised_object = merge(
-              serialised_object,
-              {
-                'relationships': {
-                  field.name: attr._ref,
-                },
-              },
-            )
-          else:
-            serialised_object = merge(
-              serialised_object,
-              {
-                'relationships': {
-                  field.name: field.related_model.__name__,
-                },
-              },
-            )
-        else:
-          serialised_object = merge(
-            serialised_object,
-            {
-              'attributes': {
-                field.name: str(attr),
-              },
-            },
-          )
-
-    return serialised_object
