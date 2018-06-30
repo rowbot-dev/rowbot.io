@@ -12,7 +12,7 @@ class APITestCase(TestCase):
     Member.objects.create(username='wilbur', email='wilbur@wilbur.com')
 
   def test_empty(self):
-    # print(json.dumps(api.empty().empty(), indent=2))
+    # print(json.dumps(api.respond().render(), indent=2))
     # print(len(json.dumps(api.empty().empty())))
     self.assertTrue(True)
 
@@ -29,12 +29,13 @@ class APITestCase(TestCase):
               },
             },
           },
+          '_attributes': None,
         },
       },
     }
 
     response = api.respond(payload)
 
-    print(response.render())
+    print(json.dumps(response.render(), indent=2))
 
     self.assertTrue(False)

@@ -90,6 +90,22 @@
         "children": {
           "filter and instances": "The filter schema should receive an input describing how to filter the data, but should provide no output. The filter key should not even be visible in the output even if the mode is set to verbose. This behaviour is not controllable from within the schema, but must be judged from its parent, unless the way a schema renders itself is changed. Further, while input is sent to the filter schema, its values will affect the output of the instances schema. The instances output must contain every instance referred to during the query process, including instances from model methods, creation, and filtering. The model schema must act as a whole, since each part interacts with many others. They also must be done as a cascade, starting with filtering and creation and ending with the exclusion of certain attributes or relationships.",
           "models and references": "The original idea of references is that they could be used as a shorthand for a group of objects given as the output of a function or a filter. Perhaps create, filter, delete, paginate, and sort should be demoted to the level of any other model method. After all, their output is a set of model instances. In effect, a reference is generated for the output of any function, including deletion, since these values can be used to remove local storage.",
+          "modes": "The mode was meant to control how the whole schema would present itself. There are several problems. The biggest is that the mode is both a value drawn from the input and a value that affects the output. This means it is not a matter of customisation, but is intrinsic to the schema. By rights it should sit outside the schema. The puppeteer is not part of the puppet. The alternative to this is to have a hard-coded declaration extracting the mode from the schema before it is processed, such that the mode will affect its own schema. It is strange, and opens the door to other hard-coded aspects of the schema which might not be appropriate. On a more practical note, the global mode should affect whether the description of a schema is shown, among other things. Is this true in all cases? Are there situations when the description should be shown even in a lower mode?",
+          "respond method": {
+            "description": "How many payloads can come through this door? Right off the bat, a distinction can be made between a value which is a JSON structure and one which is not. A single value cannot be recursive. The same set of questions can be asked at any level of the schema.",
+            "children": {
+              "questions": {
+                "description": "A list of questions that is asked at any level of the schema",
+                "children": {
+                  "payload type": "Is the payload of the correct type? If not, it should be returned immediately with an error.",
+                  "single valued payload": "If the payload has no children, it should execute its predefined query function and return the result.",
+                  "invalid keys": "If the payload contains invalid child keys, it should return immediately with an error detailing the invalid keys",
+                  "child responses": "The payload should be given to the children of the schema in some form, either divided by key, chained, or complete. Each child should return two things: whether it should be displayed at all, and the content of its response.",
+                }
+              }
+            }
+          },
+          "null payload": "Maybe there don't have to be modes at all. If the payload is None, the response can just be the schema. This can apply to any level of the schema. If you want the schema for some part of the full schema, set its key to none. The mode of the schema can be included from the server side to say how the schem should be interpreted. A client application can be set up to received messages in different modes, for example the smallest could be a payload of raw data with no structure except an unique id and a blob of data. Database models could be used to mediate and prepare for this type of exchange.",
         }
       }
     }

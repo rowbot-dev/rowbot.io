@@ -33,4 +33,4 @@ class UnrecognisedKeys(Error):
 
 class errors:
   SERVER_TYPES = ServerTypes
-  UNRECOGNISED_KEYS = UnrecognisedKeys
+  INVALID_KEYS = UnrecognisedKeys

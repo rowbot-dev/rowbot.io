@@ -17,53 +17,57 @@ class Schema():
     self.template = template
     self.active_server_type = None
 
-  def query(self, payload):
+  def query(self, payload=None):
     return None
 
-  def respond(self, payload):
-
-    response = Response(
+  def response(self):
+    return Response(
       description=self.description,
       server_types=self.server_types,
     )
 
-    type_validated = self.validate_server_type(payload)
-    if not type_validated:
-      response.add_error(errors.SERVER_TYPES(self.server_types))
+  def respond(self, payload=None):
+    response = self.response()
+
+    if payload is None:
+      response.empty = True
+
+      if self.template is not None:
+        response.template = self.template.respond()
+
+      if self.children is not None:
+        for child_key, child in self.children.items():
+          response.add_child(child_key, child.respond())
+
       return response
+
+    if not self.validate_server_type(payload):
+      return response.add_error(errors.SERVER_TYPES(self.server_types))
 
     if not self.children:
-      response.add_value(self.query(payload))
-      return response
+      return response.add_value(self.query(payload))
 
-    unrecognised_keys = payload.keys() - self.children.keys()
-    if unrecognised_keys:
-      response.add_error(errors.UNRECOGNISED_KEYS(unrecognised_keys))
-      return response
+    invalid_keys = payload.keys() - self.children.keys()
+    if invalid_keys:
+      return response.add_error(errors.INVALID_KEYS(invalid_keys))
 
-    for child_key, child in self.children.items():
-      child_payload = payload.get(child_key)
-      if child_payload is not None and child is not None:
-        response.add_child(child_key, child.respond(child_payload))
+    child_responses = self.child_responses(payload)
 
-    return response
-
-  def empty(self):
-
-    response = Response(
-      description=self.description,
-      server_types=self.server_types,
-    )
-
-    if self.template:
-      response.template = self.template.empty()
-
-    if self.children:
-      for child_key, child in self.children.items():
-        if child is not None:
-          response.add_child(child_key, child.empty())
+    for child_key, child_response in child_responses.items():
+      if child_response is not None:
+        response.add_child(child_key, child_response)
 
     return response
+
+  def child_responses(self, payload):
+    return self.consolidate({
+      child_key: child.respond(payload=payload.get(child_key))
+      for child_key, child in self.children.items()
+      if child_key in payload
+    })
+
+  def consolidate(self, child_responses):
+    return child_responses
 
   def validate_server_type(self, payload):
     for server_type in self.server_types:

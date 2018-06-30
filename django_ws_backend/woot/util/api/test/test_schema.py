@@ -73,7 +73,7 @@ class SchemaRespondTestCase(TestCase):
     response = self.schema.respond(payload)
     self.assertTrue(response.errors)
 
-    unrecognised_keys_error = errors.UNRECOGNISED_KEYS([unrecognised_key])
+    unrecognised_keys_error = errors.INVALID_KEYS([unrecognised_key])
     self.assertEqual(unrecognised_keys_error.description, response.errors[0].description)
 
   def test_children_boolean_payload(self):
