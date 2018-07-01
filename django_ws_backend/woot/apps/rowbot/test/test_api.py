@@ -20,16 +20,17 @@ class APITestCase(TestCase):
     payload = {
       'models': {
         'Member': {
-          '_filter': {
-            '_composite': 'username',
-            '_components': {
-              'username': {
-                '_key': 'username__contains',
-                '_value': 'a',
+          'methods': {
+            'filter': {
+              'composite': 'username',
+              'components': {
+                'username': {
+                  '_key': 'username__contains',
+                  '_value': 'a',
+                },
               },
             },
           },
-          '_attributes': None,
         },
       },
     }

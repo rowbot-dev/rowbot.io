@@ -44,6 +44,9 @@ class String(Type):
   description = 'A string of characters'
   _type = '__string'
 
+  def validate(self, value):
+    return isinstance(value, str)
+
 class UUID(Type):
   description = 'A valid UUID'
   _type = '__uuid'

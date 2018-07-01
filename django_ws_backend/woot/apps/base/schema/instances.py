@@ -1,49 +1,7 @@
 
-from util.merge import merge
-from util.api import Schema, types, map_type, errors, constants
+from util.api import Schema, types, errors, constants
 
-class model_schema_constants:
-  ATTRIBUTES = '_attributes'
-  RELATIONSHIPS = '_relationships'
-  METHODS = '_methods'
-  INSTANCES = '_instances'
-  FILTER = '_filter'
-  SORT = '_sort'
-  PAGINATE = '_paginate'
-  CREATE = '_create'
-  DELETE = '_delete'
-  ARGUMENTS = '_arguments'
-  GET = '_get'
-  SET = '_set'
-
-class AttributeSchema(Schema):
-  def __init__(self, Model, authorization=None, **kwargs):
-    super().__init__(**kwargs)
-    self.children = {
-      field.name: Schema(
-        description='',
-        server_types=map_type(field.get_internal_type())
-      )
-      for field in Model._meta.get_fields()
-      if (
-        not field.is_relation
-      )
-    }
-
-  def query(self, payload):
-    pass
-
-class RelationshipSchema(Schema):
-  def __init__(self, Model, authorization=None, **kwargs):
-    super().__init__(**kwargs)
-    self.children = {
-      field.name: Schema()
-      for field in Model._meta.get_fields()
-      if field.is_relation
-    }
-
-  def query(self, payload):
-    pass
+from .constants import model_schema_constants
 
 class SingleInstanceSchema(Schema):
   def __init__(self, Model, authorization=None, **kwargs):
@@ -104,40 +62,6 @@ class InstancesSchema(Schema):
   def __init__(self, Model, authorization=None, **kwargs):
     super().__init__(**kwargs)
     self.template = SingleInstanceSchema(Model, authorization=authorization)
-
-  def query(self, payload):
-    pass
-
-class FilterSchema(Schema):
-  def __init__(self, Model, authorization=None, **kwargs):
-    super().__init__(**kwargs)
-    self.model = Model
-
-  def query(self, payload):
-    print(payload)
-
-class ModelSchema(Schema):
-  def __init__(self, Model, authorization=None, **kwargs):
-    super().__init__(**kwargs)
-    self.children = {
-      model_schema_constants.ATTRIBUTES: Model.objects.schema_attributes(),
-      model_schema_constants.RELATIONSHIPS: Model.objects.schema_relationships(),
-      model_schema_constants.INSTANCES: Model.objects.schema_instances(),
-      model_schema_constants.METHODS: Model.objects.schema_model_methods(),
-      model_schema_constants.FILTER: FilterSchema(Model, authorization=authorization),
-      # model_schema_constants.SORT: Schema(
-      #   description='',
-      # ),
-      # model_schema_constants.PAGINATE: Schema(
-      #   description='',
-      # ),
-      # model_schema_constants.CREATE: Schema(
-      #   description='',
-      # ),
-      # model_schema_constants.DELETE: Schema(
-      #   description='',
-      # ),
-    }
 
   def query(self, payload):
     pass

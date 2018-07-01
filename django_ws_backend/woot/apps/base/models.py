@@ -4,7 +4,13 @@ from django.db.models import Q
 
 from util.api import Schema
 
-from .schema import ModelSchema, AttributeSchema, RelationshipSchema, InstancesSchema
+from .schema import (
+  ModelSchema,
+  AttributeSchema,
+  RelationshipSchema,
+  InstancesSchema,
+  ModelMethodsSchema
+)
 
 import uuid
 from uuid import UUID
@@ -92,7 +98,7 @@ class Manager(models.Manager):
     return Schema(description='No available instance methods')
 
   def schema_model_methods(self, authorization=None):
-    return Schema(description='No available model methods')
+    return ModelMethodsSchema(self.model, authorization=authorization)
 
   def schema_instances(self, authorization=None):
     return InstancesSchema(self.model, authorization=authorization)

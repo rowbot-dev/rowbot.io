@@ -18,7 +18,7 @@ class Schema():
     self.active_server_type = None
 
   def query(self, payload=None):
-    return None
+    return payload
 
   def response(self):
     return Response(
@@ -60,13 +60,13 @@ class Schema():
     return response
 
   def child_responses(self, payload):
-    return self.consolidate({
+    return self.consolidate_child_responses({
       child_key: child.respond(payload=payload.get(child_key))
       for child_key, child in self.children.items()
       if child_key in payload
     })
 
-  def consolidate(self, child_responses):
+  def consolidate_child_responses(self, child_responses):
     return child_responses
 
   def validate_server_type(self, payload):
