@@ -10,21 +10,7 @@ class constants:
 
 class BasicTestCase(TestCase):
   def setUp(self):
-    self.composite = 'username & ( email | password )'
-    self.components = {
-      'username': {
-        constants.KEY: 'username__contains',
-        constants.VALUE: 'a',
-      },
-      'email': {
-        constants.KEY: 'email__contains',
-        constants.VALUE: 'a',
-      },
-      'password': {
-        constants.KEY: 'password__contains',
-        constants.VALUE: 'a',
-      },
-    }
+    self.filter_schema
 
   def test_composite_parse(self):
 
@@ -45,7 +31,7 @@ class BasicTestCase(TestCase):
         ],
         '_or': [
           {
-            
+
           },
         ],
       },

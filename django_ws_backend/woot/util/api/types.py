@@ -32,7 +32,11 @@ class Structure(Type):
     return isinstance(value, dict)
 
 class Array(Type):
-  pass
+  description = 'A JSON array'
+  _type = '__array'
+
+  def validate(self, value):
+    return isinstance(value, list)
 
 class Integer(Type):
   pass

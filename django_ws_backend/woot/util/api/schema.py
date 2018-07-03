@@ -45,6 +45,9 @@ class Schema():
       return response.add_error(errors.SERVER_TYPES(self.server_types))
 
     if not self.children:
+      if self.template:
+        return response.add_value(self.template_responses(payload))
+
       return response.add_value(self.query(payload))
 
     invalid_keys = payload.keys() - self.children.keys()
@@ -58,6 +61,19 @@ class Schema():
         response.add_child(child_key, child_response)
 
     return response
+
+  def template_responses(self, payload):
+    if isinstance(payload, list):
+      return self.consolidate_child_responses([
+        self.template.respond(payload=child_payload)
+        for child_payload in payload
+      ])
+
+    return self.consolidate_child_responses({
+      child_key: self.template.respond(payload=child_payload)
+      for child_key, child_payload in payload.items()
+      if child_key in payload
+    })
 
   def child_responses(self, payload):
     return self.consolidate_child_responses({

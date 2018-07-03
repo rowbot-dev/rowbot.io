@@ -73,4 +73,10 @@ class Response():
 
       return rendered_children
 
+    if isinstance(self.value, list):
+      return [
+        child.render()
+        for child in self.value
+      ]
+
     return self.value

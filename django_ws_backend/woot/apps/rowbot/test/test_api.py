@@ -12,9 +12,9 @@ class APITestCase(TestCase):
     Member.objects.create(username='wilbur', email='wilbur@wilbur.com')
 
   def test_empty(self):
-    # print(json.dumps(api.respond().render(), indent=2))
-    # print(len(json.dumps(api.empty().empty())))
+    print(json.dumps(api.respond().render(), indent=2))
     self.assertTrue(True)
+    # self.assertTrue(False)
 
   def test_respond(self):
     payload = {
@@ -22,13 +22,24 @@ class APITestCase(TestCase):
         'Member': {
           'methods': {
             'filter': {
-              'composite': 'username',
-              'components': {
-                'username': {
-                  '_key': 'username__contains',
-                  '_value': 'a',
+              'composite': [
+                {
+                  'key': 'username__contains',
+                  'value': 'a',
                 },
-              },
+                {
+                  'or': [
+                    {
+                      'key': 'email__contains',
+                      'value': 'a',
+                    },
+                    {
+                      'key': 'email__startswith',
+                      'value': 'al',
+                    },
+                  ],
+                },
+              ],
             },
           },
         },
@@ -40,3 +51,4 @@ class APITestCase(TestCase):
     print(json.dumps(response.render(), indent=2))
 
     self.assertTrue(False)
+    # self.assertTrue(True)
