@@ -16,6 +16,7 @@ class Schema():
     self.children = children
     self.template = template
     self.active_server_type = None
+    self.active_response = None
 
   def query(self, payload=None):
     return payload
@@ -27,40 +28,41 @@ class Schema():
     )
 
   def respond(self, payload=None):
-    response = self.response()
+    self.active_response = self.response()
 
     if payload is None:
-      response.empty = True
+      self.active_response.empty = True
 
       if self.template is not None:
-        response.template = self.template.respond()
+        self.active_response.template = self.template.respond()
 
       if self.children is not None:
         for child_key, child in self.children.items():
-          response.add_child(child_key, child.respond())
+          self.active_response.add_child(child_key, child.respond())
 
-      return response
+      return self.active_response
 
     if not self.validate_server_type(payload):
-      return response.add_error(errors.SERVER_TYPES(self.server_types))
+      return self.active_response.add_error(errors.SERVER_TYPES(self.server_types))
 
     if not self.children:
       if self.template:
-        return response.add_value(self.template_responses(payload))
+        return self.active_response.add_value(self.template_responses(payload))
 
-      return response.add_value(self.query(payload))
+      return self.active_response.add_value(self.query(payload))
 
     invalid_keys = payload.keys() - self.children.keys()
     if invalid_keys:
-      return response.add_error(errors.INVALID_KEYS(invalid_keys))
+      return self.active_response.add_error(errors.INVALID_KEYS(invalid_keys))
 
     child_responses = self.child_responses(payload)
 
-    for child_key, child_response in child_responses.items():
-      if child_response is not None:
-        response.add_child(child_key, child_response)
+    if child_responses is not None:
+      for child_key, child_response in child_responses.items():
+        if child_response is not None:
+          self.active_response.add_child(child_key, child_response)
 
-    return response
+    return self.active_response
 
   def template_responses(self, payload):
     if isinstance(payload, list):
