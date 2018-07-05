@@ -1,4 +1,6 @@
 
+from .constants import constants
+
 class Type():
   description = None
 
@@ -6,37 +8,24 @@ class Type():
     self.description = description or self.description
 
   def __eq__(self, other):
-    return self._type == other._type
+    return self.code == other.code
 
   def validate(self, value):
     return False
 
   def render(self):
-    return self._type
+    return {
+      constants.TYPE: self.type,
+      constants.DESCRIPTION: self.description,
+    }
 
 class Boolean(Type):
+  code = '001'
   description = 'A true or false value'
-  _type = '__boolean'
+  type = '__boolean'
 
   def validate(self, value):
     return isinstance(value, bool)
-
-class Model(Type):
-  pass
-
-class Structure(Type):
-  description = 'A JSON object'
-  _type = '__structure'
-
-  def validate(self, value):
-    return isinstance(value, dict)
-
-class Array(Type):
-  description = 'A JSON array'
-  _type = '__array'
-
-  def validate(self, value):
-    return isinstance(value, list)
 
 class Integer(Type):
   pass
@@ -45,19 +34,40 @@ class Float(Type):
   pass
 
 class String(Type):
+  code = '004'
   description = 'A string of characters'
-  _type = '__string'
+  type = '__string'
 
   def validate(self, value):
     return isinstance(value, str)
 
+class Structure(Type):
+  code = '005'
+  description = 'A JSON object'
+  type = '__structure'
+
+  def validate(self, value):
+    return isinstance(value, dict)
+
+class Array(Type):
+  code = '006'
+  description = 'A JSON array'
+  type = '__array'
+
+  def validate(self, value):
+    return isinstance(value, list)
+
 class UUID(Type):
+  code = '007'
   description = 'A valid UUID'
-  _type = '__uuid'
+  type = '__uuid'
 
 class Time(Type):
   description = 'A valid timestamp'
-  _type = '__time'
+  type = '__time'
+
+class Model(Type):
+  pass
 
 class Ref(Type):
   pass
@@ -71,7 +81,7 @@ class Immutable(Type):
 
 class Any(Type):
   description = 'Any value'
-  _type = '__any'
+  type = '__any'
 
   def validate(self, value):
     return True
@@ -90,9 +100,6 @@ class types:
   ENUM = Enum
   IMMUTABLE = Immutable
   ANY = Any
-
-  def as_entries():
-    pass
 
 def map_type(type_to_map):
   type_map = {
