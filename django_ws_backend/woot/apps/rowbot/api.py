@@ -3,7 +3,7 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from asgiref.sync import async_to_sync
 
 from util.merge import merge
-from util.api import Schema, DefaultSchema, types, map_type, errors
+from util.api import StructureSchema, types, map_type, errors
 
 # from apps.logger.models import SocketLogger
 from apps.rowbot.models import (
@@ -19,12 +19,11 @@ class api_constants:
   MODELS = 'models'
   SYSTEM = 'system'
 
-api = Schema(
+api = StructureSchema(
   description='',
   children=merge(
-    DefaultSchema().children,
     {
-      api_constants.MODELS: Schema(
+      api_constants.MODELS: StructureSchema(
         description='',
         children={
           Model.__name__: Model.objects.schema() for Model in [
@@ -38,7 +37,7 @@ api = Schema(
           ]
         },
       ),
-      api_constants.SYSTEM: Schema(
+      api_constants.SYSTEM: StructureSchema(
         description='',
         children={
 

@@ -63,8 +63,12 @@ class UUID(Type):
   type = '__uuid'
 
 class Time(Type):
+  code = '008'
   description = 'A valid timestamp'
-  type = '__time'
+  type = '__datetime'
+
+  def validate(self, value):
+    return True
 
 class Model(Type):
   pass
@@ -80,6 +84,7 @@ class Immutable(Type):
   pass
 
 class Any(Type):
+  code = '013'
   description = 'Any value'
   type = '__any'
 

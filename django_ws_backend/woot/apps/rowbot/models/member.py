@@ -7,32 +7,32 @@ from django.conf import settings
 from django.db import models
 
 from util.merge import merge
-from util.api import Schema, types, map_type, errors, constants
+from util.api import Schema, StructureSchema, types, map_type, errors, constants
 from apps.base.models import Model, Manager, random_key
 from apps.base.schema import model_schema_constants
 
 import uuid
 
 class MemberManager(BaseUserManager, Manager):
-  def schema(self, authorization=None):
-    schema = super().schema(authorization=authorization)
+  def schema(self):
+    schema = super().schema()
 
     # make modifications based on authorization
 
     return schema
 
   def schema_instance_methods(self, authorization=None):
-    return Schema(
-      description='Methods for the {} model',
+    return StructureSchema(
+      description='Methods for the Member model',
       children={
         self.model.send_activation_email.__name__: Schema(
           description='Send the activation email to the member',
           server_types=types.BOOLEAN('A value of true will trigger this method'),
         ),
-        self.model.activate.__name__: Schema(
+        self.model.activate.__name__: StructureSchema(
           description='Send the activation email to the member',
           children={
-            model_schema_constants.ARGUMENTS: Schema(
+            model_schema_constants.ARGUMENTS: StructureSchema(
               description='',
               children={
                 'activation_key': Schema(

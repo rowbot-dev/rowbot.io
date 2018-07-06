@@ -2,7 +2,7 @@
 from util.merge import merge
 from util.force_array import force_array
 
-from .response import Response, StructureResponse, ArrayResponse, IndexedResponse
+from .response import Response, StructureResponse, ArrayResponse, IndexedResponse, TemplateResponse
 from .errors import errors
 from .types import types
 from .constants import constants
@@ -124,7 +124,7 @@ class IndexedSchema(Schema):
     passes_type_validation = super().passes_type_validation(payload)
     if not passes_type_validation:
       return False
-      
+
     invalid_indexes = [
       index
       for index in payload.keys()
@@ -140,3 +140,23 @@ class IndexedSchema(Schema):
   def responds_to_valid_payload(self, payload):
     for child_index, child_payload in payload.items():
       self.active_response.add_child(child_index, self.template.respond(child_payload))
+
+class TemplateSchema(Schema):
+  default_server_types = types.STRUCTURE()
+
+  def __init__(self, template=None, **kwargs):
+    super().__init__(**kwargs)
+    self.template = template
+
+  def response(self):
+    return TemplateResponse(
+      description=self.description,
+      server_types=self.server_types,
+    )
+
+  def responds_to_none(self):
+    super().responds_to_none()
+    self.active_response.template = self.template.respond()
+
+  def responds_to_valid_payload(self, payload):
+    self.responds_to_none()

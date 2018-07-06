@@ -1,8 +1,16 @@
 
+import json
+
 from django.db.models import Q
 
 from util.construct_filter_query import construct_filter_query
-from util.api import Schema, Error, Response, types, errors, constants
+from util.api import (
+  Schema, StructureSchema, ArraySchema, IndexedSchema,
+  Response, StructureResponse, ArrayResponse,
+  types,
+  errors, Error,
+  constants,
+)
 
 from .constants import model_schema_constants
 
@@ -30,11 +38,34 @@ class QueryAndOrPresentError(Error):
       description='A query cannot contain both AND and OR keys',
     )
 
-class QuerySchema(Schema):
+class QueryResponse(StructureResponse):
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    self.has_child_errors = False
+    self.key_value = False
+
+  def add_child(self, child_key, child_response):
+    super().add_child(child_key, child_response)
+    if not self.key_value and (child_response.errors or child_response.has_child_errors):
+      self.has_child_errors = True
+
+  def render_value(self):
+    super().render_value()
+    if self.key_value:
+      key_response = self.children.get(model_schema_constants.KEY)
+      value_response = self.children.get(model_schema_constants.VALUE)
+
+      if not key_response.errors and not value_response.errors:
+        self.rendered = Q(**{key_response.render(): value_response.render()})
+    else:
+      [response] = self.children.values()
+      if not response.errors and not response.has_child_errors:
+        self.rendered = response.render()
+
+class QuerySchema(StructureSchema):
   def __init__(self, OR=True, **kwargs):
     super().__init__(
       **kwargs,
-      description='',
       children={
         model_schema_constants.KEY: Schema(
           description='',
@@ -44,148 +75,118 @@ class QuerySchema(Schema):
           description='',
           server_types=types.STRING(),
         ),
-        model_schema_constants.AND: Schema(
-          server_types=types.ARRAY(),
+        model_schema_constants.AND: ArraySchema(
+          template=Schema(),
         ),
-        model_schema_constants.OR: Schema(
-          server_types=types.ARRAY(),
+        model_schema_constants.OR: ArraySchema(
+          template=Schema(),
         ),
       },
-    )
-
-  def respond(self, payload=None):
-    if payload is None:
-      return super().respond(payload=payload)
-
-    self.active_response = self.response()
-
-    if not self.validate_server_type(payload):
-      return self.active_response.add_error(errors.SERVER_TYPES(self.server_types))
-
-    invalid_keys = payload.keys() - self.children.keys()
-    if invalid_keys:
-      return self.active_response.add_error(errors.INVALID_KEYS(invalid_keys))
-
-    self.query_errors(payload)
-    if self.active_response.errors:
-      return self.active_response
-
-    if model_schema_constants.KEY in payload and model_schema_constants.VALUE in payload:
-      key = payload.get(model_schema_constants.KEY)
-      value = payload.get(model_schema_constants.VALUE)
-
-      return self.active_response.add_value(Q(**{key: value}))
-
-    if model_schema_constants.AND in payload:
-      and_payload = payload.get(model_schema_constants.AND)
-      and_child = self.children.get(model_schema_constants.AND)
-      and_response = and_child.respond(and_payload)
-
-      if and_response.errors:
-        return {model_schema_constants.AND: and_response}
-
-      return and_response
-
-    if model_schema_constants.OR in payload:
-      or_payload = payload.get(model_schema_constants.OR)
-      or_child = self.children.get(model_schema_constants.OR)
-      or_response = or_child.respond(or_payload)
-
-      if or_response.errors:
-        return {model_schema_constants.OR: or_response}
-
-      return or_response
-
-  def query_errors(self, payload):
-    if model_schema_constants.KEY in payload:
-      if model_schema_constants.VALUE not in payload:
-        self.active_response.add_error(QueryKeyValueNotPresentError())
-      else:
-        if model_schema_constants.AND in payload or model_schema_constants.OR in payload:
-          self.active_response.add_error(QueryAndOrPresentWithKeyValueError())
-
-    if model_schema_constants.AND in payload and model_schema_constants.OR in payload:
-      self.active_response.add_error(QueryAndOrPresentError())
-
-class CompositeResponse(Response):
-  def __init__(self, OR=True, **kwargs):
-    self.OR = OR
-    super().__init__(**kwargs)
-
-  def render_value(self):
-    base_query = Q()
-    rendered_with_errors = []
-    for child in self.value:
-      rendered_child = child.render()
-
-      if not isinstance(rendered_child, Q):
-        rendered_with_errors.append(rendered_child)
-      else:
-        if self.OR:
-          base_query = base_query | rendered_child
-        else:
-          base_query = base_query & rendered_child
-
-    if rendered_with_errors:
-      return rendered_with_errors
-
-    return base_query
-
-class CompositeSchema(Schema):
-  def __init__(self, OR=True, **kwargs):
-    self.OR = OR
-    super().__init__(
-      **kwargs,
-      description=(
-        'This key acts as an implicit OR for the children it receives.'
-        'Its purpose is to return the fully composed query to the FilterSchema.'
-      ),
-      server_types=types.ARRAY(),
-      template=QuerySchema(),
     )
 
   def response(self):
-    return CompositeResponse(OR=self.OR)
+    return QueryResponse(description=self.description, server_types=self.server_types)
 
-  def template_responses(self, payload):
+  def passes_pre_response_checks(self, payload):
+    passes_pre_response_checks = super().passes_pre_response_checks(payload)
+    if model_schema_constants.KEY in payload:
+      if model_schema_constants.VALUE not in payload:
+        self.active_response.add_error(QueryKeyValueNotPresentError())
+        return False
+      else:
+        if model_schema_constants.AND in payload or model_schema_constants.OR in payload:
+          self.active_response.add_error(QueryAndOrPresentWithKeyValueError())
+          return False
+
+      self.active_response.key_value = True
+
+    if model_schema_constants.AND in payload and model_schema_constants.OR in payload:
+      self.active_response.add_error(QueryAndOrPresentError())
+      return False
+
+    return passes_pre_response_checks
+
+class CompositeResponse(ArrayResponse):
+  def __init__(self, OR=True, **kwargs):
+    super().__init__(**kwargs)
+    self.has_child_errors = False
+    self.OR = OR
+
+  def add_child(self, child_response):
+    super().add_child(child_response)
+    if child_response.errors or child_response.has_child_errors:
+      self.has_child_errors = True
+
+  def render_value(self):
+    if self.has_child_errors:
+      self.rendered = []
+      for child_response in self.children:
+        if child_response.has_child_errors:
+          self.rendered.append(child_response.render())
+        else:
+          self.rendered.append(child_response.render_errors())
+    else:
+      self.rendered = Q()
+      for child in self.children:
+        if self.OR:
+          self.rendered = self.rendered | child.render()
+        else:
+          self.rendered = self.rendered & child.render()
+
+class CompositeSchema(ArraySchema):
+  def __init__(self, OR=True, query_description=None, **kwargs):
+    self.OR = OR
+    super().__init__(template=QuerySchema(description=query_description), **kwargs)
+
+  def response(self):
+    return CompositeResponse(
+      OR=self.OR,
+      description=self.description,
+      server_types=self.server_types,
+    )
+
+  def responds_to_valid_payload(self, payload):
     self.template.children.update({
-      model_schema_constants.AND: CompositeSchema(OR=False),
+      model_schema_constants.AND: CompositeSchema(OR=False, description='C2', query_description='Q2'),
       model_schema_constants.OR: CompositeSchema(),
     })
+    super().responds_to_valid_payload(payload)
 
-    return [
-      self.template.respond(payload=child_payload)
-      for child_payload in payload
-    ]
-
-class FilterSchema(Schema):
-  def __init__(self, Model, authorization=None, **kwargs):
+class FilterSchema(StructureSchema):
+  def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(
       **kwargs,
-      description='',
       children={
-        model_schema_constants.COMPOSITE: CompositeSchema(),
-        model_schema_constants.SORT: Schema(),
-        model_schema_constants.PAGINATE: Schema(),
+        model_schema_constants.COMPOSITE: CompositeSchema(
+          description='C1',
+          query_description='Q1',
+        ),
+        # model_schema_constants.SORT: Schema(),
+        # model_schema_constants.PAGINATE: Schema(),
       },
     )
 
-  def consolidate_child_responses(self, child_responses):
-    composite_response = child_responses.get(model_schema_constants.COMPOSITE)
-    composite_query = composite_response.render()
+  def responds_to_valid_payload(self, payload):
+    super().responds_to_valid_payload(payload)
+    composite_response = self.active_response.children.get(model_schema_constants.COMPOSITE)
 
-    print(composite_query)
+    self.active_response.children = {}
+    if composite_response.errors or composite_response.has_child_errors:
+      self.active_response.children.update({
+        model_schema_constants.COMPOSITE: composite_response,
+      })
+    else:
+      print(composite_response.render())
 
-    return {}
 
-class ModelMethodsSchema(Schema):
-  def __init__(self, Model, authorization=None, **kwargs):
+class ModelMethodsSchema(StructureSchema):
+  def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(
       **kwargs,
       description='No available model methods',
       children={
-        model_schema_constants.FILTER: FilterSchema(Model, authorization=authorization),
+        model_schema_constants.FILTER: FilterSchema(Model),
       },
     )

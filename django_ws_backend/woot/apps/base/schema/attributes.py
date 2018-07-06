@@ -1,8 +1,8 @@
 
-from util.api import Schema, types, map_type
+from util.api import Schema, StructureSchema, types, map_type
 
-class AttributeSchema(Schema):
-  def __init__(self, Model, authorization=None, **kwargs):
+class AttributeSchema(StructureSchema):
+  def __init__(self, Model, **kwargs):
     super().__init__(**kwargs)
     self.children = {
       field.name: Schema(
@@ -14,6 +14,3 @@ class AttributeSchema(Schema):
         not field.is_relation
       )
     }
-
-  def query(self, payload):
-    pass

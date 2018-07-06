@@ -39,6 +39,7 @@ class Response():
         for server_type in self.server_types
       },
     }
+    return self.rendered
 
   def render_errors(self):
     self.rendered = {
@@ -47,9 +48,11 @@ class Response():
         for error in self.errors
       },
     }
+    return self.rendered
 
   def render_value(self):
     self.rendered = self.value
+    return self.rendered
 
 class StructureResponse(Response):
   def __init__(self, **kwargs):
@@ -117,3 +120,17 @@ class IndexedResponse(Response):
       child_index: child_response.render()
       for child_index, child_response in self.children.items()
     }
+
+class TemplateResponse(Response):
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    self.template = None
+
+  def render_empty(self):
+    super().render_empty()
+    self.rendered.update({
+      constants.TEMPLATE: self.template.render(),
+    })
+
+  def render_value(self):
+    self.render_empty()

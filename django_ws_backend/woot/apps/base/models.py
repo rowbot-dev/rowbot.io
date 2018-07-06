@@ -85,23 +85,23 @@ class Manager(models.Manager):
       },
     }
 
-  def schema(self, authorization=None):
-    return ModelSchema(self.model, authorization=authorization)
+  def schema(self):
+    return ModelSchema(self.model)
 
   def schema_attributes(self, authorization=None):
-    return AttributeSchema(self.model, authorization=authorization)
+    return AttributeSchema(self.model)
 
   def schema_relationships(self, authorization=None):
-    return RelationshipSchema(self.model, authorization=authorization)
+    return RelationshipSchema(self.model)
 
-  def schema_instance_methods(self, authorization=None):
+  def schema_instance_methods(self):
     return Schema(description='No available instance methods')
 
-  def schema_model_methods(self, authorization=None):
-    return ModelMethodsSchema(self.model, authorization=authorization)
+  def schema_model_methods(self):
+    return ModelMethodsSchema(self.model)
 
-  def schema_instances(self, authorization=None):
-    return InstancesSchema(self.model, authorization=authorization)
+  def schema_instances(self):
+    return InstancesSchema(self.model)
 
 class Model(models.Model):
 

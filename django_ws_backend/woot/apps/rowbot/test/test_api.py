@@ -12,7 +12,7 @@ class APITestCase(TestCase):
     Member.objects.create(username='wilbur', email='wilbur@wilbur.com')
 
   def test_empty(self):
-    print(json.dumps(api.respond().render(), indent=2))
+    # print(json.dumps(api.respond().render(), indent=2))
     self.assertTrue(True)
     # self.assertTrue(False)
 
@@ -31,7 +31,7 @@ class APITestCase(TestCase):
                   'and': [
                     {
                       'key': 'email__contains',
-                      '_value': 'a',
+                      'value': 'a',
                     },
                     {
                       'key': 'email__startswith',
