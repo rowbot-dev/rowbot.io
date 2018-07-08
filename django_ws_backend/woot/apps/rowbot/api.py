@@ -30,9 +30,11 @@ api = StructureSchema(
             # AssetModel, Asset, AssetInstance,
             # Club,
             # EventModel, EventNotificationModel, Event, EventInstance, EventNotification,
-            Member,
+            # Member,
             # AuthenticationToken,
-            # RoleModel, RolePermission, Role, RoleInstance, RoleRecord,
+            # RoleModel, RolePermission,
+            Role,
+            # RoleInstance, RoleRecord,
             # TeamModel, Team, TeamInstance, TeamRecord,
           ]
         },

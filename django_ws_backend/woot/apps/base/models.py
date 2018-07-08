@@ -1,8 +1,11 @@
 
 from django.db import models
 from django.db.models import Q
+from django.core.exceptions import FieldDoesNotExist
 
-from util.api import Schema
+from util.api import Schema, Error
+
+from .constants import query_directives, is_valid_query_directive
 
 from .schema import (
   ModelSchema,
@@ -31,6 +34,30 @@ def is_valid_uuid(uuid_string):
     return False
   return str(val) == uuid_string or val.hex == uuid_string or val == uuid_string
 
+class FieldDoesNotExistError(Error):
+  def __init__(self, field, model):
+    return super().__init__(
+      code='014',
+      name='model_field_does_not_exist',
+      description='Field <{}> does not exist on the <{}> model'.format(field, model),
+    )
+
+class MultipleDirectivesForNonRelatedFieldError(Error):
+  def __init__(self, field, directives):
+    return super().__init__(
+      code='015',
+      name='model_multiple_directives',
+      description='Multiple directives given for field <{}>: [{}]'.format(field, ','.join(directives)),
+    )
+
+class InvalidQueryDirectiveError(Error):
+  def __init__(self, field, directive):
+    return super().__init__(
+      code='016',
+      name='model_invalid_directive',
+      description='Invalid directive given for field <{}>: <{}>'.format(field, directive),
+    )
+
 class Manager(models.Manager):
   use_for_related_fields = True
 
@@ -39,51 +66,33 @@ class Manager(models.Manager):
       return super().get(**kwargs)
     return None
 
-  def query(self, query, authorization=None):
-    filter = query.get('filter', {})
-    methods = query.get('methods', {})
+  def query_check(self, key, value):
+    tokens = key.split(query_directives.JOIN)
+    query_errors = []
+    field_name, rest_of_tokens = tokens[0], tokens[1:]
 
-    instances = {}
-    for instance in self.filter(**filter):
-      instances = merge(
-        instances,
-        {
-          instance._id: instance.serialize(),
-        }
-      )
+    try:
+      field = self.model._meta.get_field(field_name)
+    except FieldDoesNotExist:
+      query_errors.append(FieldDoesNotExistError(field_name, self.model._meta.object_name))
+      return query_errors
 
-    method_results = {}
-    for method_name, method_args in methods.items():
-      if hasattr(self, method_name):
-        method = getattr(self, method_name)
-        method_results = merge(
-          method_results,
-          {
-            'results': {
-              method_name: method(method_args),
-            },
-          },
-        )
-      else:
-        method_results = merge(
-          method_results,
-          {
-            'errors': {
-              method_name: Errors.no_such_model_method(self.model.__name__, method_name),
-            },
-          },
-        )
+    if field.is_relation:
+      related_field_errors = field.related_model.objects.query_check(query_directives.JOIN.join(rest_of_tokens), value)
+      if related_field_errors:
+        query_errors.extend(related_field_errors)
+        return query_errors
+    else:
+      if len(rest_of_tokens) > 1:
+        query_errors.append(MultipleDirectivesForNonRelatedFieldError(field_name, rest_of_tokens))
+        return query_errors
+      elif len(rest_of_tokens) == 1:
+        [directive] = rest_of_tokens
+        if not is_valid_query_directive(directive):
+          query_errors.append(InvalidQueryDirectiveError(field_name, directive))
+          return query_errors
 
-    return {
-      'data': {
-        'models': {
-          self.model.__name__: {
-            'instances': instances,
-            'methods': method_results,
-          },
-        },
-      },
-    }
+    return []
 
   def schema(self):
     return ModelSchema(self.model)

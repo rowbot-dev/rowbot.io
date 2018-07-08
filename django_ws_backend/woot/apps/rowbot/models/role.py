@@ -32,7 +32,7 @@ class RolePermission(Model):
   roles = models.ManyToManyField('rowbot.RoleModel', related_name='permissions')
 
   # Properties
-  model_name = models.CharField(max_length=255) # TODO: find out what this was for
+  model_name = models.CharField(max_length=255)
   name = models.CharField(max_length=255)
 
 

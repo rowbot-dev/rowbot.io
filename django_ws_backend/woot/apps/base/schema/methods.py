@@ -3,7 +3,7 @@ import json
 
 from django.db.models import Q
 
-from util.construct_filter_query import construct_filter_query
+from util.pluck import pluck
 from util.api import (
   Schema, StructureSchema, ArraySchema, IndexedSchema,
   Response, StructureResponse, ArrayResponse,
@@ -62,7 +62,8 @@ class QueryResponse(StructureResponse):
         self.rendered = response.render()
 
 class QuerySchema(StructureSchema):
-  def __init__(self, OR=True, **kwargs):
+  def __init__(self, Model, **kwargs):
+    self.model = Model
     super().__init__(
       **kwargs,
       children={
@@ -95,8 +96,15 @@ class QuerySchema(StructureSchema):
       if model_schema_constants.AND in payload or model_schema_constants.OR in payload:
         self.active_response.add_error(QueryAndOrPresentWithKeyValueError())
 
-      self.active_response.key_value = True
       if self.active_response.has_errors():
+        return False
+
+      self.active_response.key_value = True
+      key, value = pluck(payload, model_schema_constants.KEY, model_schema_constants.VALUE)
+      model_query_check_errors = self.model.objects.query_check(key, value)
+      if model_query_check_errors:
+        for error in model_query_check_errors:
+          self.active_response.add_error(error)
         return False
 
     if model_schema_constants.AND in payload and model_schema_constants.OR in payload:
@@ -132,9 +140,10 @@ class CompositeResponse(ArrayResponse):
           self.rendered = self.rendered & child.render()
 
 class CompositeSchema(ArraySchema):
-  def __init__(self, OR=True, **kwargs):
+  def __init__(self, Model, OR=True, **kwargs):
+    self.model = Model
     self.OR = OR
-    super().__init__(template=QuerySchema(), **kwargs)
+    super().__init__(template=QuerySchema(Model), **kwargs)
 
   def response(self):
     return CompositeResponse(
@@ -145,8 +154,8 @@ class CompositeSchema(ArraySchema):
 
   def responds_to_valid_payload(self, payload):
     self.template.children.update({
-      model_schema_constants.AND: CompositeSchema(OR=False),
-      model_schema_constants.OR: CompositeSchema(),
+      model_schema_constants.AND: CompositeSchema(self.model, OR=False),
+      model_schema_constants.OR: CompositeSchema(self.model),
     })
     super().responds_to_valid_payload(payload)
 
@@ -160,7 +169,7 @@ class FilterSchema(StructureSchema):
     super().__init__(
       **kwargs,
       children={
-        model_schema_constants.COMPOSITE: CompositeSchema(),
+        model_schema_constants.COMPOSITE: CompositeSchema(Model),
         # model_schema_constants.SORT: Schema(),
         # model_schema_constants.PAGINATE: Schema(),
       },

@@ -3,14 +3,18 @@ import json
 from django.test import TestCase
 
 from ..api import api
-from ..models import Member
+from ..models import Member, Role, RoleModel, Club
 
 class APITestCase(TestCase):
   def setUp(self):
     Member.objects.create(username='alfred', email='alfred@alfred.com')
     Member.objects.create(username='alfred1', email='alfred111@alfred.com')
     Member.objects.create(username='wilbur', email='wilbur@wilbur.com')
-    Member.objects.create(username='jamal', email='aldjamal@wilbur.com')
+    member = Member.objects.create(username='jamal', email='aldjamal@wilbur.com')
+
+    club = Club.objects.create(name='club_name')
+    role_model = RoleModel.objects.create(club=club)
+    Role.objects.create(model=role_model, member=member, nickname='jamal')
 
   def test_empty(self):
     # print(json.dumps(api.respond().render(), indent=2))
@@ -39,6 +43,31 @@ class APITestCase(TestCase):
                       'value': 'al',
                     },
                   ],
+                },
+              ],
+            },
+          },
+        },
+      },
+    }
+
+    response = api.respond(payload)
+
+    print(json.dumps(response.render(), indent=2))
+
+    # self.assertTrue(False)
+    self.assertTrue(True)
+
+  def test_respond_role(self):
+    payload = {
+      'models': {
+        'Role': {
+          'methods': {
+            'filter': {
+              'composite': [
+                {
+                  'key': 'member__username',
+                  'value': 'a',
                 },
               ],
             },
