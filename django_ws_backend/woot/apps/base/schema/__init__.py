@@ -16,7 +16,6 @@ class ModelSchema(StructureSchema):
       # model_schema_constants.RELATIONSHIPS: Model.objects.schema_relationships(),
       # model_schema_constants.INSTANCES: Model.objects.schema_instances(),
       model_schema_constants.METHODS: Model.objects.schema_model_methods(),
-      # model_schema_constants.FILTER: FilterSchema(Model, authorization=authorization),
       # model_schema_constants.SORT: Schema(
       #   description='',
       # ),
@@ -30,6 +29,3 @@ class ModelSchema(StructureSchema):
       #   description='',
       # ),
     }
-
-  def query(self, payload):
-    pass

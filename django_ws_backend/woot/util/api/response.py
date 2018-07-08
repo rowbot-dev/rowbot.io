@@ -12,6 +12,10 @@ class Response():
     self.is_empty = False
     self.value = None
     self.rendered = None
+    self.has_child_errors = False
+
+  def has_errors(self):
+    return self.errors or self.has_child_errors
 
   def add_error(self, error):
     self.errors.append(error)

@@ -31,7 +31,7 @@ class APITestCase(TestCase):
                   'and': [
                     {
                       'key': 'email__contains',
-                      'value': 'a',
+                      'value': 'd',
                     },
                     {
                       'key': 'email__startswith',
