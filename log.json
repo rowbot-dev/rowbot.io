@@ -107,6 +107,30 @@
           },
           "null payload": "Maybe there don't have to be modes at all. If the payload is None, the response can just be the schema. This can apply to any level of the schema. If you want the schema for some part of the full schema, set its key to none. The mode of the schema can be included from the server side to say how the schem should be interpreted. A client application can be set up to received messages in different modes, for example the smallest could be a payload of raw data with no structure except an unique id and a blob of data. Database models could be used to mediate and prepare for this type of exchange.",
         }
+      },
+      "20180705": {
+        "description": "Thinking about how to design the schema better now that I have made the recursive portion of it work for the query.",
+        "children": {
+          "Ways a schema can go": {
+            "description": "A schema can take several forms, and there are paths through the schema taken by different use-cases.",
+            "children": {
+              "Schema is just a passthrough category": "The only errors this can produce is a unrecognised key or a type error. The default schema and response should account for this option, since it will be the most common.",
+              "Schema collects a structure below it a yields a value": "",
+            }
+          }
+        }
+      },
+      "20180706": {
+        "description": "Continuing with the schema revision, splitting into different types",
+        "children": {
+          "implement chained variable model check": "The queries can be deconstructed individually and checked down through the chain of models without touching the database. This will allow the errors to apply specifically to a single query.",
+        }
+      },
+      "20180707": {
+        "description": "Thinking about model methods and their output",
+        "children": {
+          "model queries": "A query to a model should only yield instances of that model. This allow everything to stay confined to the correct branch of the tree. Is this correct? Can I have a method of a class that yields results from another class?",
+        }
       }
     }
   },
