@@ -10,6 +10,7 @@ class APITestCase(TestCase):
     Member.objects.create(username='alfred', email='alfred@alfred.com')
     Member.objects.create(username='alfred1', email='alfred111@alfred.com')
     Member.objects.create(username='wilbur', email='wilbur@wilbur.com')
+    Member.objects.create(username='jamal', email='aldjamal@wilbur.com')
 
   def test_empty(self):
     # print(json.dumps(api.respond().render(), indent=2))
