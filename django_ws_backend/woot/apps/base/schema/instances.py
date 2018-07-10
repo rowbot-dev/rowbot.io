@@ -1,5 +1,11 @@
 
-from util.api import Schema, StructureSchema, TemplateSchema, types, errors, constants
+from util.api import (
+  Schema, StructureSchema, IndexedSchema,
+  StructureResponse, IndexedResponse,
+  types,
+  errors,
+  constants,
+)
 
 from .constants import model_schema_constants
 
@@ -58,10 +64,50 @@ class SingleInstanceSchema(StructureSchema):
       model_schema_constants.METHODS: Model.objects.schema_instance_methods(),
     }
 
-class InstancesSchema(TemplateSchema):
-  def __init__(self, Model, authorization=None, **kwargs):
-    super().__init__(**kwargs)
-    self.template = SingleInstanceSchema(Model)
+class InstanceResponse(StructureResponse):
+  pass
 
-  def query(self, payload):
-    pass
+class InstanceSchema(StructureSchema):
+  def __init__(self, Model, **kwargs):
+    super().__init__(
+      **kwargs,
+      children={
+        model_schema_constants.ATTRIBUTES: IndexedSchema(
+          index_type=types.STRING(),
+          template=StructureSchema(
+            children={
+
+            },
+          ),
+        ),
+      },
+    )
+
+  def response(self):
+    return InstanceResponse(
+      description=self.description,
+      server_types=self.server_types,
+    )
+
+class InstancesResponse(IndexedResponse):
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+
+  def add_queryset(self, queryset):
+    for obj in queryset:
+      self.add_child(obj._id, self.template.respond(obj))
+
+  def add_attributes(self, attributes):
+    self.attributes = attributes
+
+class InstancesSchema(IndexedSchema):
+  def __init__(self, Model, **kwargs):
+    super().__init__(**kwargs)
+    self.template = InstanceSchema(Model)
+
+  def response(self):
+    return InstancesResponse(
+      description=self.description,
+      server_types=self.server_types,
+      template=self.template,
+    )

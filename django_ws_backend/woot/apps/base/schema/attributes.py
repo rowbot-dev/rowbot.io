@@ -1,5 +1,5 @@
 
-from util.api import Schema, StructureSchema, types, map_type
+from util.api import Schema, StructureSchema, types
 
 class AttributeSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
@@ -7,7 +7,7 @@ class AttributeSchema(StructureSchema):
     self.children = {
       field.name: Schema(
         description='',
-        server_types=map_type(field.get_internal_type())
+        server_types=types.BOOLEAN(),
       )
       for field in Model._meta.get_fields()
       if (

@@ -62,11 +62,15 @@ class APITestCase(TestCase):
     payload = {
       'models': {
         'Role': {
+          'attributes': {
+            'id': True,
+            'date_created': True,
+          },
           'methods': {
             'filter': {
               'composite': [
                 {
-                  'key': 'member__username',
+                  'key': 'member__username__contains',
                   'value': 'a',
                 },
               ],

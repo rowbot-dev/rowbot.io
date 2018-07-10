@@ -54,7 +54,7 @@ class Schema():
 class StructureSchema(Schema):
   default_server_types = types.STRUCTURE()
 
-  def __init__(self, children=None, **kwargs):
+  def __init__(self, **kwargs, children=None):
     super().__init__(**kwargs)
     self.children = children
 
@@ -91,11 +91,8 @@ class ArraySchema(Schema):
     return ArrayResponse(
       description=self.description,
       server_types=self.server_types,
+      template=self.template,
     )
-
-  def responds_to_none(self):
-    super().responds_to_none()
-    self.active_response.template = self.template.respond()
 
   def responds_to_valid_payload(self, payload):
     for child_payload in payload:
@@ -114,11 +111,8 @@ class IndexedSchema(Schema):
     return IndexedResponse(
       description=self.description,
       server_types=self.server_types,
+      template=self.template,
     )
-
-  def responds_to_none(self):
-    super().responds_to_none()
-    self.active_response.template = self.template.respond()
 
   def passes_type_validation(self, payload):
     passes_type_validation = super().passes_type_validation(payload)
@@ -152,11 +146,8 @@ class TemplateSchema(Schema):
     return TemplateResponse(
       description=self.description,
       server_types=self.server_types,
+      template=self.template,
     )
-
-  def responds_to_none(self):
-    super().responds_to_none()
-    self.active_response.template = self.template.respond()
 
   def responds_to_valid_payload(self, payload):
     self.responds_to_none()

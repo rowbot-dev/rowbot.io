@@ -62,9 +62,12 @@ class Manager(models.Manager):
   use_for_related_fields = True
 
   def get(self, **kwargs):
-    if self.filter(**kwargs).exists():
+    if super().filter(**kwargs).exists():
       return super().get(**kwargs)
     return None
+
+  def filter(self, *args, **kwargs):
+    return super().filter(*args, **kwargs), {}
 
   def query_check(self, key, value):
     tokens = key.split(query_directives.JOIN)
@@ -92,7 +95,7 @@ class Manager(models.Manager):
           query_errors.append(InvalidQueryDirectiveError(field_name, directive))
           return query_errors
 
-    return []
+    return query_errors
 
   def schema(self):
     return ModelSchema(self.model)

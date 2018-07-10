@@ -82,9 +82,9 @@ class StructureResponse(Response):
     }
 
 class ArrayResponse(Response):
-  def __init__(self, **kwargs):
+  def __init__(self, template=None, **kwargs):
     super().__init__(**kwargs)
-    self.template = None
+    self.template = template
     self.children = []
 
   def add_child(self, child_response):
@@ -93,7 +93,7 @@ class ArrayResponse(Response):
   def render_empty(self):
     super().render_empty()
     self.rendered.update({
-      constants.TEMPLATE: self.template.render(),
+      constants.TEMPLATE: self.template.respond().render(),
     })
 
   def render_value(self):
@@ -103,9 +103,9 @@ class ArrayResponse(Response):
     ]
 
 class IndexedResponse(Response):
-  def __init__(self, **kwargs):
+  def __init__(self, template=None, **kwargs):
     super().__init__(**kwargs)
-    self.template = None
+    self.template = template
     self.children = {}
 
   def add_child(self, child_index, child_response):
@@ -116,7 +116,7 @@ class IndexedResponse(Response):
   def render_empty(self):
     super().render_empty()
     self.rendered.update({
-      constants.TEMPLATE: self.template.render(),
+      constants.TEMPLATE: self.template.respond().render(),
     })
 
   def render_value(self):
@@ -126,14 +126,14 @@ class IndexedResponse(Response):
     }
 
 class TemplateResponse(Response):
-  def __init__(self, **kwargs):
+  def __init__(self, template=None, **kwargs):
     super().__init__(**kwargs)
-    self.template = None
+    self.template = template
 
   def render_empty(self):
     super().render_empty()
     self.rendered.update({
-      constants.TEMPLATE: self.template.render(),
+      constants.TEMPLATE: self.template.respond().render(),
     })
 
   def render_value(self):
