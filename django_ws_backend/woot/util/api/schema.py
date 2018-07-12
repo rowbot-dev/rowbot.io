@@ -2,23 +2,29 @@
 from util.merge import merge
 from util.force_array import force_array
 
-from .response import Response, StructureResponse, ArrayResponse, IndexedResponse, TemplateResponse
+from .response import (
+  Response,
+  StructureResponse,
+  ArrayResponse,
+  IndexedResponse,
+  TemplateResponse,
+)
 from .errors import errors
 from .types import types
 from .constants import constants
 
 class Schema():
   default_server_types = types.STRING()
+  default_response = Response
 
-  def __init__(self, description=None, server_types=None):
+  def __init__(self, description=None, server_types=None, response=None, client=None):
     self.description = description
     self.server_types = force_array(server_types or self.default_server_types)
-
-  def response(self):
-    return Response(description=self.description, server_types=self.server_types)
+    self.response = response or self.default_response
+    self.client = client
 
   def respond(self, payload=None):
-    self.active_response = self.response()
+    self.active_response = self.response(self)
 
     if payload is None:
       self.responds_to_none()
@@ -31,6 +37,10 @@ class Schema():
       return self.active_response
 
     self.responds_to_valid_payload(payload)
+
+    if self.client is not None:
+      self.active_response = self.client.respond(payload=self.active_response.render())
+
     return self.active_response
 
   def responds_to_none(self):
@@ -53,13 +63,11 @@ class Schema():
 
 class StructureSchema(Schema):
   default_server_types = types.STRUCTURE()
+  default_response = StructureResponse
 
-  def __init__(self, **kwargs, children=None):
+  def __init__(self, children={}, **kwargs):
     super().__init__(**kwargs)
     self.children = children
-
-  def response(self):
-    return StructureResponse(description=self.description, server_types=self.server_types)
 
   def responds_to_none(self):
     super().responds_to_none()
@@ -82,17 +90,11 @@ class StructureSchema(Schema):
 
 class ArraySchema(Schema):
   default_server_types = types.ARRAY()
+  default_response = ArrayResponse
 
   def __init__(self, template=None, **kwargs):
     super().__init__(**kwargs)
     self.template = template
-
-  def response(self):
-    return ArrayResponse(
-      description=self.description,
-      server_types=self.server_types,
-      template=self.template,
-    )
 
   def responds_to_valid_payload(self, payload):
     for child_payload in payload:
@@ -101,18 +103,12 @@ class ArraySchema(Schema):
 class IndexedSchema(Schema):
   default_server_types = types.STRUCTURE()
   default_index_type = types.UUID()
+  default_response = IndexedResponse
 
   def __init__(self, index_type=None, template=None, **kwargs):
     super().__init__(**kwargs)
     self.index_type = index_type or self.default_index_type
     self.template = template
-
-  def response(self):
-    return IndexedResponse(
-      description=self.description,
-      server_types=self.server_types,
-      template=self.template,
-    )
 
   def passes_type_validation(self, payload):
     passes_type_validation = super().passes_type_validation(payload)
@@ -137,17 +133,11 @@ class IndexedSchema(Schema):
 
 class TemplateSchema(Schema):
   default_server_types = types.STRUCTURE()
+  default_response = TemplateResponse
 
   def __init__(self, template=None, **kwargs):
     super().__init__(**kwargs)
     self.template = template
-
-  def response(self):
-    return TemplateResponse(
-      description=self.description,
-      server_types=self.server_types,
-      template=self.template,
-    )
 
   def responds_to_valid_payload(self, payload):
     self.responds_to_none()

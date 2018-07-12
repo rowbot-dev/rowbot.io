@@ -2,11 +2,13 @@
 from util.merge import merge
 
 from .constants import constants
+from .errors import errors
 
 class Response():
-  def __init__(self, description=None, server_types=None):
-    self.description = description
-    self.server_types = server_types
+  def __init__(self, parent_schema):
+    self.description = parent_schema.description
+    self.server_types = parent_schema.server_types
+    self.client_schema = parent_schema.client
     self.active_server_type = None
     self.errors = []
     self.is_empty = False
@@ -43,6 +45,12 @@ class Response():
         for server_type in self.server_types
       },
     }
+
+    if self.client_schema is not None:
+      self.rendered.update({
+        constants.CLIENT: self.client_schema.respond().render(),
+      })
+
     return self.rendered
 
   def render_errors(self):
@@ -59,8 +67,8 @@ class Response():
     return self.rendered
 
 class StructureResponse(Response):
-  def __init__(self, **kwargs):
-    super().__init__(**kwargs)
+  def __init__(self, parent_schema):
+    super().__init__(parent_schema)
     self.children = {}
 
   def add_child(self, child_key, child_response):
@@ -82,9 +90,9 @@ class StructureResponse(Response):
     }
 
 class ArrayResponse(Response):
-  def __init__(self, template=None, **kwargs):
-    super().__init__(**kwargs)
-    self.template = template
+  def __init__(self, parent_schema):
+    super().__init__(parent_schema)
+    self.template_schema = parent_schema.template
     self.children = []
 
   def add_child(self, child_response):
@@ -93,7 +101,7 @@ class ArrayResponse(Response):
   def render_empty(self):
     super().render_empty()
     self.rendered.update({
-      constants.TEMPLATE: self.template.respond().render(),
+      constants.TEMPLATE: self.template_schema.respond().render(),
     })
 
   def render_value(self):
@@ -103,9 +111,9 @@ class ArrayResponse(Response):
     ]
 
 class IndexedResponse(Response):
-  def __init__(self, template=None, **kwargs):
-    super().__init__(**kwargs)
-    self.template = template
+  def __init__(self, parent_schema):
+    super().__init__(parent_schema)
+    self.template_schema = parent_schema.template
     self.children = {}
 
   def add_child(self, child_index, child_response):
@@ -116,7 +124,7 @@ class IndexedResponse(Response):
   def render_empty(self):
     super().render_empty()
     self.rendered.update({
-      constants.TEMPLATE: self.template.respond().render(),
+      constants.TEMPLATE: self.template_schema.respond().render(),
     })
 
   def render_value(self):
@@ -126,14 +134,14 @@ class IndexedResponse(Response):
     }
 
 class TemplateResponse(Response):
-  def __init__(self, template=None, **kwargs):
-    super().__init__(**kwargs)
-    self.template = template
+  def __init__(self, parent_schema):
+    super().__init__(parent_schema)
+    self.template_schema = parent_schema.template
 
   def render_empty(self):
     super().render_empty()
     self.rendered.update({
-      constants.TEMPLATE: self.template.respond().render(),
+      constants.TEMPLATE: self.template_schema.respond().render(),
     })
 
   def render_value(self):

@@ -62,10 +62,6 @@ class APITestCase(TestCase):
     payload = {
       'models': {
         'Role': {
-          'attributes': {
-            'id': True,
-            'date_created': True,
-          },
           'methods': {
             'filter': {
               'composite': [
@@ -79,6 +75,23 @@ class APITestCase(TestCase):
         },
       },
     }
+
+    # response = {
+    #   'models': {
+    #     'Role': {
+    #       'methods': {
+    #         'filter': {
+    #           'count': 1,
+    #         },
+    #       },
+    #       'instances': {
+    #         '23l4kj234lkjaslkjad92123lkj': {
+    #           ''
+    #         },
+    #       },
+    #     },
+    #   },
+    # }
 
     response = api.respond(payload)
 

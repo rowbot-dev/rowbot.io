@@ -39,6 +39,48 @@ class SchemaTestCase(TestCase):
       },
     })
 
+class AsymmetricSchemaTestCase(TestCase):
+  def setUp(self):
+    self.schema = Schema(
+      description='Some description',
+      client=Schema(server_types=types.BOOLEAN()),
+    )
+
+  def test_simple_response(self):
+    payload = 'Sample value'
+    response = self.schema.respond(payload)
+
+    error = errors.SERVER_TYPES(self.schema.client.server_types)
+
+    self.assertEqual(response.render(), {
+      constants.ERRORS: {
+        error.code: error.render(),
+      },
+    })
+
+  def test_fails_type_validation(self):
+    payload = {}
+    response = self.schema.respond(payload)
+
+    error = errors.SERVER_TYPES(self.schema.server_types)
+
+    self.assertEqual(response.render(), {
+      constants.ERRORS: {
+        error.code: error.render(),
+      },
+    })
+
+  def test_empty(self):
+    response = self.schema.respond()
+    self.assertEqual(response.render(), {
+      constants.DESCRIPTION: self.schema.description,
+      constants.SERVER_TYPES: {
+        server_type.code: server_type.render()
+        for server_type in self.schema.server_types
+      },
+      constants.CLIENT: self.schema.client.respond().render(),
+    })
+
 class StructureSchemaTestCase(TestCase):
   def setUp(self):
     self.test_key = 'test'
@@ -232,7 +274,6 @@ class IndexedSchemaTestCase(TestCase):
 
 class TemplateSchemaTestCase(TestCase):
   def setUp(self):
-    self.maxDiff = None
     self.schema = TemplateSchema(
       description='Some description',
       template=Schema(),

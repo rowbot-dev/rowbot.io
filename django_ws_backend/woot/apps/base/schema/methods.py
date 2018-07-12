@@ -39,8 +39,8 @@ class QueryAndOrPresentError(Error):
     )
 
 class QueryResponse(StructureResponse):
-  def __init__(self, **kwargs):
-    super().__init__(**kwargs)
+  def __init__(self, parent_schema):
+    super().__init__(parent_schema)
     self.key_value = False
 
   def add_child(self, child_key, child_response):
@@ -65,6 +65,7 @@ class QuerySchema(StructureSchema):
     self.model = Model
     super().__init__(
       **kwargs,
+      response=QueryResponse,
       children={
         model_schema_constants.KEY: Schema(
           description='',
@@ -82,9 +83,6 @@ class QuerySchema(StructureSchema):
         ),
       },
     )
-
-  def response(self):
-    return QueryResponse(description=self.description, server_types=self.server_types)
 
   def passes_pre_response_checks(self, payload):
     passes_pre_response_checks = super().passes_pre_response_checks(payload)
@@ -113,9 +111,9 @@ class QuerySchema(StructureSchema):
     return passes_pre_response_checks
 
 class CompositeResponse(ArrayResponse):
-  def __init__(self, OR=True, **kwargs):
-    super().__init__(**kwargs)
-    self.OR = OR
+  def __init__(self, parent_schema):
+    super().__init__(parent_schema)
+    self.OR = parent_schema.OR
 
   def add_child(self, child_response):
     super().add_child(child_response)
@@ -144,17 +142,13 @@ class CompositeResponse(ArrayResponse):
 
 class CompositeSchema(ArraySchema):
   def __init__(self, Model, OR=True, **kwargs):
-    super().__init__(**kwargs)
+    super().__init__(
+      **kwargs,
+      response=CompositeResponse,
+      template=QuerySchema(Model),
+    )
     self.model = Model
     self.OR = OR
-    self.template = QuerySchema(Model)
-
-  def response(self):
-    return CompositeResponse(
-      OR=self.OR,
-      description=self.description,
-      server_types=self.server_types,
-    )
 
   def responds_to_valid_payload(self, payload):
     self.template.children.update({
@@ -163,9 +157,9 @@ class CompositeSchema(ArraySchema):
     })
     super().responds_to_valid_payload(payload)
 
-class ModelMethodResponse(StructureResponse):
-  def __init__(self, **kwargs):
-    super().__init__(**kwargs)
+class FilterResponse(StructureResponse):
+  def __init__(self, parent_schema):
+    super().__init__(parent_schema)
     self.internal_queryset = None
     self.internal_reference = None
     self.external_queryset = None
@@ -182,23 +176,26 @@ class FilterSchema(StructureSchema):
       **kwargs,
       children={
         model_schema_constants.COMPOSITE: CompositeSchema(Model),
-        # model_schema_constants.SORT: Schema(),
-        # model_schema_constants.PAGINATE: Schema(),
       },
+      client=StructureSchema(
+        response=FilterResponse,
+        children={
+          model_schema_constants.COMPOSITE: Schema(),
+        }
+      ),
     )
-
-  def response(self):
-    return ModelMethodResponse(description=self.description, server_types=self.server_types)
 
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)
     composite_response = self.active_response.children.get(model_schema_constants.COMPOSITE)
     composite_query = composite_response.get_query()
 
-    if composite_query is not None:
-      queryset, query_reference = self.model.objects.filter(composite_query)
+    print(composite_query)
 
-      self.active_response.add_internal_queryset(queryset, query_reference)
+    # if composite_query is not None:
+    #   queryset, query_reference = self.model.objects.filter(composite_query)
+    #
+    #   self.active_response.add_internal_queryset(queryset, query_reference)
 
 class ModelMethodsSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
