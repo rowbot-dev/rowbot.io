@@ -28,7 +28,7 @@ class FilterSchemaTestCase(TestCase):
       ],
     }
 
-    response = self.schema.respond()
+    response = self.schema.respond(payload)
 
     print(json.dumps(response.render(), indent=2))
 

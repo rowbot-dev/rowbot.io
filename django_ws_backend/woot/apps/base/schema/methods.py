@@ -157,7 +157,7 @@ class CompositeSchema(ArraySchema):
     })
     super().responds_to_valid_payload(payload)
 
-class FilterResponse(StructureResponse):
+class FilterClientReponse(StructureResponse):
   def __init__(self, parent_schema):
     super().__init__(parent_schema)
     self.internal_queryset = None
@@ -169,6 +169,17 @@ class FilterResponse(StructureResponse):
     self.internal_queryset = queryset
     self.internal_reference = query_reference
 
+class FilterClientSchema(StructureSchema):
+  def __init__(self, **kwargs):
+    super().__init__(
+      **kwargs,
+      response=FilterClientReponse,
+      children={
+        model_schema_constants.COUNT: Schema(server_types=types.INTEGER()),
+        model_schema_constants.REFERENCE: Schema(server_types=types.UUID()),
+      },
+    )
+
 class FilterSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
@@ -177,25 +188,22 @@ class FilterSchema(StructureSchema):
       children={
         model_schema_constants.COMPOSITE: CompositeSchema(Model),
       },
-      client=StructureSchema(
-        response=FilterResponse,
-        children={
-          model_schema_constants.COMPOSITE: Schema(),
-        }
-      ),
     )
 
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)
+
     composite_response = self.active_response.children.get(model_schema_constants.COMPOSITE)
     composite_query = composite_response.get_query()
 
-    print(composite_query)
+    if composite_query is not None:
 
-    # if composite_query is not None:
-    #   queryset, query_reference = self.model.objects.filter(composite_query)
-    #
-    #   self.active_response.add_internal_queryset(queryset, query_reference)
+      queryset, query_reference = self.model.objects.filter(composite_query)
+
+      self.active_response = FilterClientSchema().respond({
+        model_schema_constants.COUNT: queryset.count(),
+        model_schema_constants.REFERENCE: query_reference,
+      })
 
 class ModelMethodsSchema(StructureSchema):
   def __init__(self, Model, **kwargs):

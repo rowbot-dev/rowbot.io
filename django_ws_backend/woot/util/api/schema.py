@@ -38,8 +38,7 @@ class Schema():
 
     self.responds_to_valid_payload(payload)
 
-    if self.client is not None:
-      self.active_response = self.client.respond(payload=self.active_response.render())
+    self.responds_to_client()
 
     return self.active_response
 
@@ -60,6 +59,10 @@ class Schema():
 
   def responds_to_valid_payload(self, payload):
     self.active_response.add_value(payload)
+
+  def responds_to_client(self):
+    if self.client is not None:
+      self.active_response = self.client.respond(payload=self.active_response.render())
 
 class StructureSchema(Schema):
   default_server_types = types.STRUCTURE()

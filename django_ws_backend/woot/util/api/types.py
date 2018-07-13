@@ -1,4 +1,6 @@
 
+from util.is_valid_uuid import is_valid_uuid
+
 from .constants import constants
 
 class Type():
@@ -28,7 +30,12 @@ class Boolean(Type):
     return isinstance(value, bool)
 
 class Integer(Type):
-  pass
+  code = '002'
+  description = 'A whole number value'
+  type = '__integer'
+
+  def validate(self, value):
+    return isinstance(value, int)
 
 class Float(Type):
   pass
@@ -61,6 +68,9 @@ class UUID(Type):
   code = '007'
   description = 'A valid UUID'
   type = '__uuid'
+
+  def validate(self, value):
+    return is_valid_uuid(value)
 
 class Time(Type):
   code = '008'

@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.core.exceptions import FieldDoesNotExist
 
 from util.api import Schema, Error
+from util.is_valid_uuid import is_valid_uuid
 
 from .constants import query_directives, is_valid_query_directive
 
@@ -16,23 +17,6 @@ from .schema import (
 )
 
 import uuid
-from uuid import UUID
-import string
-import random
-
-def random_key():
-  chars = string.ascii_uppercase + string.digits
-  return ''.join([random.choice(chars) for _ in range(8)])
-
-def is_valid_uuid(uuid_string):
-  try:
-    if hasattr(uuid_string, 'hex') and is_valid_uuid(uuid_string.hex):
-      val = uuid_string
-    else:
-      val = UUID(uuid_string, version=4)
-  except ValueError:
-    return False
-  return str(val) == uuid_string or val.hex == uuid_string or val == uuid_string
 
 class FieldDoesNotExistError(Error):
   def __init__(self, field, model):
@@ -67,7 +51,7 @@ class Manager(models.Manager):
     return None
 
   def filter(self, *args, **kwargs):
-    return super().filter(*args, **kwargs), {}
+    return super().filter(*args, **kwargs), '7eb995a5-d08f-44ce-bb64-a7a6d57680d9'
 
   def query_check(self, key, value):
     tokens = key.split(query_directives.JOIN)

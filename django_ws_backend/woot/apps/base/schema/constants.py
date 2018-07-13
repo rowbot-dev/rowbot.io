@@ -17,3 +17,5 @@ class model_schema_constants:
   SET = '_set'
   KEY = 'key'
   VALUE = 'value'
+  REFERENCE = 'reference'
+  COUNT = 'count'

@@ -48,6 +48,18 @@ class APITestCase(TestCase):
             },
           },
         },
+        'Role': {
+          'methods': {
+            'filter': {
+              'composite': [
+                {
+                  'key': 'member__username__contains',
+                  'value': 'a',
+                },
+              ],
+            },
+          },
+        },
       },
     }
 
@@ -55,8 +67,8 @@ class APITestCase(TestCase):
 
     print(json.dumps(response.render(), indent=2))
 
-    # self.assertTrue(False)
-    self.assertTrue(True)
+    self.assertTrue(False)
+    # self.assertTrue(True)
 
   def test_respond_role(self):
     payload = {
@@ -76,26 +88,9 @@ class APITestCase(TestCase):
       },
     }
 
-    # response = {
-    #   'models': {
-    #     'Role': {
-    #       'methods': {
-    #         'filter': {
-    #           'count': 1,
-    #         },
-    #       },
-    #       'instances': {
-    #         '23l4kj234lkjaslkjad92123lkj': {
-    #           ''
-    #         },
-    #       },
-    #     },
-    #   },
-    # }
-
     response = api.respond(payload)
 
     print(json.dumps(response.render(), indent=2))
 
-    self.assertTrue(False)
-    # self.assertTrue(True)
+    # self.assertTrue(False)
+    self.assertTrue(True)

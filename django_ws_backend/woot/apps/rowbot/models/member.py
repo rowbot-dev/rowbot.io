@@ -7,8 +7,9 @@ from django.conf import settings
 from django.db import models
 
 from util.merge import merge
+from util.random_string import random_key
 from util.api import Schema, StructureSchema, types, map_type, errors, constants
-from apps.base.models import Model, Manager, random_key
+from apps.base.models import Model, Manager
 from apps.base.schema import model_schema_constants
 
 import uuid
