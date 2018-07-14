@@ -9,6 +9,7 @@ from util.is_valid_uuid import is_valid_uuid
 from .constants import query_directives, is_valid_query_directive
 
 from .schema import (
+  model_schema_constants,
   ModelSchema,
   AttributeSchema,
   RelationshipSchema,
@@ -44,6 +45,15 @@ class InvalidQueryDirectiveError(Error):
 
 class Manager(models.Manager):
   use_for_related_fields = True
+
+  def attributes(self):
+    return [
+      field
+      for field in self.model._meta.get_fields()
+      if (
+        not field.is_relation
+      )
+    ]
 
   def get(self, **kwargs):
     if super().filter(**kwargs).exists():
@@ -98,6 +108,19 @@ class Manager(models.Manager):
 
   def schema_instances(self):
     return InstancesSchema(self.model)
+
+  def serialize(self, instance, attributes=[]):
+    return {
+      model_schema_constants.ATTRIBUTES: self.serialize_attributes(instance, attributes=attributes)
+    }
+
+  def serialize_attributes(self, instance, attributes=attributes):
+    return {
+      attribute_field.name: str(getattr(instance, attribute_field.name))
+      for attribute_field
+      in self.attributes()
+      if attribute_field.name in attributes
+    }
 
 class Model(models.Model):
 

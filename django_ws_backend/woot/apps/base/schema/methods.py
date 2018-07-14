@@ -205,6 +205,8 @@ class FilterSchema(StructureSchema):
         model_schema_constants.REFERENCE: query_reference,
       })
 
+      self.active_response.add_internal_queryset(queryset, query_reference)
+
 class ModelMethodsSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
     self.model = Model

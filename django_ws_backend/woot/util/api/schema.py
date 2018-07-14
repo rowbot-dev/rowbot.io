@@ -23,8 +23,11 @@ class Schema():
     self.response = response or self.default_response
     self.client = client
 
+  def get_response(self):
+    return self.response(self)
+
   def respond(self, payload=None):
-    self.active_response = self.response(self)
+    self.active_response = self.get_response()
 
     if payload is None:
       self.responds_to_none()

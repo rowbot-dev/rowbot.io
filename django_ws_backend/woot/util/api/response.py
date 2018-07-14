@@ -6,6 +6,7 @@ from .errors import errors
 
 class Response():
   def __init__(self, parent_schema):
+    self.parent_schema = parent_schema
     self.description = parent_schema.description
     self.server_types = parent_schema.server_types
     self.client_schema = parent_schema.client
