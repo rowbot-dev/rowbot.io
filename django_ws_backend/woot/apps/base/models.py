@@ -19,6 +19,8 @@ from .schema import (
 
 import uuid
 
+ID_FIELD = 'id'
+
 class FieldDoesNotExistError(Error):
   def __init__(self, field, model):
     return super().__init__(
@@ -52,6 +54,16 @@ class Manager(models.Manager):
       for field in self.model._meta.get_fields()
       if (
         not field.is_relation
+        and field.name != ID_FIELD
+      )
+    ]
+
+  def relationships(self):
+    return [
+      field
+      for field in self.model._meta.get_fields()
+      if (
+        field.is_relation
       )
     ]
 
@@ -109,9 +121,10 @@ class Manager(models.Manager):
   def schema_instances(self):
     return InstancesSchema(self.model)
 
-  def serialize(self, instance, attributes=[]):
+  def serialize(self, instance, attributes=[], relationships=[]):
     return {
-      model_schema_constants.ATTRIBUTES: self.serialize_attributes(instance, attributes=attributes)
+      model_schema_constants.ATTRIBUTES: self.serialize_attributes(instance, attributes=attributes),
+      model_schema_constants.RELATIONSHIPS: self.serialize_relationships(instance, relationships=relationships),
     }
 
   def serialize_attributes(self, instance, attributes=attributes):
@@ -120,6 +133,14 @@ class Manager(models.Manager):
       for attribute_field
       in self.attributes()
       if attribute_field.name in attributes
+    }
+
+  def serialize_relationships(self, instance, relationships=relationships):
+    return {
+      relationship_field.name: str(getattr(instance, relationship_field.name))
+      for relationship_field
+      in self.relationships()
+      if relationship_field.name in relationships
     }
 
 class Model(models.Model):
@@ -139,3 +160,10 @@ class Model(models.Model):
   @property
   def _ref(self):
     return '{}.{}'.format(self.__class__.__name__, self._id)
+
+class MockParentModel(Model):
+  name = models.CharField(max_length=255)
+
+class MockModel(Model):
+  parent = models.ForeignKey(MockParentModel, related_name='children', on_delete=models.CASCADE)
+  name = models.CharField(max_length=255)

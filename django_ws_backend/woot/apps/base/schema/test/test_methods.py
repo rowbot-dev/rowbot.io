@@ -3,14 +3,8 @@ import json
 from django.db import models
 from django.test import TestCase
 
-from ...models import Model
+from ...models import MockModel
 from ..methods import FilterSchema
-
-class MockModel(Model):
-  class Meta:
-    app_label = 'base'
-
-  name = models.CharField(max_length=255)
 
 class FilterSchemaTestCase(TestCase):
   def setUp(self):
