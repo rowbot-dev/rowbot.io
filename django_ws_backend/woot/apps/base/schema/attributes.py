@@ -1,11 +1,11 @@
 
 from util.api import Schema, StructureSchema, StructureResponse, Error, types
 
-class AttributeUniformAttributeInclusiveError(Error):
+class UniformAttributeInclusiveError(Error):
   def __init__(self):
     return super().__init__(
       code='124',
-      name='attribute_uniform_attribute_inclusive',
+      name='uniform_attribute_inclusive',
       description='Attribute keys must be all inclusive or exclusive',
     )
 
@@ -49,7 +49,7 @@ class AttributeSchema(StructureSchema):
 
     values = payload.values()
     if any(values) and not all(values):
-      self.active_response.add_error(AttributeUniformAttributeInclusiveError())
+      self.active_response.add_error(UniformAttributeInclusiveError())
       return False
 
     if all(values):
