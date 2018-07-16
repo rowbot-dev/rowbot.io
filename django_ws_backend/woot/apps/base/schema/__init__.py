@@ -15,7 +15,7 @@ class ModelSchema(StructureSchema):
       model_schema_constants.ATTRIBUTES: Model.objects.schema_attributes(),
       model_schema_constants.RELATIONSHIPS: Model.objects.schema_relationships(),
       model_schema_constants.METHODS: Model.objects.schema_model_methods(),
-      # model_schema_constants.INSTANCES: Model.objects.schema_instances(),
+      model_schema_constants.INSTANCES: Model.objects.schema_instances(),
     }
 
   def responds_to_valid_payload(self, payload):
@@ -40,9 +40,11 @@ class ModelSchema(StructureSchema):
       for methods_child in methods_response.children.values():
         methods_internal_instances.extend(list(methods_child.internal_queryset))
 
-      print(methods_internal_instances, attributes_response.get_attributes(), relationships_response.get_relationships())
-
-      # instances_response.add_instances(methods_internal_instances, attributes_response.get_attributes())
+      instances_response.add_instances(
+        methods_internal_instances,
+        attributes_response.get_attributes(),
+        relationships_response.get_relationships(),
+      )
 
       # self.active_response.children.update({
       #   model_schema_constants.INSTANCES: instances_response,

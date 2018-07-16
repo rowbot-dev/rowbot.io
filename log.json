@@ -131,6 +131,18 @@
         "children": {
           "model queries": "A query to a model should only yield instances of that model. This allow everything to stay confined to the correct branch of the tree. Is this correct? Can I have a method of a class that yields results from another class?",
         }
+      },
+      "20180715": {
+        "description": "Working on instances schema. Quite tricky.",
+        "children": {
+          "instances schema": "The complication is difference between responding to an incoming instance with an id and a set of attributes and relationships specified, and trying to respond to a model instance that has already been fetched from the database. The correct way to do it is probably to divide the process into two sections, one of which is fetching from the database, such that the model instance can be returned instead of the call to the database.",
+        }
+      },
+      "20180716": {
+        "description": "Continuing with instances schema.",
+        "children": {
+          "instances": "My new idea is that the instances indexed schema should only be used for input. The reason is, the values of attributes, relationships, and instances methods should be accessed via model methods such as get and filter.",
+        }
       }
     }
   },

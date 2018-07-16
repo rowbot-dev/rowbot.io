@@ -17,17 +17,22 @@ class Schema():
   default_server_types = types.STRING()
   default_response = Response
 
-  def __init__(self, description=None, server_types=None, response=None, client=None):
+  def __init__(self, description=None, server_types=None, response=None, client=None, closed=False):
     self.description = description
     self.server_types = force_array(server_types or self.default_server_types)
     self.response = response or self.default_response
     self.client = client
+    self.closed = closed
 
   def get_response(self):
     return self.response(self)
 
   def respond(self, payload=None):
     self.active_response = self.get_response()
+
+    if payload is not None and self.closed:
+      self.responds_closed()
+      return self.active_response
 
     if payload is None:
       self.responds_to_none()
@@ -44,6 +49,9 @@ class Schema():
     self.responds_to_client()
 
     return self.active_response
+
+  def responds_closed(self):
+    self.active_response.add_error(errors.CLOSED())
 
   def responds_to_none(self):
     self.active_response.is_empty = True

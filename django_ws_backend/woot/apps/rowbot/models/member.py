@@ -14,14 +14,11 @@ from apps.base.schema import model_schema_constants
 
 import uuid
 
+class member_constants:
+  omitted_attributes = ['password']
+  omitted_relationships = ['logentry']
+
 class MemberManager(BaseUserManager, Manager):
-  def schema(self):
-    schema = super().schema()
-
-    # make modifications based on authorization
-
-    return schema
-
   def schema_instance_methods(self, authorization=None):
     return StructureSchema(
       description='Methods for the Member model',
@@ -46,6 +43,26 @@ class MemberManager(BaseUserManager, Manager):
         ),
       },
     )
+
+  def attributes(self):
+    attributes = super().attributes()
+    return [
+      field
+      for field in attributes
+      if (
+        field.name not in member_constants.omitted_attributes
+      )
+    ]
+
+  def relationships(self):
+    relationships = super().relationships()
+    return [
+      field
+      for field in relationships
+      if (
+        field.name not in member_constants.omitted_relationships
+      )
+    ]
 
 # m = Member.objects.create(username='npiano', email='nicholas.d.piano@gmail.com', first_name='Nicholas', last_name='Piano')
 class Member(AbstractBaseUser, PermissionsMixin, Model):

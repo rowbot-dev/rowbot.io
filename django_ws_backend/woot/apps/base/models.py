@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import Q
 from django.core.exceptions import FieldDoesNotExist
 
-from util.api import Schema, Error
+from util.api import Schema, StructureSchema, Error, types, constants
 from util.is_valid_uuid import is_valid_uuid
 
 from .constants import query_directives, is_valid_query_directive
@@ -112,11 +112,38 @@ class Manager(models.Manager):
   def schema_relationships(self, authorization=None):
     return RelationshipSchema(self.model)
 
-  def schema_instance_methods(self):
-    return Schema(description='No available instance methods')
-
   def schema_model_methods(self):
     return ModelMethodsSchema(self.model)
+
+  def schema_instance_attributes(self):
+    return StructureSchema(
+      description='No available instance methods',
+      children={
+        attribute_field.name: Schema()
+        for attribute_field
+        in self.attributes()
+      }
+    )
+
+  def schema_instance_relationships(self):
+    return StructureSchema(
+      description='No available instance methods',
+      children={
+        relationship_field.name: Schema(
+          description='No available instance methods',
+          server_types=[
+            types.REF(),
+            types.ARRAY(),
+            types.NULL(),
+          ],
+        )
+        for relationship_field
+        in self.relationships()
+      }
+    )
+
+  def schema_instance_methods(self):
+    return Schema(description='No available instance methods')
 
   def schema_instances(self):
     return InstancesSchema(self.model)
@@ -137,11 +164,28 @@ class Manager(models.Manager):
 
   def serialize_relationships(self, instance, relationships=relationships):
     return {
-      relationship_field.name: str(getattr(instance, relationship_field.name))
+      relationship_field.name: (
+        (
+          getattr(instance, relationship_field.name)._ref
+          if getattr(instance, relationship_field.name) is not None
+          else constants.NULL
+        )
+        if relationship_field.one_to_one or relationship_field.many_to_one
+        else [
+          related_object._ref
+          for related_object
+          in self.get_related_objects(instance, relationship_field)
+        ]
+      )
       for relationship_field
       in self.relationships()
       if relationship_field.name in relationships
     }
+
+  def get_related_objects(self, instance, field):
+    if field.is_relation and (field.many_to_many or field.one_to_many):
+      return getattr(instance, field.name).all()
+    return []
 
 class Model(models.Model):
 
@@ -160,3 +204,16 @@ class Model(models.Model):
   @property
   def _ref(self):
     return '{}.{}'.format(self.__class__.__name__, self._id)
+
+class MockParentModel(Model):
+  class Meta:
+    app_label = 'base'
+
+  name = models.CharField(max_length=255)
+
+class MockModel(Model):
+  class Meta:
+    app_label = 'base'
+
+  parent = models.ForeignKey(MockParentModel, related_name='children', on_delete=models.CASCADE, null=True)
+  name = models.CharField(max_length=255)
