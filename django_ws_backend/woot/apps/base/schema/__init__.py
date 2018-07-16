@@ -24,11 +24,11 @@ class ModelSchema(StructureSchema):
     attributes_response = self.active_response.children.get(model_schema_constants.ATTRIBUTES)
     relationships_response = self.active_response.children.get(model_schema_constants.RELATIONSHIPS)
     methods_response = self.active_response.children.get(model_schema_constants.METHODS)
-    # instances_response = self.active_response.children.get(model_schema_constants.INSTANCES)
+    instances_response = self.active_response.children.get(model_schema_constants.INSTANCES)
 
     if methods_response is not None:
-      # if instances_response is None:
-      #   instances_response = self.children.get(model_schema_constants.INSTANCES).get_response()
+      if instances_response is None:
+        instances_response = self.children.get(model_schema_constants.INSTANCES).get_response()
 
       if attributes_response is None:
         attributes_response = self.children.get(model_schema_constants.ATTRIBUTES).get_response()
@@ -46,6 +46,6 @@ class ModelSchema(StructureSchema):
         relationships_response.get_relationships(),
       )
 
-      # self.active_response.children.update({
-      #   model_schema_constants.INSTANCES: instances_response,
-      # })
+      self.active_response.children.update({
+        model_schema_constants.INSTANCES: instances_response,
+      })
