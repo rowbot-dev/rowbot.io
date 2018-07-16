@@ -84,7 +84,17 @@ class Model(Type):
   pass
 
 class Ref(Type):
-  pass
+  code = '010'
+  description = 'A string composed of a model name and uuid separated by a point'
+  type = '__ref'
+
+  def validate(self, value):
+    if isinstance(value, str):
+      split_value = value.split('.')
+      if len(split_value) == 2:
+        [model_name, uuid_value] = split_value
+        return is_valid_uuid(uuid_value)
+    return False
 
 class Enum(Type):
   def __init__(self, *options):
@@ -101,6 +111,14 @@ class Any(Type):
   def validate(self, value):
     return True
 
+class Null(Type):
+  code = '014'
+  description = 'Null value'
+  type = '__null'
+
+  def validate(self, value):
+    return value == constants.NULL
+
 class types:
   BOOLEAN = Boolean
   MODEL = Model
@@ -115,6 +133,7 @@ class types:
   ENUM = Enum
   IMMUTABLE = Immutable
   ANY = Any
+  NULL = Null
 
 def map_type(type_to_map):
   type_map = {
