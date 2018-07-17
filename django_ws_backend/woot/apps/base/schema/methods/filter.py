@@ -1,6 +1,4 @@
 
-import json
-
 from django.db.models import Q
 
 from util.pluck import pluck
@@ -12,7 +10,7 @@ from util.api import (
   constants,
 )
 
-from .constants import model_schema_constants
+from ..constants import model_schema_constants
 
 class QueryKeyValueNotPresentError(Error):
   def __init__(self):
@@ -206,14 +204,3 @@ class FilterSchema(StructureSchema):
       })
 
       self.active_response.add_internal_queryset(queryset, query_reference)
-
-class ModelMethodsSchema(StructureSchema):
-  def __init__(self, Model, **kwargs):
-    self.model = Model
-    super().__init__(
-      **kwargs,
-      description='No available model methods',
-      children={
-        model_schema_constants.FILTER: FilterSchema(Model),
-      },
-    )

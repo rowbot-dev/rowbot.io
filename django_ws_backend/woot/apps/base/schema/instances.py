@@ -17,12 +17,17 @@ class InstanceSchema(StructureSchema):
       children={
         model_schema_constants.ATTRIBUTES: Model.objects.schema_instance_attributes(),
         model_schema_constants.RELATIONSHIPS: Model.objects.schema_instance_relationships(),
-        # model_schema_constants.METHODS: Model.objects.schema_instance_methods(),
       },
     )
 
   def response_from_model_instance(self, instance, attributes, relationships):
-    return self.respond(self.model.objects.serialize(instance, attributes=attributes, relationships=relationships))
+    return self.respond(
+      self.model.objects.serialize(
+        instance,
+        attributes=attributes,
+        relationships=relationships,
+      )
+    )
 
 class InstancesResponse(IndexedResponse):
   def __init__(self, parent_schema):
@@ -30,7 +35,14 @@ class InstancesResponse(IndexedResponse):
 
   def add_instances(self, instances, attributes, relationships):
     for instance in instances:
-      self.add_child(instance._id, self.template_schema.response_from_model_instance(instance, attributes, relationships))
+      self.add_child(
+        instance._id,
+        self.template_schema.response_from_model_instance(
+          instance,
+          attributes,
+          relationships,
+        )
+      )
 
 class InstancesSchema(IndexedSchema):
   def __init__(self, Model, **kwargs):
