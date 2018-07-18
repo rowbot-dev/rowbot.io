@@ -45,6 +45,10 @@ class Response():
         server_type.code: server_type.render()
         for server_type in self.server_types
       },
+      constants.ERRORS: {
+        error.code: error.render()
+        for error in self.parent_schema.available_errors
+      },
     }
 
     if self.client_schema is not None:

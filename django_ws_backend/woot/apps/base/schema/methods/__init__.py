@@ -14,3 +14,8 @@ class ModelMethodsSchema(StructureSchema):
         model_schema_constants.FILTER: FilterSchema(Model),
       },
     )
+
+  def add_reference_group_model(self, reference_group_model):
+    self.reference_group_model = reference_group_model
+    for child in self.children.values():
+      child.add_reference_group_model(reference_group_model)

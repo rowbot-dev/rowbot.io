@@ -1,51 +1,27 @@
 
+import uuid
+
 from django.db import models
 from django.db.models import Q
 from django.core.exceptions import FieldDoesNotExist
 
-from util.api import Schema, StructureSchema, Error, types, constants
-from util.is_valid_uuid import is_valid_uuid
+from util.api import Schema, StructureSchema, Error, constants
 
 from .constants import query_directives, is_valid_query_directive
-
 from .schema import (
   model_schema_constants,
-  ModelSchema,
-  AttributeSchema,
-  RelationshipSchema,
-  InstancesSchema,
-  ModelMethodsSchema
+  SchemaManagerMixin,
+)
+from .schema.methods.filter import (
+  FieldDoesNotExistError,
+  MultipleDirectivesForNonRelatedFieldError,
+  InvalidQueryDirectiveError,
 )
 
-import uuid
+class models_constants:
+  ID = 'id'
 
-ID_FIELD = 'id'
-
-class FieldDoesNotExistError(Error):
-  def __init__(self, field, model):
-    return super().__init__(
-      code='014',
-      name='model_field_does_not_exist',
-      description='Field <{}> does not exist on the <{}> model'.format(field, model),
-    )
-
-class MultipleDirectivesForNonRelatedFieldError(Error):
-  def __init__(self, field, directives):
-    return super().__init__(
-      code='015',
-      name='model_multiple_directives',
-      description='Multiple directives given for field <{}>: [{}]'.format(field, ','.join(directives)),
-    )
-
-class InvalidQueryDirectiveError(Error):
-  def __init__(self, field, directive):
-    return super().__init__(
-      code='016',
-      name='model_invalid_directive',
-      description='Invalid directive given for field <{}>: <{}>'.format(field, directive),
-    )
-
-class Manager(models.Manager):
+class Manager(models.Manager, SchemaManagerMixin):
   use_for_related_fields = True
 
   def attributes(self):
@@ -54,7 +30,7 @@ class Manager(models.Manager):
       for field in self.model._meta.get_fields()
       if (
         not field.is_relation
-        and field.name != ID_FIELD
+        and field.name != models_constants.ID
       )
     ]
 
@@ -73,7 +49,7 @@ class Manager(models.Manager):
     return None
 
   def filter(self, *args, **kwargs):
-    return super().filter(*args, **kwargs), '7eb995a5-d08f-44ce-bb64-a7a6d57680d9'
+    return super().filter(*args, **kwargs)
 
   def query_check(self, key, value):
     tokens = key.split(query_directives.JOIN)
@@ -83,7 +59,7 @@ class Manager(models.Manager):
     try:
       field = self.model._meta.get_field(field_name)
     except FieldDoesNotExist:
-      query_errors.append(FieldDoesNotExistError(field_name, self.model._meta.object_name))
+      query_errors.append(FieldDoesNotExistError(field=field_name, model=self.model._meta.object_name))
       return query_errors
 
     if field.is_relation:
@@ -93,60 +69,15 @@ class Manager(models.Manager):
         return query_errors
     else:
       if len(rest_of_tokens) > 1:
-        query_errors.append(MultipleDirectivesForNonRelatedFieldError(field_name, rest_of_tokens))
+        query_errors.append(MultipleDirectivesForNonRelatedFieldError(field=field_name, directives=rest_of_tokens))
         return query_errors
       elif len(rest_of_tokens) == 1:
         [directive] = rest_of_tokens
         if not is_valid_query_directive(directive):
-          query_errors.append(InvalidQueryDirectiveError(field_name, directive))
+          query_errors.append(InvalidQueryDirectiveError(field=field_name, directive=directive))
           return query_errors
 
     return query_errors
-
-  def schema(self):
-    return ModelSchema(self.model)
-
-  def schema_attributes(self, authorization=None):
-    return AttributeSchema(self.model)
-
-  def schema_relationships(self, authorization=None):
-    return RelationshipSchema(self.model)
-
-  def schema_model_methods(self):
-    return ModelMethodsSchema(self.model)
-
-  def schema_instance_attributes(self):
-    return StructureSchema(
-      description='No available instance methods',
-      children={
-        attribute_field.name: Schema()
-        for attribute_field
-        in self.attributes()
-      }
-    )
-
-  def schema_instance_relationships(self):
-    return StructureSchema(
-      description='No available instance methods',
-      children={
-        relationship_field.name: Schema(
-          description='No available instance methods',
-          server_types=[
-            types.REF(),
-            types.ARRAY(),
-            types.NULL(),
-          ],
-        )
-        for relationship_field
-        in self.relationships()
-      }
-    )
-
-  def schema_instance_methods(self):
-    return Schema(description='No available instance methods')
-
-  def schema_instances(self):
-    return InstancesSchema(self.model)
 
   def serialize(self, instance, attributes=[], relationships=[]):
     return {
@@ -174,18 +105,13 @@ class Manager(models.Manager):
         else [
           related_object._ref
           for related_object
-          in self.get_related_objects(instance, relationship_field)
+          in getattr(instance, relationship_field.name).all()
         ]
       )
       for relationship_field
       in self.relationships()
       if relationship_field.name in relationships
     }
-
-  def get_related_objects(self, instance, field):
-    if field.is_relation and (field.many_to_many or field.one_to_many):
-      return getattr(instance, field.name).all()
-    return []
 
 class Model(models.Model):
 

@@ -30,6 +30,10 @@ class RelationshipResponse(StructureResponse):
     return list(relationship_names - child_keys)
 
 class RelationshipSchema(StructureSchema):
+  available_errors = StructureSchema.available_errors + [
+    UniformRelationshipInclusiveError(),
+  ]
+
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(

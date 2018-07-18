@@ -11,6 +11,7 @@ from util.api import (
 )
 
 from ..constants import model_schema_constants
+from .base import BaseMethodSchema
 
 class QueryKeyValueNotPresentError(Error):
   def __init__(self):
@@ -36,6 +37,42 @@ class QueryAndOrPresentError(Error):
       description='A query cannot contain both AND and OR keys',
     )
 
+class FieldDoesNotExistError(Error):
+  def __init__(self, field=None, model=None):
+    return super().__init__(
+      code='014',
+      name='model_field_does_not_exist',
+      description=(
+        'Field <{}> does not exist on the <{}> model'.format(field, model)
+        if field is not None and model is not None
+        else 'The given field must exist on the model'
+      ),
+    )
+
+class MultipleDirectivesForNonRelatedFieldError(Error):
+  def __init__(self, field=None, directives=None):
+    return super().__init__(
+      code='015',
+      name='model_multiple_directives',
+      description=(
+        'Multiple directives given for field <{}>: [{}]'.format(field, ','.join(directives))
+        if field is not None and directives is not None
+        else 'Fields can only respond to a single directive'
+      ),
+    )
+
+class InvalidQueryDirectiveError(Error):
+  def __init__(self, field=None, directive=None):
+    return super().__init__(
+      code='016',
+      name='model_invalid_directive',
+      description=(
+        'Invalid directive given for field <{}>: <{}>'.format(field, directive)
+        if field is not None and directive is not None
+        else 'Unrecognised directive'
+      ),
+    )
+
 class QueryResponse(StructureResponse):
   def __init__(self, parent_schema):
     super().__init__(parent_schema)
@@ -59,6 +96,15 @@ class QueryResponse(StructureResponse):
         return response.get_query()
 
 class QuerySchema(StructureSchema):
+  available_errors = StructureSchema.available_errors + [
+    QueryKeyValueNotPresentError(),
+    QueryAndOrPresentWithKeyValueError(),
+    QueryAndOrPresentError(),
+    FieldDoesNotExistError(),
+    MultipleDirectivesForNonRelatedFieldError(),
+    InvalidQueryDirectiveError(),
+  ]
+
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(
@@ -178,11 +224,12 @@ class FilterClientSchema(StructureSchema):
       },
     )
 
-class FilterSchema(StructureSchema):
+class FilterSchema(BaseMethodSchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(
       **kwargs,
+      response=FilterClientReponse,
       children={
         model_schema_constants.COMPOSITE: CompositeSchema(Model),
       },
@@ -196,7 +243,8 @@ class FilterSchema(StructureSchema):
 
     if composite_query is not None:
 
-      queryset, query_reference = self.model.objects.filter(composite_query)
+      queryset = self.model.objects.filter(composite_query)
+      query_reference = self.reference_group_model.objects.from_queryset(queryset)
 
       self.active_response = FilterClientSchema().respond({
         model_schema_constants.COUNT: queryset.count(),

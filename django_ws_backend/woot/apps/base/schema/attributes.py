@@ -30,6 +30,10 @@ class AttributeResponse(StructureResponse):
     return list(attribute_names - child_keys)
 
 class AttributeSchema(StructureSchema):
+  available_errors = StructureSchema.available_errors + [
+    UniformAttributeInclusiveError(),
+  ]
+
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(

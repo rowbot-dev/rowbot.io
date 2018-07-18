@@ -16,6 +16,10 @@ from .constants import constants
 class Schema():
   default_server_types = types.STRING()
   default_response = Response
+  available_errors = [
+    errors.CLOSED(),
+    errors.SERVER_TYPES(),
+  ]
 
   def __init__(self, description=None, server_types=None, response=None, client=None, closed=False):
     self.description = description
@@ -62,7 +66,7 @@ class Schema():
         self.active_response.active_server_type = server_type
         return True
 
-    self.active_response.add_error(errors.SERVER_TYPES(self.server_types))
+    self.active_response.add_error(errors.SERVER_TYPES(server_types=self.server_types))
     return False
 
   def passes_pre_response_checks(self, payload):
@@ -78,6 +82,9 @@ class Schema():
 class StructureSchema(Schema):
   default_server_types = types.STRUCTURE()
   default_response = StructureResponse
+  available_errors = Schema.available_errors + [
+    errors.INVALID_KEYS(),
+  ]
 
   def __init__(self, children={}, **kwargs):
     super().__init__(**kwargs)
@@ -118,6 +125,9 @@ class IndexedSchema(Schema):
   default_server_types = types.STRUCTURE()
   default_index_type = types.UUID()
   default_response = IndexedResponse
+  available_errors = Schema.available_errors + [
+    errors.INVALID_INDEXES(),
+  ]
 
   def __init__(self, index_type=None, template=None, **kwargs):
     super().__init__(**kwargs)
@@ -136,7 +146,7 @@ class IndexedSchema(Schema):
     ]
 
     if invalid_indexes:
-      self.active_response.add_error(errors.INVALID_INDEXES(invalid_indexes, self.index_type))
+      self.active_response.add_error(errors.INVALID_INDEXES(indexes=invalid_indexes, index_type=self.index_type))
       return False
 
     return True

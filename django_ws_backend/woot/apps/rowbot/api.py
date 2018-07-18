@@ -6,6 +6,8 @@ from util.merge import merge
 from util.api import StructureSchema, types, map_type, errors
 
 # from apps.logger.models import SocketLogger
+from apps.base.schema import ModelsSchemaWithReferences
+from apps.reference.models import ReferenceGroup
 from apps.rowbot.models import (
   AssetModel, Asset, AssetInstance,
   Club,
@@ -21,32 +23,31 @@ class api_constants:
 
 api = StructureSchema(
   description='',
-  children=merge(
-    {
-      api_constants.MODELS: StructureSchema(
-        description='',
-        children={
-          Model.__name__: Model.objects.schema() for Model in [
-            # AssetModel, Asset, AssetInstance,
-            # Club,
-            # EventModel, EventNotificationModel, Event, EventInstance, EventNotification,
-            Member,
-            # AuthenticationToken,
-            # RoleModel, RolePermission,
-            Role,
-            # RoleInstance, RoleRecord,
-            # TeamModel, Team, TeamInstance, TeamRecord,
-          ]
-        },
-      ),
-      api_constants.SYSTEM: StructureSchema(
-        description='',
-        children={
+  children={
+    api_constants.MODELS: ModelsSchemaWithReferences(
+      reference_group_model=ReferenceGroup,
+      description='',
+      children={
+        Model.__name__: Model.objects.schema() for Model in [
+          # AssetModel, Asset, AssetInstance,
+          # Club,
+          # EventModel, EventNotificationModel, Event, EventInstance, EventNotification,
+          Member,
+          # AuthenticationToken,
+          # RoleModel, RolePermission,
+          Role,
+          # RoleInstance, RoleRecord,
+          # TeamModel, Team, TeamInstance, TeamRecord,
+        ]
+      },
+    ),
+    api_constants.SYSTEM: StructureSchema(
+      description='',
+      children={
 
-        },
-      ),
-    },
-  ),
+      },
+    ),
+  },
 )
 
 ROWBOT = 'rowbot'

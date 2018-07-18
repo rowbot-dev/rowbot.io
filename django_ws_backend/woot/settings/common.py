@@ -41,6 +41,7 @@ THIRD_PARTY_APPS = (
 )
 LOCAL_APPS = (
   'apps.base',
+  'apps.reference',
   'apps.rowbot',
 )
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS

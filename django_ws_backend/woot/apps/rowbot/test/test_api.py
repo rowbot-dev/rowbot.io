@@ -1,5 +1,6 @@
 
 import json
+
 from django.test import TestCase
 
 from ..api import api
@@ -66,11 +67,10 @@ class APITestCase(TestCase):
       'models': {
         'Role': {
           'attributes': {
-            'nickname': False,
+            'nickname': True,
+            'is_confirmed': True,
           },
-          'relationships': {
-            'model': True,
-          },
+          'relationships': None,
           'methods': {
             'filter': {
               'composite': [
