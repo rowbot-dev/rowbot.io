@@ -33,14 +33,20 @@ class InstancesResponse(IndexedResponse):
   def __init__(self, parent_schema):
     super().__init__(parent_schema)
 
-  def add_instances(self, instances, attributes, relationships):
+  def add_attributes(self, attributes):
+    self.attributes = attributes
+
+  def add_relationships(self, relationships):
+    self.relationships = relationships
+
+  def add_instances(self, instances):
     for instance in instances:
       self.add_child(
         instance._id,
         self.template_schema.response_from_model_instance(
           instance,
-          attributes,
-          relationships,
+          self.attributes,
+          self.relationships,
         )
       )
 

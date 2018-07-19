@@ -7,7 +7,7 @@ from util.api import StructureSchema, types, map_type, errors
 
 # from apps.logger.models import SocketLogger
 from apps.base.schema import ModelsSchemaWithReferences
-from apps.reference.models import ReferenceGroup
+from apps.reference.models import ReferenceGroup, Reference
 from apps.rowbot.models import (
   AssetModel, Asset, AssetInstance,
   Club,
@@ -26,6 +26,7 @@ api = StructureSchema(
   children={
     api_constants.MODELS: ModelsSchemaWithReferences(
       reference_group_model=ReferenceGroup,
+      reference_model=Reference,
       description='',
       children={
         Model.__name__: Model.objects.schema() for Model in [

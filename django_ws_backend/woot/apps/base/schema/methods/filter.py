@@ -205,13 +205,17 @@ class FilterClientReponse(StructureResponse):
   def __init__(self, parent_schema):
     super().__init__(parent_schema)
     self.internal_queryset = None
-    self.internal_reference = None
     self.external_queryset = None
-    self.external_reference = None
+    self.reference = None
 
-  def add_internal_queryset(self, queryset, query_reference):
+  def add_internal_queryset(self, queryset):
     self.internal_queryset = queryset
-    self.internal_reference = query_reference
+
+  def add_external_queryset(self, queryset):
+    self.external_queryset = queryset
+
+  def add_reference(self, query_reference):
+    self.reference = query_reference
 
 class FilterClientSchema(StructureSchema):
   def __init__(self, **kwargs):
@@ -251,4 +255,5 @@ class FilterSchema(BaseMethodSchema):
         model_schema_constants.REFERENCE: query_reference,
       })
 
-      self.active_response.add_internal_queryset(queryset, query_reference)
+      self.active_response.add_internal_queryset(queryset)
+      self.active_response.add_reference(query_reference)

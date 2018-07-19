@@ -9,17 +9,37 @@ from .instances import InstancesSchema
 from .methods import ModelMethodsSchema
 
 class ModelsSchemaWithReferences(StructureSchema):
-  def __init__(self, reference_group_model=None, **kwargs):
+  def __init__(self, reference_group_model=None, reference_model=None, **kwargs):
     self.reference_group_model = reference_group_model
+    self.reference_model = reference_model
     super().__init__(**kwargs)
     for child in self.children.values():
       child.add_reference_group_model(reference_group_model)
 
+    self.children.update({
+      model_schema_constants.REFERENCE_GROUP: reference_group_model.objects.schema(),
+      model_schema_constants.REFERENCE: reference_model.objects.schema(),
+    })
+
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)
 
-    for child_response_key, child_response in self.active_response.children.items():
-      print(child_response_key, child_response.children.get(model_schema_constants.INSTANCES))
+    for child_response in self.active_response.children.values():
+      methods_response = child_response.children.get(model_schema_constants.METHODS)
+
+      if methods_response is not None:
+        for methods_child in methods_response.children.values():
+          if methods_child.external_queryset is not None:
+            model_name = methods_child.external_queryset.model.__name__
+            model_response = self.active_response.children.get(model_name)
+            if model_response is None:
+              model_response = self.children.get(model_name).get_response()
+
+            instances_response = model_response.children.get(model_schema_constants.INSTANCES)
+            if instances_response is None:
+              instances_response = model_response.parent_schema.children.get(model_schema_constants.INSTANCES).get_response()
+
+            instances_response.add_instances(methods_child.external_queryset)
 
 class ModelSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
@@ -59,11 +79,9 @@ class ModelSchema(StructureSchema):
         if methods_child.internal_queryset is not None:
           methods_internal_instances.extend(list(methods_child.internal_queryset))
 
-      instances_response.add_instances(
-        methods_internal_instances,
-        attributes_response.get_attributes(),
-        relationships_response.get_relationships(),
-      )
+      instances_response.add_attributes(attributes_response.get_attributes())
+      instances_response.add_relationships(relationships_response.get_relationships())
+      instances_response.add_instances(methods_internal_instances)
 
       self.active_response.children.update({
         model_schema_constants.INSTANCES: instances_response,

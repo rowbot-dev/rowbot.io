@@ -59,8 +59,8 @@ class APITestCase(TestCase):
 
     print(json.dumps(response.render(), indent=2))
 
-    self.assertTrue(False)
-    # self.assertTrue(True)
+    # self.assertTrue(False)
+    self.assertTrue(True)
 
   def test_respond_role(self):
     payload = {
@@ -70,7 +70,6 @@ class APITestCase(TestCase):
             'nickname': True,
             'is_confirmed': True,
           },
-          'relationships': None,
           'methods': {
             'filter': {
               'composite': [
@@ -89,5 +88,5 @@ class APITestCase(TestCase):
 
     print(json.dumps(response.render(), indent=2))
 
-    # self.assertTrue(False)
-    self.assertTrue(True)
+    self.assertTrue(False)
+    # self.assertTrue(True)
