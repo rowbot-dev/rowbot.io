@@ -20,7 +20,7 @@ class InstanceSchema(StructureSchema):
       },
     )
 
-  def response_from_model_instance(self, instance, attributes, relationships):
+  def response_from_model_instance(self, instance, attributes=None, relationships=None):
     return self.respond(
       self.model.objects.serialize(
         instance,
@@ -32,6 +32,8 @@ class InstanceSchema(StructureSchema):
 class InstancesResponse(IndexedResponse):
   def __init__(self, parent_schema):
     super().__init__(parent_schema)
+    self.attributes = None
+    self.relationships = None
 
   def add_attributes(self, attributes):
     self.attributes = attributes
@@ -45,8 +47,8 @@ class InstancesResponse(IndexedResponse):
         instance._id,
         self.template_schema.response_from_model_instance(
           instance,
-          self.attributes,
-          self.relationships,
+          attributes=self.attributes,
+          relationships=self.relationships,
         )
       )
 

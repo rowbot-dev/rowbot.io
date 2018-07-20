@@ -13,6 +13,14 @@ class ReferenceGroupManager(Manager):
 
     return reference_group._id
 
+  def from_multiple_querysets(self, querysets):
+    reference_group = self.create()
+    for queryset in querysets:
+      for obj in queryset:
+        reference_group.references.create(value=obj._ref)
+
+    return reference_group._id
+
 class ReferenceGroup(Model):
   objects = ReferenceGroupManager()
 

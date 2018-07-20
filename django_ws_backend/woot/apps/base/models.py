@@ -79,21 +79,21 @@ class Manager(models.Manager, SchemaManagerMixin):
 
     return query_errors
 
-  def serialize(self, instance, attributes=[], relationships=[]):
+  def serialize(self, instance, attributes=None, relationships=None):
     return {
       model_schema_constants.ATTRIBUTES: self.serialize_attributes(instance, attributes=attributes),
       model_schema_constants.RELATIONSHIPS: self.serialize_relationships(instance, relationships=relationships),
     }
 
-  def serialize_attributes(self, instance, attributes=attributes):
+  def serialize_attributes(self, instance, attributes=None):
     return {
       attribute_field.name: str(getattr(instance, attribute_field.name))
       for attribute_field
       in self.attributes()
-      if attribute_field.name in attributes
+      if attributes is None or attribute_field.name in attributes
     }
 
-  def serialize_relationships(self, instance, relationships=relationships):
+  def serialize_relationships(self, instance, relationships=None):
     return {
       relationship_field.name: (
         (
@@ -110,7 +110,7 @@ class Manager(models.Manager, SchemaManagerMixin):
       )
       for relationship_field
       in self.relationships()
-      if relationship_field.name in relationships
+      if relationships is None or relationship_field.name in relationships
     }
 
 class Model(models.Model):

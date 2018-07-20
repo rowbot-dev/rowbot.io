@@ -205,14 +205,14 @@ class FilterClientReponse(StructureResponse):
   def __init__(self, parent_schema):
     super().__init__(parent_schema)
     self.internal_queryset = None
-    self.external_queryset = None
+    self.external_querysets = []
     self.reference = None
 
   def add_internal_queryset(self, queryset):
     self.internal_queryset = queryset
 
   def add_external_queryset(self, queryset):
-    self.external_queryset = queryset
+    self.external_querysets.append(queryset)
 
   def add_reference(self, query_reference):
     self.reference = query_reference

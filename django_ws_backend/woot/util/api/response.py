@@ -16,6 +16,7 @@ class Response():
     self.value = None
     self.rendered = None
     self.has_child_errors = False
+    self.should_render = True
 
   def has_errors(self):
     return self.errors or self.has_child_errors
@@ -79,6 +80,15 @@ class StructureResponse(Response):
   def add_child(self, child_key, child_response):
     self.children.update({child_key: child_response})
 
+  def get_child(self, child_key):
+    return self.children.get(child_key)
+
+  def force_get_child(self, child_key):
+    if child_key not in self.children:
+      self.add_child(child_key, self.parent_schema.children.get(child_key).get_response())
+
+    return self.get_child(child_key)
+
   def render_empty(self):
     super().render_empty()
     self.rendered.update({
@@ -92,6 +102,7 @@ class StructureResponse(Response):
     self.rendered = {
       child_key: child_response.render()
       for child_key, child_response in self.children.items()
+      if child_response.should_render
     }
 
 class ArrayResponse(Response):
