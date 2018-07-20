@@ -66,10 +66,8 @@ class APITestCase(TestCase):
     payload = {
       'models': {
         'Role': {
-          'attributes': {
-            'nickname': True,
-            'is_confirmed': True,
-          },
+          'attributes': False,
+          'relationships': False,
           'methods': {
             'filter': {
               'composite': [
@@ -80,6 +78,10 @@ class APITestCase(TestCase):
               ],
             },
           },
+        },
+        'Reference': {
+          'attributes': False,
+          'relationships': False,
         },
       },
     }

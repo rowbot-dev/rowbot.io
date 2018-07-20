@@ -5,7 +5,7 @@ from util.api import Schema, StructureSchema, types, errors, Error, constants
 from .constants import model_schema_constants
 from .attributes import AttributeSchema
 from .relationships import RelationshipSchema
-from .instances import InstancesSchema
+from .instances import InstancesSchema, InstanceAttributeSchema, InstanceRelationshipSchema
 from .methods import ModelMethodsSchema
 
 class ModelsSchemaWithReferences(StructureSchema):
@@ -61,21 +61,20 @@ class ModelSchema(StructureSchema):
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)
 
+    attributes_response = self.active_response.force_get_child(model_schema_constants.ATTRIBUTES)
+    relationships_response = self.active_response.force_get_child(model_schema_constants.RELATIONSHIPS)
     methods_response = self.active_response.get_child(model_schema_constants.METHODS)
+    instances_response = self.active_response.force_get_child(model_schema_constants.INSTANCES)
 
+    methods_internal_instances = []
     if methods_response is not None:
-      attributes_response = self.active_response.force_get_child(model_schema_constants.ATTRIBUTES)
-      relationships_response = self.active_response.force_get_child(model_schema_constants.RELATIONSHIPS)
-      instances_response = self.active_response.force_get_child(model_schema_constants.INSTANCES)
-
-      methods_internal_instances = []
       for methods_child in methods_response.children.values():
         if methods_child.internal_queryset is not None:
           methods_internal_instances.extend(list(methods_child.internal_queryset))
 
-      instances_response.add_attributes(attributes_response.get_attributes())
-      instances_response.add_relationships(relationships_response.get_relationships())
-      instances_response.add_instances(methods_internal_instances)
+    instances_response.add_attributes(attributes_response.get_attributes())
+    instances_response.add_relationships(relationships_response.get_relationships())
+    instances_response.add_instances(methods_internal_instances)
 
 class SchemaManagerMixin:
   def schema(self):
@@ -91,31 +90,10 @@ class SchemaManagerMixin:
     return ModelMethodsSchema(self.model)
 
   def schema_instance_attributes(self):
-    return StructureSchema(
-      description='No available instance methods',
-      children={
-        attribute_field.name: Schema()
-        for attribute_field
-        in self.attributes()
-      }
-    )
+    return InstanceAttributeSchema(self.model)
 
   def schema_instance_relationships(self):
-    return StructureSchema(
-      description='No available instance methods',
-      children={
-        relationship_field.name: Schema(
-          description='No available instance methods',
-          server_types=[
-            types.REF(),
-            types.ARRAY(),
-            types.NULL(),
-          ],
-        )
-        for relationship_field
-        in self.relationships()
-      }
-    )
+    return InstanceRelationshipSchema(self.model)
 
   def schema_instance_methods(self):
     return Schema(description='No available instance methods')

@@ -5,25 +5,25 @@ from apps.base.models import Model, Manager
 
 import uuid
 
-class ReferenceGroupManager(Manager):
+class ReferenceManager(Manager):
   def from_queryset(self, queryset):
-    reference_group = self.create()
+    reference = self.create()
     for obj in queryset:
-      reference_group.references.create(value=obj._ref)
+      reference.entries.create(value=obj._ref)
 
-    return reference_group._id
+    return reference._id
 
   def from_multiple_querysets(self, querysets):
-    reference_group = self.create()
+    reference = self.create()
     for queryset in querysets:
       for obj in queryset:
-        reference_group.references.create(value=obj._ref)
+        reference.entries.create(value=obj._ref)
 
-    return reference_group._id
-
-class ReferenceGroup(Model):
-  objects = ReferenceGroupManager()
+    return reference._id
 
 class Reference(Model):
-  group = models.ForeignKey('reference.ReferenceGroup', related_name='references', on_delete=models.CASCADE)
+  objects = ReferenceManager()
+
+class Entry(Model):
+  reference = models.ForeignKey('reference.Reference', related_name='entries', on_delete=models.CASCADE)
   value = models.CharField(max_length=255)
