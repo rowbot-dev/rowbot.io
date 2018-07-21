@@ -40,6 +40,10 @@ class Manager(models.Manager, SchemaManagerMixin):
       for field in self.model._meta.get_fields()
       if (
         field.is_relation
+        or (
+          field.auto_created
+          and not field.concrete
+        )
       )
     ]
 
@@ -52,21 +56,31 @@ class Manager(models.Manager, SchemaManagerMixin):
     return super().filter(*args, **kwargs)
 
   def create_from_schema(self, **kwargs):
+    add_after_creation = {}
+    modified_kwargs = {}
     for property_key, property in kwargs.items():
       field = self.model._meta.get_field(property_key)
       if field.is_relation:
         if field.one_to_one or field.many_to_one:
           related_object = field.related_model.objects.get(id=property)
-          kwargs.update({
+          modified_kwargs.update({
             property_key: related_object,
           })
         elif field.one_to_many or field.many_to_many:
           related_objects = field.related_model.objects.filter(id__in=property)
-          kwargs.update({
+          add_after_creation.update({
             property_key: related_objects,
           })
-          
-    return super().create(**kwargs)
+      else:
+        modified_kwargs.update({property_key: property})
+
+    created = super().create(**modified_kwargs)
+    for property_key, property in add_after_creation.items():
+      for related_object in property:
+        relationship = getattr(created, property_key)
+        relationship.add(related_object)
+
+    return created
 
   def query_check(self, key, value):
     tokens = key.split(query_directives.JOIN)

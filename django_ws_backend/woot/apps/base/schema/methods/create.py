@@ -41,7 +41,7 @@ class AttributesCreateResponse(StructureResponse):
       self.has_child_errors = True
 
   def get_attributes(self):
-    if not self.has_errors():
+    if not self.has_errors() and not self.is_empty:
       return self.render()
     return {}
 
@@ -83,7 +83,7 @@ class RelationshipCreateSchema(Schema):
     self.relationship = relationship
     super().__init__(
       **kwargs,
-      description=relationship.verbose_name,
+      description=relationship.name,
       server_types=(
         types.UUID()
         if relationship.one_to_one or relationship.many_to_one
@@ -101,7 +101,7 @@ class RelationshipsCreateResponse(StructureResponse):
       self.has_child_errors = True
 
   def get_relationships(self):
-    if not self.has_errors():
+    if not self.has_errors() and not self.is_empty:
       return self.render()
     return {}
 
@@ -125,7 +125,6 @@ class RelationshipsCreateSchema(StructureSchema):
       children={
         relationship.name: RelationshipCreateSchema(relationship)
         for relationship in Model.objects.relationships()
-        if relationship.editable
       },
     )
 
@@ -157,14 +156,18 @@ class PrototypeResponse(StructureResponse):
       attributes_response = self.force_get_child(model_schema_constants.ATTRIBUTES)
       relationships_response = self.force_get_child(model_schema_constants.RELATIONSHIPS)
 
-      prototype = {}
-      for attribute_name, attribute in attributes_response.get_attributes().items():
-        prototype.update({attribute_name: attribute})
+      attributes = attributes_response.get_attributes()
+      relationships = relationships_response.get_relationships()
 
-      for relationship_name, relationship in relationships_response.get_relationships().items():
-        prototype.update({relationship_name: relationship})
+      if attributes and relationships:
+        prototype = {}
+        for attribute_name, attribute in attributes.items():
+          prototype.update({attribute_name: attribute})
 
-      return prototype
+        for relationship_name, relationship in relationships.items():
+          prototype.update({relationship_name: relationship})
+
+        return prototype
 
 class MustContainAllNonNullableKeysError(Error):
   def __init__(self, not_included=None):

@@ -15,8 +15,8 @@ class APITestCase(TestCase):
 
     club = Club.objects.create(name='club_name')
     self.role_model = RoleModel.objects.create(club=club)
-    Role.objects.create(model=self.role_model, member=self.member, nickname='alfie')
-    Role.objects.create(model=self.role_model, member=member2, nickname='alf')
+    self.role1 = Role.objects.create(model=self.role_model, member=self.member, nickname='alfie')
+    self.role2 = Role.objects.create(model=self.role_model, member=member2, nickname='alf')
     Role.objects.create(model=self.role_model, member=member3, nickname='wil')
     Role.objects.create(model=self.role_model, member=member4, nickname='jamal')
 
@@ -108,6 +108,10 @@ class APITestCase(TestCase):
                 'relationships': {
                   'model': self.role_model._id,
                   'member': self.member._id,
+                  'is_subordinate_to': [
+                    self.role1._id,
+                    self.role2._id,
+                  ],
                 },
               },
             },
