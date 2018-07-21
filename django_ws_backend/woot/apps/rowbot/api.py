@@ -25,7 +25,7 @@ api = StructureSchema(
   description='',
   children={
     api_constants.MODELS: ModelsSchemaWithReferences(
-      reference_group_model=Reference,
+      reference_model=Reference,
       description='',
       children={
         Model.__name__: Model.objects.schema() for Model in [

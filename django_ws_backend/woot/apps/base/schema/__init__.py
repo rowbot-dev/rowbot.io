@@ -9,14 +9,14 @@ from .instances import InstancesSchema, InstanceAttributeSchema, InstanceRelatio
 from .methods import ModelMethodsSchema
 
 class ModelsSchemaWithReferences(StructureSchema):
-  def __init__(self, reference_group_model=None, **kwargs):
-    self.reference_group_model = reference_group_model
+  def __init__(self, reference_model=None, **kwargs):
+    self.reference_model = reference_model
     super().__init__(**kwargs)
     for child in self.children.values():
-      child.add_reference_group_model(reference_group_model)
+      child.add_reference_model(reference_model)
 
     self.children.update({
-      model_schema_constants.REFERENCE: reference_group_model.objects.schema(),
+      model_schema_constants.REFERENCE: reference_model.objects.schema(),
     })
 
   def responds_to_valid_payload(self, payload):
@@ -38,7 +38,7 @@ class ModelsSchemaWithReferences(StructureSchema):
               external_model_instances_response.add_instances(external_queryset)
 
             if method_response.reference is not None:
-              reference_instance = self.reference_group_model.objects.get(id=method_response.reference)
+              reference_instance = self.reference_model.objects.get(id=method_response.reference)
               reference_response = self.active_response.force_get_child(model_schema_constants.REFERENCE)
               reference_instances_response = reference_response.force_get_child(model_schema_constants.INSTANCES)
               reference_instances_response.add_instances([reference_instance])
@@ -53,10 +53,10 @@ class ModelSchema(StructureSchema):
       model_schema_constants.INSTANCES: Model.objects.schema_instances(),
     }
 
-  def add_reference_group_model(self, reference_group_model):
-    self.reference_group_model = reference_group_model
+  def add_reference_model(self, reference_model):
+    self.reference_model = reference_model
     methods_schema = self.children.get(model_schema_constants.METHODS)
-    methods_schema.add_reference_group_model(reference_group_model)
+    methods_schema.add_reference_model(reference_model)
 
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)

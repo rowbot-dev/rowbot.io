@@ -51,6 +51,23 @@ class Manager(models.Manager, SchemaManagerMixin):
   def filter(self, *args, **kwargs):
     return super().filter(*args, **kwargs)
 
+  def create_from_schema(self, **kwargs):
+    for property_key, property in kwargs.items():
+      field = self.model._meta.get_field(property_key)
+      if field.is_relation:
+        if field.one_to_one or field.many_to_one:
+          related_object = field.related_model.objects.get(id=property)
+          kwargs.update({
+            property_key: related_object,
+          })
+        elif field.one_to_many or field.many_to_many:
+          related_objects = field.related_model.objects.filter(id__in=property)
+          kwargs.update({
+            property_key: related_objects,
+          })
+          
+    return super().create(**kwargs)
+
   def query_check(self, key, value):
     tokens = key.split(query_directives.JOIN)
     query_errors = []
@@ -121,7 +138,7 @@ class Model(models.Model):
     abstract = True
 
   id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-  date_created = models.DateTimeField(auto_now_add=True)
+  date_created = models.DateTimeField(auto_now_add=True, editable=False, verbose_name='Date created')
 
   @property
   def _id(self):

@@ -19,3 +19,4 @@ class model_schema_constants:
   VALUE = 'value'
   REFERENCE = 'Reference'
   COUNT = 'count'
+  TEMPORARY_IDS = 'temporary_ids'

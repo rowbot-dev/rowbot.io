@@ -1,6 +1,6 @@
 
 from util.api import (
-  Schema, StructureSchema, IndexedSchema,
+  Schema, ClosedSchema, StructureSchema, IndexedSchema,
   StructureResponse, IndexedResponse,
   types,
   errors,
@@ -63,11 +63,10 @@ class InstancesResponse(IndexedResponse):
         )
       )
 
-class InstancesSchema(IndexedSchema):
+class InstancesSchema(IndexedSchema, ClosedSchema):
   def __init__(self, Model, **kwargs):
     super().__init__(
       **kwargs,
-      closed=True,
       response=InstancesResponse,
       template=InstanceSchema(Model),
     )

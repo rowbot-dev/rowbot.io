@@ -17,7 +17,6 @@ class Schema():
   default_server_types = types.STRING()
   default_response = Response
   available_errors = [
-    errors.CLOSED(),
     errors.SERVER_TYPES(),
   ]
 
@@ -26,17 +25,12 @@ class Schema():
     self.server_types = force_array(server_types or self.default_server_types)
     self.response = response or self.default_response
     self.client = client
-    self.closed = closed
 
   def get_response(self):
     return self.response(self)
 
   def respond(self, payload=None):
     self.active_response = self.get_response()
-
-    if payload is not None and self.closed:
-      self.responds_closed()
-      return self.active_response
 
     if payload is None:
       self.responds_to_none()
@@ -78,6 +72,20 @@ class Schema():
   def responds_to_client(self):
     if self.client is not None:
       self.active_response = self.client.respond(payload=self.active_response.render())
+
+class ClosedSchema(Schema):
+  available_errors = [
+    errors.CLOSED(),
+  ]
+  
+  def respond(self, payload=None):
+    self.active_response = self.get_response()
+
+    if payload is not None:
+      self.active_response.add_error(errors.CLOSED())
+      return self.active_response
+
+    return super().respond(payload=payload)
 
 class StructureSchema(Schema):
   default_server_types = types.STRUCTURE()

@@ -11,7 +11,7 @@ from util.api import (
 )
 
 from ..constants import model_schema_constants
-from .base import BaseMethodSchema
+from .base import BaseClientResponse, BaseMethodSchema
 
 class QueryKeyValueNotPresentError(Error):
   def __init__(self):
@@ -201,39 +201,29 @@ class CompositeSchema(ArraySchema):
     })
     super().responds_to_valid_payload(payload)
 
-class FilterClientReponse(StructureResponse):
-  def __init__(self, parent_schema):
-    super().__init__(parent_schema)
-    self.internal_queryset = None
-    self.external_querysets = []
-    self.reference = None
-
-  def add_internal_queryset(self, queryset):
-    self.internal_queryset = queryset
-
-  def add_external_queryset(self, queryset):
-    self.external_querysets.append(queryset)
-
-  def add_reference(self, query_reference):
-    self.reference = query_reference
+class FilterClientResponse(StructureResponse, BaseClientResponse):
+  pass
 
 class FilterClientSchema(StructureSchema):
   def __init__(self, **kwargs):
     super().__init__(
       **kwargs,
-      response=FilterClientReponse,
+      response=FilterClientResponse,
       children={
         model_schema_constants.COUNT: Schema(server_types=types.INTEGER()),
         model_schema_constants.REFERENCE: Schema(server_types=types.UUID()),
       },
     )
 
-class FilterSchema(BaseMethodSchema):
+class FilterResponse(StructureResponse, BaseClientResponse):
+  pass
+
+class FilterSchema(BaseMethodSchema, StructureSchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(
       **kwargs,
-      response=FilterClientReponse,
+      response=FilterResponse,
       children={
         model_schema_constants.COMPOSITE: CompositeSchema(Model),
       },
@@ -242,18 +232,23 @@ class FilterSchema(BaseMethodSchema):
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)
 
-    composite_response = self.active_response.children.get(model_schema_constants.COMPOSITE)
+    composite_response = self.active_response.force_get_child(model_schema_constants.COMPOSITE)
     composite_query = composite_response.get_query()
 
     if composite_query is not None:
-
       queryset = self.model.objects.filter(composite_query)
-      query_reference = self.reference_group_model.objects.from_queryset(queryset)
-
-      self.active_response = FilterClientSchema().respond({
+      filter_client_payload = {
         model_schema_constants.COUNT: queryset.count(),
-        model_schema_constants.REFERENCE: query_reference,
-      })
+      }
 
+      if self.reference_model is not None:
+        query_reference = self.reference_model.objects.from_queryset(queryset)
+        filter_client_payload.update({
+          model_schema_constants.REFERENCE: query_reference,
+        })
+
+      self.active_response = FilterClientSchema().respond(filter_client_payload)
       self.active_response.add_internal_queryset(queryset)
-      self.active_response.add_reference(query_reference)
+
+      if self.reference_model is not None:
+        self.active_response.add_reference(query_reference)
