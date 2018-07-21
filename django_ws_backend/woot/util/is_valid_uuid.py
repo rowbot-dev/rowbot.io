@@ -3,7 +3,7 @@ import uuid
 from uuid import UUID
 
 def is_valid_uuid(uuid_string):
-  if isinstance(uuid_string, str):
+  if isinstance(uuid_string, str) or isinstance(uuid_string, UUID):
     try:
       if hasattr(uuid_string, 'hex') and is_valid_uuid(uuid_string.hex):
         val = uuid_string
