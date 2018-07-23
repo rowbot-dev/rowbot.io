@@ -2,17 +2,17 @@
 from util.api import Error
 
 class UniformInclusiveError(Error):
+  code = '005'
   def __init__(self):
     return super().__init__(
-      code='005',
       name='uniform_attribute_inclusive',
       description='Attribute keys must be all inclusive or exclusive',
     )
 
 class NonNullableNotIncludedError(Error):
+  code = '006'
   def __init__(self, not_included=None):
     return super().__init__(
-      code='006',
       name='non_nullable_not_included',
       description=(
         'Non-nullable fields [{}] must be included'.format(','.join(not_included))
@@ -22,9 +22,9 @@ class NonNullableNotIncludedError(Error):
     )
 
 class MustContainAllNonNullableKeysError(Error):
+  code = '007'
   def __init__(self, not_included=None):
     return super().__init__(
-      code='007',
       name='must_contain_non_nullable',
       description=(
         'Keys [{}] with non-nullable fields must be included'.format(','.join(not_included))
@@ -34,33 +34,33 @@ class MustContainAllNonNullableKeysError(Error):
     )
 
 class QueryKeyValueNotPresentError(Error):
+  code = '008'
   def __init__(self):
     return super().__init__(
-      code='008',
       name='query_key_value_not_present',
       description='Both key and value must be present',
     )
 
 class QueryAndOrPresentWithKeyValueError(Error):
+  code = '009'
   def __init__(self):
     return super().__init__(
-      code='009',
       name='query_and_or_present_with_key_value',
       description='AND and OR keys must not be present with key or value keys',
     )
 
 class QueryAndOrPresentError(Error):
+  code = '010'
   def __init__(self):
     return super().__init__(
-      code='010',
       name='query_and_or_present',
       description='A query cannot contain both AND and OR keys',
     )
 
 class FieldDoesNotExistError(Error):
+  code = '011'
   def __init__(self, field=None, model=None):
     return super().__init__(
-      code='011',
       name='model_field_does_not_exist',
       description=(
         'Field <{}> does not exist on the <{}> model'.format(field, model)
@@ -70,9 +70,9 @@ class FieldDoesNotExistError(Error):
     )
 
 class MultipleDirectivesForNonRelatedFieldError(Error):
+  code = '012'
   def __init__(self, field=None, directives=None):
     return super().__init__(
-      code='012',
       name='model_multiple_directives',
       description=(
         'Multiple directives given for field <{}>: [{}]'.format(field, ','.join(directives))
@@ -82,9 +82,9 @@ class MultipleDirectivesForNonRelatedFieldError(Error):
     )
 
 class InvalidQueryDirectiveError(Error):
+  code = '013'
   def __init__(self, field=None, directive=None):
     return super().__init__(
-      code='013',
       name='model_invalid_directive',
       description=(
         'Invalid directive given for field <{}>: <{}>'.format(field, directive)

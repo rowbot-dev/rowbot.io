@@ -12,8 +12,5 @@ class ErrorsTestCase(TestCase):
     print(errors.CLOSED().code)
     print(errors.SERVER_TYPES().code)
     print(errors.INVALID_KEYS().code)
-    print(errors.INVALID_KEYS().code)
-    print(errors.INVALID_KEYS().code)
-    print(errors.INVALID_KEYS().code)
 
     self.assertTrue(False)
