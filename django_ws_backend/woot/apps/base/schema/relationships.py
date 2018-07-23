@@ -1,14 +1,8 @@
 
 from util.force_array import force_array
-from util.api import Schema, StructureSchema, StructureResponse, Error, types
+from util.api import Schema, StructureSchema, StructureResponse, types
 
-class UniformRelationshipInclusiveError(Error):
-  def __init__(self):
-    return super().__init__(
-      code='125',
-      name='uniform_relationship_inclusive',
-      description='Relationship keys must be all inclusive or exclusive',
-    )
+from .errors import model_schema_errors
 
 class RelationshipResponse(StructureResponse):
   def __init__(self, parent_schema):
@@ -40,7 +34,7 @@ class RelationshipSchema(StructureSchema):
     types.BOOLEAN(),
   ]
   available_errors = StructureSchema.available_errors + [
-    UniformRelationshipInclusiveError(),
+    model_schema_errors.UNIFORM_INCLUSIVE(),
   ]
 
   def __init__(self, Model, **kwargs):
@@ -65,7 +59,7 @@ class RelationshipSchema(StructureSchema):
 
     values = payload.values()
     if any(values) and not all(values):
-      self.active_response.add_error(UniformRelationshipInclusiveError())
+      self.active_response.add_error(model_schema_errors.UNIFORM_INCLUSIVE())
       return False
 
     if all(values):

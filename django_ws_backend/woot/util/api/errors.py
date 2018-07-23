@@ -1,4 +1,8 @@
 
+class error_constants:
+  name = 'name'
+  description = 'description'
+
 class Error:
   def __init__(self, code=None, name=None, description=None):
     self.code = code
@@ -7,8 +11,8 @@ class Error:
 
   def render(self):
     return {
-      'name': self.name,
-      'description': self.description,
+      error_constants.name: self.name,
+      error_constants.description: self.description,
     }
 
 class Closed(Error):
@@ -63,7 +67,7 @@ class InvalidIndexes(Error):
     )
 
 class errors:
+  CLOSED = Closed
   SERVER_TYPES = ServerTypes
   INVALID_KEYS = InvalidKeys
   INVALID_INDEXES = InvalidIndexes
-  CLOSED = Closed

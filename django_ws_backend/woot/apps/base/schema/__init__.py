@@ -1,8 +1,9 @@
 
 from util.merge import merge
-from util.api import Schema, StructureSchema, types, errors, Error, constants
+from util.api import Schema, StructureSchema, types, constants
 
 from .constants import model_schema_constants
+from .errors import model_schema_errors
 from .attributes import AttributeSchema
 from .relationships import RelationshipSchema
 from .instances import InstancesSchema, InstanceAttributeSchema, InstanceRelationshipSchema

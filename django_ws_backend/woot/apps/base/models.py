@@ -10,12 +10,8 @@ from util.api import Schema, StructureSchema, Error, constants
 from .constants import query_directives, is_valid_query_directive
 from .schema import (
   model_schema_constants,
+  model_schema_errors,
   SchemaManagerMixin,
-)
-from .schema.methods.filter import (
-  FieldDoesNotExistError,
-  MultipleDirectivesForNonRelatedFieldError,
-  InvalidQueryDirectiveError,
 )
 
 class models_constants:
@@ -90,7 +86,7 @@ class Manager(models.Manager, SchemaManagerMixin):
     try:
       field = self.model._meta.get_field(field_name)
     except FieldDoesNotExist:
-      query_errors.append(FieldDoesNotExistError(field=field_name, model=self.model._meta.object_name))
+      query_errors.append(model_schema_errors.FIELD_DOES_NOT_EXIST(field=field_name, model=self.model._meta.object_name))
       return query_errors
 
     if field.is_relation:
@@ -100,12 +96,12 @@ class Manager(models.Manager, SchemaManagerMixin):
         return query_errors
     else:
       if len(rest_of_tokens) > 1:
-        query_errors.append(MultipleDirectivesForNonRelatedFieldError(field=field_name, directives=rest_of_tokens))
+        query_errors.append(model_schema_errors.MULTIPLE_DIRECTIVES_FOR_NON_RELATED_FIELD(field=field_name, directives=rest_of_tokens))
         return query_errors
       elif len(rest_of_tokens) == 1:
         [directive] = rest_of_tokens
         if not is_valid_query_directive(directive):
-          query_errors.append(InvalidQueryDirectiveError(field=field_name, directive=directive))
+          query_errors.append(model_schema_errors.INVALID_QUERY_DIRECTIVE(field=field_name, directive=directive))
           return query_errors
 
     return query_errors

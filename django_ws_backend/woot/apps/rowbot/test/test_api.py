@@ -99,23 +99,25 @@ class APITestCase(TestCase):
     payload = {
       'models': {
         'Role': {
-          'methods': {
-            'create': {
-              'temp_id_1': {
-                'attributes': {
-                  'nickname': 'wham',
-                },
-                'relationships': {
-                  'model': self.role_model._id,
-                  'member': self.member._id,
-                  'is_subordinate_to': [
-                    self.role1._id,
-                    self.role2._id,
-                  ],
-                },
-              },
-            },
-          },
+          'methods': None,
+
+          # {
+          #   'create': {
+          #     'temp_id_1': {
+          #       'attributes': {
+          #         'nickname': 'wham',
+          #       },
+          #       'relationships': {
+          #         'model': self.role_model._id,
+          #         'member': self.member._id,
+          #         'is_subordinate_to': [
+          #           self.role1._id,
+          #           self.role2._id,
+          #         ],
+          #       },
+          #     },
+          #   },
+          # },
         },
       },
     }

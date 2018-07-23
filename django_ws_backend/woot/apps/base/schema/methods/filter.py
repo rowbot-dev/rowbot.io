@@ -6,72 +6,12 @@ from util.api import (
   Schema, StructureSchema, ArraySchema, IndexedSchema,
   Response, StructureResponse, ArrayResponse,
   types,
-  errors, Error,
   constants,
 )
 
 from ..constants import model_schema_constants
+from ..errors import model_schema_errors
 from .base import BaseClientResponse, BaseMethodSchema
-
-class QueryKeyValueNotPresentError(Error):
-  def __init__(self):
-    return super().__init__(
-      code='003',
-      name='query_key_value_not_present',
-      description='Both key and value must be present',
-    )
-
-class QueryAndOrPresentWithKeyValueError(Error):
-  def __init__(self):
-    return super().__init__(
-      code='004',
-      name='query_and_or_present_with_key_value',
-      description='AND and OR keys must not be present with key or value keys',
-    )
-
-class QueryAndOrPresentError(Error):
-  def __init__(self):
-    return super().__init__(
-      code='005',
-      name='query_and_or_present',
-      description='A query cannot contain both AND and OR keys',
-    )
-
-class FieldDoesNotExistError(Error):
-  def __init__(self, field=None, model=None):
-    return super().__init__(
-      code='014',
-      name='model_field_does_not_exist',
-      description=(
-        'Field <{}> does not exist on the <{}> model'.format(field, model)
-        if field is not None and model is not None
-        else 'The given field must exist on the model'
-      ),
-    )
-
-class MultipleDirectivesForNonRelatedFieldError(Error):
-  def __init__(self, field=None, directives=None):
-    return super().__init__(
-      code='015',
-      name='model_multiple_directives',
-      description=(
-        'Multiple directives given for field <{}>: [{}]'.format(field, ','.join(directives))
-        if field is not None and directives is not None
-        else 'Fields can only respond to a single directive'
-      ),
-    )
-
-class InvalidQueryDirectiveError(Error):
-  def __init__(self, field=None, directive=None):
-    return super().__init__(
-      code='016',
-      name='model_invalid_directive',
-      description=(
-        'Invalid directive given for field <{}>: <{}>'.format(field, directive)
-        if field is not None and directive is not None
-        else 'Unrecognised directive'
-      ),
-    )
 
 class QueryResponse(StructureResponse):
   def __init__(self, parent_schema):
@@ -97,12 +37,12 @@ class QueryResponse(StructureResponse):
 
 class QuerySchema(StructureSchema):
   available_errors = StructureSchema.available_errors + [
-    QueryKeyValueNotPresentError(),
-    QueryAndOrPresentWithKeyValueError(),
-    QueryAndOrPresentError(),
-    FieldDoesNotExistError(),
-    MultipleDirectivesForNonRelatedFieldError(),
-    InvalidQueryDirectiveError(),
+    model_schema_errors.QUERY_KEY_VALUE_NOT_PRESENT(),
+    model_schema_errors.QUERY_AND_OR_PRESENT_WITH_KEY_VALUE(),
+    model_schema_errors.QUERY_AND_OR_PRESENT(),
+    model_schema_errors.FIELD_DOES_NOT_EXIST(),
+    model_schema_errors.MULTIPLE_DIRECTIVES_FOR_NON_RELATED_FIELD(),
+    model_schema_errors.INVALID_QUERY_DIRECTIVE(),
   ]
 
   def __init__(self, Model, **kwargs):
@@ -132,10 +72,10 @@ class QuerySchema(StructureSchema):
     passes_pre_response_checks = super().passes_pre_response_checks(payload)
     if model_schema_constants.KEY in payload or model_schema_constants.VALUE in payload:
       if model_schema_constants.KEY not in payload or model_schema_constants.VALUE not in payload:
-        self.active_response.add_error(QueryKeyValueNotPresentError())
+        self.active_response.add_error(model_schema_errors.QUERY_KEY_VALUE_NOT_PRESENT())
 
       if model_schema_constants.AND in payload or model_schema_constants.OR in payload:
-        self.active_response.add_error(QueryAndOrPresentWithKeyValueError())
+        self.active_response.add_error(model_schema_errors.QUERY_AND_OR_PRESENT_WITH_KEY_VALUE())
 
       if self.active_response.has_errors():
         return False
@@ -149,7 +89,7 @@ class QuerySchema(StructureSchema):
         return False
 
     if model_schema_constants.AND in payload and model_schema_constants.OR in payload:
-      self.active_response.add_error(QueryAndOrPresentError())
+      self.active_response.add_error(model_schema_errors.QUERY_AND_OR_PRESENT())
       return False
 
     return passes_pre_response_checks

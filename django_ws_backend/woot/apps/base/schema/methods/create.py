@@ -3,24 +3,12 @@ from util.api import (
   Schema, StructureSchema, IndexedSchema,
   Response, StructureResponse, IndexedResponse,
   types, map_type,
-  errors, Error,
   constants,
 )
 
 from ..constants import model_schema_constants
+from ..errors import model_schema_errors
 from .base import BaseClientResponse, BaseMethodSchema
-
-class NonNullableNotIncludedError(Error):
-  def __init__(self, not_included=None):
-    return super().__init__(
-      code='065',
-      name='non_nullable_not_included',
-      description=(
-        'Non-nullable fields [{}] must be included'.format(','.join(not_included))
-        if not_included is not None
-        else 'All non-nullable fields must be included'
-      ),
-    )
 
 class AttributeCreateSchema(Schema):
   def __init__(self, attribute, **kwargs):
@@ -73,7 +61,7 @@ class AttributesCreateSchema(StructureSchema):
     passes_pre_response_checks = super().passes_pre_response_checks(payload)
     non_nullable_not_included = self.non_nullable - payload.keys()
     if non_nullable_not_included:
-      self.active_response.add_error(NonNullableNotIncludedError(non_nullable_not_included))
+      self.active_response.add_error(model_schema_errors.NON_NULLABLE_NOT_INCLUDED(non_nullable_not_included))
       return False
 
     return passes_pre_response_checks
@@ -137,7 +125,7 @@ class RelationshipsCreateSchema(StructureSchema):
     passes_pre_response_checks = super().passes_pre_response_checks(payload)
     non_nullable_not_included = self.non_nullable - payload.keys()
     if non_nullable_not_included:
-      self.active_response.add_error(NonNullableNotIncludedError(non_nullable_not_included))
+      self.active_response.add_error(model_schema_errors.NON_NULLABLE_NOT_INCLUDED(non_nullable_not_included))
       return False
 
     return passes_pre_response_checks
@@ -169,18 +157,6 @@ class PrototypeResponse(StructureResponse):
 
         return prototype
 
-class MustContainAllNonNullableKeysError(Error):
-  def __init__(self, not_included=None):
-    return super().__init__(
-      code='066',
-      name='must_contain_non_nullable',
-      description=(
-        'Keys [{}] with non-nullable fields must be included'.format(','.join(not_included))
-        if not_included is not None
-        else 'All keys with non-nullable fields must be included'
-      ),
-    )
-
 class PrototypeSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
@@ -203,7 +179,7 @@ class PrototypeSchema(StructureSchema):
 
     missing_non_nullable = non_nullable - payload.keys()
     if missing_non_nullable:
-      self.active_response.add_error(MustContainAllNonNullableKeysError(missing_non_nullable))
+      self.active_response.add_error(model_schema_errors.MUST_CONTAIN_ALL_NON_NULLABLE(missing_non_nullable))
       return False
 
     return passes_pre_response_checks
