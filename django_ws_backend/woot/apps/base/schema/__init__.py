@@ -17,13 +17,13 @@ class ModelsSchemaWithReferences(StructureSchema):
       child.add_reference_model(reference_model)
 
     self.children.update({
-      model_schema_constants.REFERENCE: reference_model.objects.schema(),
+      model_schema_constants.REFERENCE_MODEL: reference_model.objects.schema(),
     })
 
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)
 
-    models_in_payload = self.active_response.children.keys() - set(model_schema_constants.REFERENCE)
+    models_in_payload = self.active_response.children.keys() - set(model_schema_constants.REFERENCE_MODEL)
 
     if models_in_payload:
       for model_name in models_in_payload:
@@ -40,7 +40,7 @@ class ModelsSchemaWithReferences(StructureSchema):
 
             if method_response.reference is not None:
               reference_instance = self.reference_model.objects.get(id=method_response.reference)
-              reference_response = self.active_response.force_get_child(model_schema_constants.REFERENCE)
+              reference_response = self.active_response.force_get_child(model_schema_constants.REFERENCE_MODEL)
               reference_instances_response = reference_response.force_get_child(model_schema_constants.INSTANCES)
               reference_instances_response.add_instances([reference_instance])
 

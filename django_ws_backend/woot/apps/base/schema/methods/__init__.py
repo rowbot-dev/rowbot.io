@@ -4,6 +4,8 @@ from util.api import StructureSchema
 from ..constants import model_schema_constants
 from .filter import FilterSchema
 from .create import CreateSchema
+from .delete import DeleteSchema
+from .get import GetSchema
 
 class ModelMethodsSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
@@ -14,6 +16,8 @@ class ModelMethodsSchema(StructureSchema):
       children={
         model_schema_constants.FILTER: FilterSchema(Model),
         model_schema_constants.CREATE: CreateSchema(Model),
+        model_schema_constants.DELETE: DeleteSchema(Model),
+        model_schema_constants.GET: GetSchema(Model),
       },
     )
 

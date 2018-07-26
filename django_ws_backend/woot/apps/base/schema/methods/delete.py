@@ -1,26 +1,24 @@
 
 from util.api import (
   Schema, IndexedSchema, ArraySchema,
-  ArrayResponse,
+  ArrayResponse, IndexedResponse,
   types,
 )
 
-from ..constants import model_schema_constants
-from ..errors import model_schema_errors
 from .base import BaseClientResponse, BaseMethodSchema
+
+class DeleteClientResponse(IndexedResponse, BaseClientResponse):
+  pass
 
 class DeleteClientSchema(IndexedSchema):
   def __init__(self, **kwargs):
     super().__init__(
       **kwargs,
+      response=DeleteClientResponse,
       template=Schema(server_types=types.BOOLEAN()),
     )
 
-class DeleteResponse(ArrayResponse):
-  def __init__(self, parent_schema):
-    super().__init__(parent_schema)
-
-class DeleteSchema(ArraySchema):
+class DeleteSchema(BaseMethodSchema, ArraySchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(

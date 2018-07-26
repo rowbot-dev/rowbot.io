@@ -99,7 +99,12 @@ class APITestCase(TestCase):
     payload = {
       'models': {
         'Role': {
-          'methods': None,
+          'methods': {
+            'delete': [
+              self.role1._id,
+              self.role2._id,
+            ],
+          },
 
           # {
           #   'create': {
@@ -122,9 +127,11 @@ class APITestCase(TestCase):
       },
     }
 
+    print(Role.objects.all())
     response = api.respond(payload)
 
     print(json.dumps(response.render(), indent=2))
+    print(Role.objects.all())
 
     self.assertTrue(False)
     # self.assertTrue(True)
