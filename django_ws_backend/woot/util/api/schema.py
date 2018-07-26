@@ -7,14 +7,15 @@ from .response import (
   StructureResponse,
   ArrayResponse,
   IndexedResponse,
-  TemplateResponse,
 )
 from .errors import errors
 from .types import types
 from .constants import constants
 
 class Schema():
-  default_server_types = types.STRING()
+  default_server_types = [
+    types.STRING(),
+  ]
   default_response = Response
   available_errors = [
     errors.SERVER_TYPES(),
@@ -77,7 +78,7 @@ class ClosedSchema(Schema):
   available_errors = [
     errors.CLOSED(),
   ]
-  
+
   def respond(self, payload=None):
     self.active_response = self.get_response()
 
@@ -88,7 +89,9 @@ class ClosedSchema(Schema):
     return super().respond(payload=payload)
 
 class StructureSchema(Schema):
-  default_server_types = types.STRUCTURE()
+  default_server_types = [
+    types.STRUCTURE(),
+  ]
   default_response = StructureResponse
   available_errors = Schema.available_errors + [
     errors.INVALID_KEYS(),
@@ -118,7 +121,9 @@ class StructureSchema(Schema):
         self.active_response.add_child(child_key, child_schema.respond(payload.get(child_key)))
 
 class ArraySchema(Schema):
-  default_server_types = types.ARRAY()
+  default_server_types = [
+    types.ARRAY(),
+  ]
   default_response = ArrayResponse
 
   def __init__(self, template=None, **kwargs):
@@ -130,7 +135,9 @@ class ArraySchema(Schema):
       self.active_response.add_child(self.template.respond(child_payload))
 
 class IndexedSchema(Schema):
-  default_server_types = types.STRUCTURE()
+  default_server_types = [
+    types.STRUCTURE(),
+  ]
   default_index_type = types.UUID()
   default_response = IndexedResponse
   available_errors = Schema.available_errors + [
@@ -162,14 +169,3 @@ class IndexedSchema(Schema):
   def responds_to_valid_payload(self, payload):
     for child_index, child_payload in payload.items():
       self.active_response.add_child(child_index, self.template.respond(child_payload))
-
-class TemplateSchema(Schema):
-  default_server_types = types.STRUCTURE()
-  default_response = TemplateResponse
-
-  def __init__(self, template=None, **kwargs):
-    super().__init__(**kwargs)
-    self.template = template
-
-  def responds_to_valid_payload(self, payload):
-    self.responds_to_none()

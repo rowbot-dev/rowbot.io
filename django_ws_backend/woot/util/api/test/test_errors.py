@@ -1,5 +1,6 @@
 
 from django.test import TestCase
+
 from ..types import types
 from ..errors import error_constants, errors, Error
 

@@ -85,7 +85,8 @@ class StructureResponse(Response):
 
   def force_get_child(self, child_key):
     if child_key not in self.children:
-      self.add_child(child_key, self.parent_schema.children.get(child_key).get_response())
+      if child_key in self.parent_schema.children:
+        self.add_child(child_key, self.parent_schema.children.get(child_key).get_response())
 
     return self.get_child(child_key)
 
@@ -148,17 +149,3 @@ class IndexedResponse(Response):
       child_index: child_response.render()
       for child_index, child_response in self.children.items()
     }
-
-class TemplateResponse(Response):
-  def __init__(self, parent_schema):
-    super().__init__(parent_schema)
-    self.template_schema = parent_schema.template
-
-  def render_empty(self):
-    super().render_empty()
-    self.rendered.update({
-      constants.TEMPLATE: self.template_schema.respond().render(),
-    })
-
-  def render_value(self):
-    self.render_empty()
