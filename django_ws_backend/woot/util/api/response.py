@@ -114,6 +114,8 @@ class ArrayResponse(Response):
 
   def add_child(self, child_response):
     self.children.append(child_response)
+    if child_response.has_errors():
+      self.has_child_errors = True
 
   def render_empty(self):
     super().render_empty()
