@@ -5,9 +5,11 @@ from .constants import constants
 
 class Type():
   description = None
+  schema = None
 
-  def __init__(self, description=None):
+  def __init__(self, description=None, schema=None):
     self.description = description or self.description
+    self.schema = schema or self.schema
 
   def __eq__(self, other):
     return self.code == other.code
@@ -16,10 +18,17 @@ class Type():
     return False
 
   def render(self):
-    return {
+    rendered = {
       constants.TYPE: self.type,
       constants.DESCRIPTION: self.description,
     }
+
+    if self.schema is not None:
+      rendered.update({
+        constants.SCHEMA: self.schema.respond().render(),
+      })
+
+    return rendered
 
 class Boolean(Type):
   code = '001'

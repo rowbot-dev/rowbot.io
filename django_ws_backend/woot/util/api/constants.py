@@ -1,5 +1,6 @@
 
 class constants:
+  SCHEMA = '_schema'
   TEMPLATE = '_template'
   DESCRIPTION = '_description'
   TYPES = '_types'

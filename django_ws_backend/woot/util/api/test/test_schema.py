@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from util.merge import merge
 from ..types import types
-from ..schema import Schema, StructureSchema, ArraySchema, IndexedSchema, TemplateSchema
+from ..schema import Schema, StructureSchema, ArraySchema, IndexedSchema
 from ..errors import errors
 from ..constants import constants
 
@@ -271,16 +271,3 @@ class IndexedSchemaTestCase(TestCase):
       },
       constants.TEMPLATE: self.schema.template.respond().render(),
     })
-
-class TemplateSchemaTestCase(TestCase):
-  def setUp(self):
-    self.schema = TemplateSchema(
-      description='Some description',
-      template=Schema(),
-    )
-
-  def test_simple_response(self):
-    payload = {}
-    payload_response = self.schema.respond(payload)
-    empty_response = self.schema.respond()
-    self.assertEqual(payload_response.render(), empty_response.render())
