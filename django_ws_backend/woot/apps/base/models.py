@@ -80,6 +80,7 @@ class Manager(models.Manager, SchemaManagerMixin):
     return created
 
   def update_from_schema(self, id=None, prototype={}):
+    print(prototype)
     if id is not None:
       instance = self.get(id=id)
 
@@ -194,4 +195,5 @@ class MockModel(Model):
     app_label = 'base'
 
   parent = models.ForeignKey(MockParentModel, related_name='children', on_delete=models.CASCADE, null=True)
+  under = models.ManyToManyField('self', related_name='over', symmetrical=False)
   name = models.CharField(max_length=255)

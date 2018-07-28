@@ -19,7 +19,7 @@ class Response():
     self.should_render = True
 
   def has_errors(self):
-    return self.errors or self.has_child_errors
+    return bool(self.errors) or self.has_child_errors
 
   def add_error(self, error):
     self.errors.append(error)
@@ -141,6 +141,8 @@ class IndexedResponse(Response):
     self.children.update({
       child_index: child_response,
     })
+    if child_response.has_errors():
+      self.has_child_errors = True
 
   def render_empty(self):
     super().render_empty()
