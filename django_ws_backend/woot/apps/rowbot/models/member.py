@@ -25,7 +25,7 @@ class MemberManager(BaseUserManager, Manager):
       children={
         self.model.send_activation_email.__name__: Schema(
           description='Send the activation email to the member',
-          server_types=types.BOOLEAN('A value of true will trigger this method'),
+          types=types.BOOLEAN('A value of true will trigger this method'),
         ),
         self.model.activate.__name__: StructureSchema(
           description='Send the activation email to the member',
@@ -35,7 +35,7 @@ class MemberManager(BaseUserManager, Manager):
               children={
                 'activation_key': Schema(
                   description='',
-                  server_types=types.UUID(),
+                  types=types.UUID(),
                 ),
               },
             ),

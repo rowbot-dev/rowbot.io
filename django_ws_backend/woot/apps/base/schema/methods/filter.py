@@ -53,11 +53,11 @@ class QuerySchema(StructureSchema):
       children={
         model_schema_constants.KEY: Schema(
           description='',
-          server_types=types.STRING(),
+          types=types.STRING(),
         ),
         model_schema_constants.VALUE: Schema(
           description='',
-          server_types=types.STRING(),
+          types=types.STRING(),
         ),
         model_schema_constants.AND: ArraySchema(
           template=Schema(),
@@ -150,8 +150,8 @@ class FilterClientSchema(StructureSchema):
       **kwargs,
       response=FilterClientResponse,
       children={
-        model_schema_constants.COUNT: Schema(server_types=types.INTEGER()),
-        model_schema_constants.REFERENCE: Schema(server_types=types.UUID()),
+        model_schema_constants.COUNT: Schema(types=types.INTEGER()),
+        model_schema_constants.REFERENCE: Schema(types=types.UUID()),
       },
     )
 

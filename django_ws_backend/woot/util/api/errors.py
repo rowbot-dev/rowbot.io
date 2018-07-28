@@ -25,12 +25,12 @@ class ServerTypes(Error):
   description = 'Type of payload must be one of the specified server types'
   description_with_arguments = 'Type of payload must be one of [{}]'
 
-  def __init__(self, server_types=None):
+  def __init__(self, types=None):
     self.description = (
       self.description_with_arguments.format(
-        ', '.join([server_type.type for server_type in server_types])
+        ', '.join([type.type for type in types])
       )
-      if server_types is not None
+      if types is not None
       else self.description
     )
 
@@ -67,6 +67,6 @@ class InvalidIndexes(Error):
 
 class errors:
   CLOSED = Closed
-  SERVER_TYPES = ServerTypes
+  TYPES = ServerTypes
   INVALID_KEYS = InvalidKeys
   INVALID_INDEXES = InvalidIndexes

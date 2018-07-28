@@ -16,7 +16,7 @@ class AttributeCreateSchema(Schema):
     super().__init__(
       **kwargs,
       description=attribute.verbose_name,
-      server_types=map_type(attribute.get_internal_type()),
+      types=map_type(attribute.get_internal_type()),
     )
 
 class AttributesCreateResponse(StructureResponse):
@@ -70,7 +70,7 @@ class RelationshipCreateSchema(Schema):
     super().__init__(
       **kwargs,
       description=relationship.name,
-      server_types=(
+      types=(
         types.UUID()
         if relationship.one_to_one or relationship.many_to_one
         else types.ARRAY()
@@ -191,10 +191,10 @@ class CreateClientSchema(StructureSchema):
       **kwargs,
       response=CreateClientResponse,
       children={
-        model_schema_constants.REFERENCE: Schema(server_types=types.UUID()),
+        model_schema_constants.REFERENCE: Schema(types=types.UUID()),
         model_schema_constants.TEMPORARY_IDS: IndexedSchema(
           index_type=types.STRING(),
-          template=Schema(server_types=types.UUID()),
+          template=Schema(types=types.UUID()),
         ),
       },
     )

@@ -17,7 +17,7 @@ class GetClientSchema(StructureSchema):
       **kwargs,
       response=GetClientResponse,
       children={
-        model_schema_constants.REFERENCE: Schema(server_types=types.UUID()),
+        model_schema_constants.REFERENCE: Schema(types=types.UUID()),
       },
     )
 
@@ -27,7 +27,7 @@ class GetSchema(BaseMethodSchema, ArraySchema):
     super().__init__(
       **kwargs,
       template=Schema(
-        server_types=types.UUID(),
+        types=types.UUID(),
       ),
     )
 

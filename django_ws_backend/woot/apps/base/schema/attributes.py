@@ -30,7 +30,7 @@ class AttributeResponse(StructureResponse):
     return list(attribute_names - child_keys)
 
 class AttributeSchema(StructureSchema):
-  default_server_types = force_array(StructureSchema.default_server_types) + [
+  default_types = force_array(StructureSchema.default_types) + [
     types.BOOLEAN(),
   ]
   available_errors = StructureSchema.available_errors + [
@@ -45,14 +45,14 @@ class AttributeSchema(StructureSchema):
       children={
         attribute.name: Schema(
           description='',
-          server_types=types.BOOLEAN(),
+          types=types.BOOLEAN(),
         )
         for attribute in Model.objects.attributes()
       },
     )
 
   def passes_pre_response_checks(self, payload):
-    if self.active_response.active_server_type == types.BOOLEAN():
+    if self.active_response.active_type == types.BOOLEAN():
       return True
 
     passes_pre_response_checks = super().passes_pre_response_checks(payload)
@@ -68,7 +68,7 @@ class AttributeSchema(StructureSchema):
     return passes_pre_response_checks
 
   def responds_to_valid_payload(self, payload):
-    if self.active_response.active_server_type == types.BOOLEAN():
+    if self.active_response.active_type == types.BOOLEAN():
       self.active_response.should_include_attributes = payload
       return
 

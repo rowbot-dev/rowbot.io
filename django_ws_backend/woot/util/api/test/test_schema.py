@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from util.merge import merge
 from ..types import types
-from ..schema import Schema, StructureSchema, ArraySchema, IndexedSchema, TemplateSchema
+from ..schema import Schema, StructureSchema, ArraySchema, IndexedSchema
 from ..errors import errors
 from ..constants import constants
 
@@ -21,7 +21,7 @@ class SchemaTestCase(TestCase):
     payload = {}
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.server_types)
+    error = errors.TYPES(self.schema.types)
 
     self.assertEqual(response.render(), {
       constants.ERRORS: {
@@ -33,9 +33,9 @@ class SchemaTestCase(TestCase):
     response = self.schema.respond()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
-      constants.SERVER_TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.server_types
+      constants.TYPES: {
+        type.code: type.render()
+        for type in self.schema.types
       },
     })
 
@@ -43,14 +43,14 @@ class AsymmetricSchemaTestCase(TestCase):
   def setUp(self):
     self.schema = Schema(
       description='Some description',
-      client=Schema(server_types=types.BOOLEAN()),
+      client=Schema(types=types.BOOLEAN()),
     )
 
   def test_simple_response(self):
     payload = 'Sample value'
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.client.server_types)
+    error = errors.TYPES(self.schema.client.types)
 
     self.assertEqual(response.render(), {
       constants.ERRORS: {
@@ -62,7 +62,7 @@ class AsymmetricSchemaTestCase(TestCase):
     payload = {}
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.server_types)
+    error = errors.TYPES(self.schema.types)
 
     self.assertEqual(response.render(), {
       constants.ERRORS: {
@@ -74,9 +74,9 @@ class AsymmetricSchemaTestCase(TestCase):
     response = self.schema.respond()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
-      constants.SERVER_TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.server_types
+      constants.TYPES: {
+        type.code: type.render()
+        for type in self.schema.types
       },
       constants.CLIENT: self.schema.client.respond().render(),
     })
@@ -103,7 +103,7 @@ class StructureSchemaTestCase(TestCase):
     payload = 'Some string'
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.server_types)
+    error = errors.TYPES(self.schema.types)
 
     self.assertEqual(response.render(), {
       constants.ERRORS: {
@@ -117,7 +117,7 @@ class StructureSchemaTestCase(TestCase):
     }
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.children.get(self.test_key).server_types)
+    error = errors.TYPES(self.schema.children.get(self.test_key).types)
 
     self.assertEqual(response.render(), {
       self.test_key: {
@@ -131,16 +131,16 @@ class StructureSchemaTestCase(TestCase):
     response = self.schema.respond()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
-      constants.SERVER_TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.server_types
+      constants.TYPES: {
+        type.code: type.render()
+        for type in self.schema.types
       },
       constants.CHILDREN: {
         self.test_key: {
           constants.DESCRIPTION: self.schema.children.get(self.test_key).description,
-          constants.SERVER_TYPES: {
-            server_type.code: server_type.render()
-            for server_type in self.schema.children.get(self.test_key).server_types
+          constants.TYPES: {
+            type.code: type.render()
+            for type in self.schema.children.get(self.test_key).types
           },
         },
       },
@@ -166,7 +166,7 @@ class ArraySchemaTestCase(TestCase):
     payload = 'Some string'
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.server_types)
+    error = errors.TYPES(self.schema.types)
 
     self.assertEqual(response.render(), {
       constants.ERRORS: {
@@ -180,7 +180,7 @@ class ArraySchemaTestCase(TestCase):
     ]
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.template.server_types)
+    error = errors.TYPES(self.schema.template.types)
 
     self.assertEqual(response.render(), [
       {
@@ -194,9 +194,9 @@ class ArraySchemaTestCase(TestCase):
     response = self.schema.respond()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
-      constants.SERVER_TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.server_types
+      constants.TYPES: {
+        type.code: type.render()
+        for type in self.schema.types
       },
       constants.TEMPLATE: self.schema.template.respond().render(),
     })
@@ -222,7 +222,7 @@ class IndexedSchemaTestCase(TestCase):
     payload = 'Some string'
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.server_types)
+    error = errors.TYPES(self.schema.types)
 
     self.assertEqual(response.render(), {
       constants.ERRORS: {
@@ -251,7 +251,7 @@ class IndexedSchemaTestCase(TestCase):
     }
     response = self.schema.respond(payload)
 
-    error = errors.SERVER_TYPES(self.schema.template.server_types)
+    error = errors.TYPES(self.schema.template.types)
 
     self.assertEqual(response.render(), {
       self.test_index: {
@@ -265,22 +265,9 @@ class IndexedSchemaTestCase(TestCase):
     response = self.schema.respond()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
-      constants.SERVER_TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.server_types
+      constants.TYPES: {
+        type.code: type.render()
+        for type in self.schema.types
       },
       constants.TEMPLATE: self.schema.template.respond().render(),
     })
-
-class TemplateSchemaTestCase(TestCase):
-  def setUp(self):
-    self.schema = TemplateSchema(
-      description='Some description',
-      template=Schema(),
-    )
-
-  def test_simple_response(self):
-    payload = {}
-    payload_response = self.schema.respond(payload)
-    empty_response = self.schema.respond()
-    self.assertEqual(payload_response.render(), empty_response.render())

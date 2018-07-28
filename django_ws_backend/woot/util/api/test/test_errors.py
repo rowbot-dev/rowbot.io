@@ -25,26 +25,26 @@ class ClosedTestCase(TestCase):
     })
 
 class ServerTypesTestCase(TestCase):
-  server_types = [
+  types = [
     types.BOOLEAN(),
     types.INTEGER(),
   ]
 
   def setUp(self):
-    self.server_types_error_with_no_arguments = errors.SERVER_TYPES()
-    self.server_types_error = errors.SERVER_TYPES(server_types=self.server_types)
+    self.types_error_with_no_arguments = errors.TYPES()
+    self.types_error = errors.TYPES(types=self.types)
 
-  def test_server_types_error_with_no_arguments(self):
-    self.assertEqual(self.server_types_error_with_no_arguments.render(), {
-      error_constants.name: errors.SERVER_TYPES.name,
-      error_constants.description: errors.SERVER_TYPES.description,
+  def test_types_error_with_no_arguments(self):
+    self.assertEqual(self.types_error_with_no_arguments.render(), {
+      error_constants.name: errors.TYPES.name,
+      error_constants.description: errors.TYPES.description,
     })
 
-  def test_server_types_error(self):
-    self.assertEqual(self.server_types_error.render(), {
-      error_constants.name: errors.SERVER_TYPES.name,
-      error_constants.description: errors.SERVER_TYPES.description_with_arguments.format(
-        ', '.join([str(server_type.type) for server_type in self.server_types])
+  def test_types_error(self):
+    self.assertEqual(self.types_error.render(), {
+      error_constants.name: errors.TYPES.name,
+      error_constants.description: errors.TYPES.description_with_arguments.format(
+        ', '.join([str(type.type) for type in self.types])
       ),
     })
 

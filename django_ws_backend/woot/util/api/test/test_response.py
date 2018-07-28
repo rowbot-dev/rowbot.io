@@ -28,7 +28,7 @@ class ResponseErrorsTestCase(TestCase):
 
   def test_has_errors(self):
     response = Response(parent_schema=self.schema)
-    response.add_error(errors.SERVER_TYPES(server_types=self.schema.default_server_types))
+    response.add_error(errors.TYPES(types=self.schema.default_types))
     self.assertFalse(response.has_child_errors)
     self.assertTrue(response.has_errors())
 
@@ -43,12 +43,12 @@ class ResponseRenderTestCase(TestCase):
   def test_empty_render_behaviour(self):
     response = Response(parent_schema=self.schema)
     response.is_empty = True
-    error = errors.SERVER_TYPES()
-    server_type = types.STRING()
+    error = errors.TYPES()
+    type = types.STRING()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: response.description,
-      constants.SERVER_TYPES: {
-        server_type.code: server_type.render(),
+      constants.TYPES: {
+        type.code: type.render(),
       },
       constants.ERRORS: {
         error.code: error.render(),
@@ -59,20 +59,20 @@ class ResponseRenderTestCase(TestCase):
     response = Response(parent_schema=self.schema)
     response.client_schema = Schema()
     response.is_empty = True
-    error = errors.SERVER_TYPES()
-    server_type = types.STRING()
+    error = errors.TYPES()
+    type = types.STRING()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: response.description,
-      constants.SERVER_TYPES: {
-        server_type.code: server_type.render(),
+      constants.TYPES: {
+        type.code: type.render(),
       },
       constants.ERRORS: {
         error.code: error.render(),
       },
       constants.CLIENT: {
         constants.DESCRIPTION: response.client_schema.description,
-        constants.SERVER_TYPES: {
-          server_type.code: server_type.render(),
+        constants.TYPES: {
+          type.code: type.render(),
         },
         constants.ERRORS: {
           error.code: error.render(),
@@ -82,7 +82,7 @@ class ResponseRenderTestCase(TestCase):
 
   def test_render_behaviour_with_errors(self):
     response = Response(parent_schema=self.schema)
-    error = errors.SERVER_TYPES(server_types=self.schema.default_server_types)
+    error = errors.TYPES(types=self.schema.default_types)
     response.add_error(error)
     self.assertEqual(response.render(), {
       constants.ERRORS: {
@@ -160,13 +160,13 @@ class StructureResponseRenderTestCase(TestCase):
     response.add_child(self.child_key, child_response)
 
     errors = self.schema.available_errors
-    server_types = self.schema.server_types
+    types = self.schema.types
 
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: response.description,
-      constants.SERVER_TYPES: {
-        server_type.code: server_type.render()
-        for server_type in server_types
+      constants.TYPES: {
+        type.code: type.render()
+        for type in types
       },
       constants.ERRORS: {
         error.code: error.render()
