@@ -36,8 +36,6 @@ class AttributesCreateResponse(StructureResponse):
 class AttributesCreateSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
-    for attribute in Model.objects.attributes():
-      print(attribute.verbose_name, attribute.has_default())
     self.non_nullable = {
       attribute.name
       for attribute in Model.objects.attributes()

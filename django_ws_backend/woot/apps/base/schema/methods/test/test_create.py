@@ -1,9 +1,11 @@
 
 import json
+
 from django.db import models
 from django.test import TestCase
 
 from apps.base.models import MockModel, MockParentModel
+
 from ..create import CreateSchema
 
 class CreateSchemaTestCase(TestCase):
