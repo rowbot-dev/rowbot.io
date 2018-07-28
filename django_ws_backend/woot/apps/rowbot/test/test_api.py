@@ -3,20 +3,21 @@ import json
 
 from django.test import TestCase
 
+from apps.base.schema.constants import model_schema_constants
 from ..api import api
 from ..models import Member, Role, RoleModel, Club
 
 class APITestCase(TestCase):
   def setUp(self):
     self.member = Member.objects.create(username='alfred', email='alfred@alfred.com')
-    member2 = Member.objects.create(username='alfred1', email='alfred111@alfred.com')
+    self.member2 = Member.objects.create(username='alfred1', email='alfred111@alfred.com')
     member3 = Member.objects.create(username='wilbur', email='wilbur@wilbur.com')
     member4 = Member.objects.create(username='jamal', email='aldjamal@wilbur.com')
 
     club = Club.objects.create(name='club_name')
     self.role_model = RoleModel.objects.create(club=club)
     self.role1 = Role.objects.create(model=self.role_model, member=self.member, nickname='alfie')
-    self.role2 = Role.objects.create(model=self.role_model, member=member2, nickname='alf')
+    self.role2 = Role.objects.create(model=self.role_model, member=self.member2, nickname='alf')
     Role.objects.create(model=self.role_model, member=member3, nickname='wil')
     Role.objects.create(model=self.role_model, member=member4, nickname='jamal')
 
@@ -100,38 +101,25 @@ class APITestCase(TestCase):
       'models': {
         'Role': {
           'methods': {
-            'delete': [
-              self.role1._id,
-              self.role2._id,
-            ],
+            'set': {
+              self.role1._id: {
+                model_schema_constants.ATTRIBUTES: {
+                  'nickname': 'asdlkjwerlkwjer',
+                },
+                model_schema_constants.RELATIONSHIPS: {
+                  'member': self.member2._id,
+                },
+              },
+            },
           },
-
-          # {
-          #   'create': {
-          #     'temp_id_1': {
-          #       'attributes': {
-          #         'nickname': 'wham',
-          #       },
-          #       'relationships': {
-          #         'model': self.role_model._id,
-          #         'member': self.member._id,
-          #         'is_subordinate_to': [
-          #           self.role1._id,
-          #           self.role2._id,
-          #         ],
-          #       },
-          #     },
-          #   },
-          # },
         },
       },
     }
 
-    print(Role.objects.all())
+    print(self.member._id, self.member2._id)
     response = api.respond(payload)
 
     print(json.dumps(response.render(), indent=2))
-    print(Role.objects.all())
 
     self.assertTrue(False)
     # self.assertTrue(True)

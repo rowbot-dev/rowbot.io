@@ -6,6 +6,7 @@ from .filter import FilterSchema
 from .create import CreateSchema
 from .delete import DeleteSchema
 from .get import GetSchema
+from .set import SetSchema
 
 class ModelMethodsSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
@@ -18,6 +19,7 @@ class ModelMethodsSchema(StructureSchema):
         model_schema_constants.CREATE: CreateSchema(Model),
         model_schema_constants.DELETE: DeleteSchema(Model),
         model_schema_constants.GET: GetSchema(Model),
+        model_schema_constants.SET: SetSchema(Model),
       },
     )
 

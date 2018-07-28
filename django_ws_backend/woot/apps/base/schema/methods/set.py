@@ -93,7 +93,7 @@ class AttributesSetSchema(StructureSchema):
 class RelationshipValueResponse(StructureResponse):
   relationship_value = None
   def get_relationship_value(self):
-    return self.relationship_value
+    return self.relationship_value or self.value
 
 class NullableRelationshipSchema(NullableSchema):
   default_response = RelationshipValueResponse
@@ -260,14 +260,15 @@ class SetSchema(BaseMethodSchema, IndexedSchema):
       set_client_payload = {}
       full_queryset = self.model.objects.filter(id__in=self.active_response.children.keys())
 
-      if self.reference_model is not None:
-        reference = self.reference_model.objects.from_queryset(full_queryset)
-        set_client_payload.update({
-          model_schema_constants.REFERENCE: reference,
-        })
+      if full_queryset:
+        if self.reference_model is not None:
+          reference = self.reference_model.objects.from_queryset(full_queryset)
+          set_client_payload.update({
+            model_schema_constants.REFERENCE: reference,
+          })
 
-      self.active_response = SetClientSchema().respond(set_client_payload)
-      self.active_response.add_internal_queryset(full_queryset)
+        self.active_response = SetClientSchema().respond(set_client_payload)
+        self.active_response.add_internal_queryset(full_queryset)
 
-      if self.reference_model is not None:
-        self.active_response.add_reference(reference)
+        if self.reference_model is not None:
+          self.active_response.add_reference(reference)
