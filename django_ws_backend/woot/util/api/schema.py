@@ -56,9 +56,9 @@ class Schema():
     self.active_response.is_empty = True
 
   def passes_type_validation(self, payload):
-    for server_type in self.types:
-      if server_type.validate(payload):
-        self.active_response.active_server_type = server_type
+    for type in self.types:
+      if type.validate(payload):
+        self.active_response.active_type = type
         return True
 
     self.active_response.add_error(errors.TYPES(types=self.types))

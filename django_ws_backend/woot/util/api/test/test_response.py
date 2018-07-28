@@ -44,11 +44,11 @@ class ResponseRenderTestCase(TestCase):
     response = Response(parent_schema=self.schema)
     response.is_empty = True
     error = errors.TYPES()
-    server_type = types.STRING()
+    type = types.STRING()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: response.description,
       constants.TYPES: {
-        server_type.code: server_type.render(),
+        type.code: type.render(),
       },
       constants.ERRORS: {
         error.code: error.render(),
@@ -60,11 +60,11 @@ class ResponseRenderTestCase(TestCase):
     response.client_schema = Schema()
     response.is_empty = True
     error = errors.TYPES()
-    server_type = types.STRING()
+    type = types.STRING()
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: response.description,
       constants.TYPES: {
-        server_type.code: server_type.render(),
+        type.code: type.render(),
       },
       constants.ERRORS: {
         error.code: error.render(),
@@ -72,7 +72,7 @@ class ResponseRenderTestCase(TestCase):
       constants.CLIENT: {
         constants.DESCRIPTION: response.client_schema.description,
         constants.TYPES: {
-          server_type.code: server_type.render(),
+          type.code: type.render(),
         },
         constants.ERRORS: {
           error.code: error.render(),
@@ -165,8 +165,8 @@ class StructureResponseRenderTestCase(TestCase):
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: response.description,
       constants.TYPES: {
-        server_type.code: server_type.render()
-        for server_type in types
+        type.code: type.render()
+        for type in types
       },
       constants.ERRORS: {
         error.code: error.render()

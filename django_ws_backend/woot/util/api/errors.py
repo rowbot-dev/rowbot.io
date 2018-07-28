@@ -28,7 +28,7 @@ class ServerTypes(Error):
   def __init__(self, types=None):
     self.description = (
       self.description_with_arguments.format(
-        ', '.join([server_type.type for server_type in types])
+        ', '.join([type.type for type in types])
       )
       if types is not None
       else self.description

@@ -10,7 +10,7 @@ class Response():
     self.description = parent_schema.description
     self.types = parent_schema.types
     self.client_schema = parent_schema.client
-    self.active_server_type = None
+    self.active_type = None
     self.errors = []
     self.is_empty = False
     self.value = None
@@ -43,8 +43,8 @@ class Response():
     self.rendered = {
       constants.DESCRIPTION: self.description,
       constants.TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.types
+        type.code: type.render()
+        for type in self.types
       },
       constants.ERRORS: {
         error.code: error.render()

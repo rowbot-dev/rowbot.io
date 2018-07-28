@@ -52,7 +52,7 @@ class RelationshipSchema(StructureSchema):
     )
 
   def passes_pre_response_checks(self, payload):
-    if self.active_response.active_server_type == types.BOOLEAN():
+    if self.active_response.active_type == types.BOOLEAN():
       return True
 
     passes_pre_response_checks = super().passes_pre_response_checks(payload)
@@ -68,7 +68,7 @@ class RelationshipSchema(StructureSchema):
     return passes_pre_response_checks
 
   def responds_to_valid_payload(self, payload):
-    if self.active_response.active_server_type == types.BOOLEAN():
+    if self.active_response.active_type == types.BOOLEAN():
       self.active_response.should_include_attributes = payload
       return
 

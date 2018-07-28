@@ -34,8 +34,8 @@ class SchemaTestCase(TestCase):
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
       constants.TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.types
+        type.code: type.render()
+        for type in self.schema.types
       },
     })
 
@@ -75,8 +75,8 @@ class AsymmetricSchemaTestCase(TestCase):
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
       constants.TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.types
+        type.code: type.render()
+        for type in self.schema.types
       },
       constants.CLIENT: self.schema.client.respond().render(),
     })
@@ -132,15 +132,15 @@ class StructureSchemaTestCase(TestCase):
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
       constants.TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.types
+        type.code: type.render()
+        for type in self.schema.types
       },
       constants.CHILDREN: {
         self.test_key: {
           constants.DESCRIPTION: self.schema.children.get(self.test_key).description,
           constants.TYPES: {
-            server_type.code: server_type.render()
-            for server_type in self.schema.children.get(self.test_key).types
+            type.code: type.render()
+            for type in self.schema.children.get(self.test_key).types
           },
         },
       },
@@ -195,8 +195,8 @@ class ArraySchemaTestCase(TestCase):
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
       constants.TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.types
+        type.code: type.render()
+        for type in self.schema.types
       },
       constants.TEMPLATE: self.schema.template.respond().render(),
     })
@@ -266,8 +266,8 @@ class IndexedSchemaTestCase(TestCase):
     self.assertEqual(response.render(), {
       constants.DESCRIPTION: self.schema.description,
       constants.TYPES: {
-        server_type.code: server_type.render()
-        for server_type in self.schema.types
+        type.code: type.render()
+        for type in self.schema.types
       },
       constants.TEMPLATE: self.schema.template.respond().render(),
     })

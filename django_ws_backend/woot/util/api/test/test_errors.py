@@ -44,7 +44,7 @@ class ServerTypesTestCase(TestCase):
     self.assertEqual(self.types_error.render(), {
       error_constants.name: errors.TYPES.name,
       error_constants.description: errors.TYPES.description_with_arguments.format(
-        ', '.join([str(server_type.type) for server_type in self.types])
+        ', '.join([str(type.type) for type in self.types])
       ),
     })
 
