@@ -14,7 +14,7 @@ class InstanceRelationshipSchema(StructureSchema):
       children={
         relationship_field.name: Schema(
           description='No available instance methods',
-          server_types=[
+          types=[
             types.REF(),
             types.ARRAY(),
             types.NULL(),

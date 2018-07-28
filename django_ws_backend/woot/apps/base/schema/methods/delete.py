@@ -15,7 +15,7 @@ class DeleteClientSchema(IndexedSchema):
     super().__init__(
       **kwargs,
       response=DeleteClientResponse,
-      template=Schema(server_types=types.BOOLEAN()),
+      template=Schema(types=types.BOOLEAN()),
     )
 
 class DeleteSchema(BaseMethodSchema, ArraySchema):
@@ -24,7 +24,7 @@ class DeleteSchema(BaseMethodSchema, ArraySchema):
     super().__init__(
       **kwargs,
       template=Schema(
-        server_types=types.UUID(),
+        types=types.UUID(),
       ),
     )
 

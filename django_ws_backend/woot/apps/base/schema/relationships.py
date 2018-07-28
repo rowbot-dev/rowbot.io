@@ -30,7 +30,7 @@ class RelationshipResponse(StructureResponse):
     return list(relationship_names - child_keys)
 
 class RelationshipSchema(StructureSchema):
-  default_server_types = force_array(StructureSchema.default_server_types) + [
+  default_types = force_array(StructureSchema.default_types) + [
     types.BOOLEAN(),
   ]
   available_errors = StructureSchema.available_errors + [
@@ -45,7 +45,7 @@ class RelationshipSchema(StructureSchema):
       children={
         relationship.name: Schema(
           description='',
-          server_types=types.BOOLEAN(),
+          types=types.BOOLEAN(),
         )
         for relationship in Model.objects.relationships()
       },

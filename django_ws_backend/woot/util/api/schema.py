@@ -13,17 +13,17 @@ from .types import types
 from .constants import constants
 
 class Schema():
-  default_server_types = [
+  default_types = [
     types.STRING(),
   ]
   default_response = Response
   available_errors = [
-    errors.SERVER_TYPES(),
+    errors.TYPES(),
   ]
 
-  def __init__(self, description=None, server_types=None, response=None, client=None, closed=False):
+  def __init__(self, description=None, types=None, response=None, client=None, closed=False):
     self.description = description
-    self.server_types = force_array(server_types or self.default_server_types)
+    self.types = force_array(types or self.default_types)
     self.response = response or self.default_response
     self.client = client
 
@@ -56,12 +56,12 @@ class Schema():
     self.active_response.is_empty = True
 
   def passes_type_validation(self, payload):
-    for server_type in self.server_types:
+    for server_type in self.types:
       if server_type.validate(payload):
         self.active_response.active_server_type = server_type
         return True
 
-    self.active_response.add_error(errors.SERVER_TYPES(server_types=self.server_types))
+    self.active_response.add_error(errors.TYPES(types=self.types))
     return False
 
   def passes_pre_response_checks(self, payload):
@@ -89,7 +89,7 @@ class ClosedSchema(Schema):
     return super().respond(payload=payload)
 
 class StructureSchema(Schema):
-  default_server_types = [
+  default_types = [
     types.STRUCTURE(),
   ]
   default_response = StructureResponse
@@ -121,7 +121,7 @@ class StructureSchema(Schema):
         self.active_response.add_child(child_key, child_schema.respond(payload.get(child_key)))
 
 class ArraySchema(Schema):
-  default_server_types = [
+  default_types = [
     types.ARRAY(),
   ]
   default_response = ArrayResponse
@@ -135,7 +135,7 @@ class ArraySchema(Schema):
       self.active_response.add_child(self.template.respond(child_payload))
 
 class IndexedSchema(Schema):
-  default_server_types = [
+  default_types = [
     types.STRUCTURE(),
   ]
   default_index_type = types.UUID()
