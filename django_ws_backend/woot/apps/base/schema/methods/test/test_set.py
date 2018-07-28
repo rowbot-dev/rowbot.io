@@ -7,39 +7,74 @@ from django.test import TestCase
 from apps.base.models import MockModel, MockParentModel
 
 from ...constants import model_schema_constants
-from ..set import SetSchema
+from ..set import NullableSchema, RelationshipSetPluralSchema, RelationshipSetSchema
 
-class FilterSchemaTestCase(TestCase):
-  NAME = 'name'
-  new_name = 'new_name'
-  PARENT = 'parent'
-  mock_parent2 = 'mock_parent2'
+class NullableSchemaTestCase(TestCase):
+  class nullable_field:
+    null = True
+    name = 'nullable'
 
   def setUp(self):
-    self.mock_parent1 = MockParentModel.objects.create(name='mock_parent1')
-    self.mock_parent2 = MockParentModel.objects.create(name=self.mock_parent2)
-    self.mock_model = MockModel.objects.create(name='name', parent=self.mock_parent1)
-    self.schema = SetSchema(MockModel)
+    self.schema = NullableSchema(self.nullable_field)
 
-  def test_filter(self):
+  def test_nullable(self):
 
     payload = {
-      self.mock_model._id: {
-        model_schema_constants.ATTRIBUTES: {
-          self.NAME: self.new_name,
-        },
-        model_schema_constants.RELATIONSHIPS: {
-          self.PARENT: self.mock_parent2,
-          'one-to-many': {
-            'remove': [],
-            'add': [],
-          },
-        },
-      }
+      'null': True,
     }
 
     response = self.schema.respond(payload)
 
     print(json.dumps(response.render(), indent=2))
+
+    self.assertTrue(True)
+
+class RelationshipSetPluralSchemaTestCase(TestCase):
+  def setUp(self):
+    self.schema = RelationshipSetPluralSchema()
+
+  def test_plural_relationship(self):
+    payload = {
+      'add': [
+
+      ],
+      'remove': [
+
+      ],
+    }
+
+    response = self.schema.respond(payload)
+
+    print(response.value.to_add)
+
+    self.assertTrue(True)
+
+class RelationshipSetSchemaTestCase(TestCase):
+  class plural_relationship:
+    name = 'plural'
+    one_to_one = True
+    null = False
+
+  class single_relationship:
+    name = 'single'
+    one_to_one = False
+    null = True
+
+  def setUp(self):
+    self.schema = RelationshipSetSchema(self.plural_relationship)
+
+  def test_plural_relationship(self):
+    payload = {
+      'add': [
+
+      ],
+      'remove': [
+
+      ],
+    }
+
+    response = self.schema.respond(payload)
+
+    print(response.render())
 
     self.assertTrue(False)

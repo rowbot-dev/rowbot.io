@@ -79,6 +79,8 @@ class StructureResponse(Response):
 
   def add_child(self, child_key, child_response):
     self.children.update({child_key: child_response})
+    if child_response.has_errors():
+      self.has_child_errors = True
 
   def get_child(self, child_key):
     return self.children.get(child_key)

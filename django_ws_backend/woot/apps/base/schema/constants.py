@@ -21,3 +21,6 @@ class model_schema_constants:
   REFERENCE = 'reference'
   COUNT = 'count'
   TEMPORARY_IDS = 'temporary_ids'
+  ADD = 'add'
+  REMOVE = 'remove'
+  NULL = 'null'

@@ -1,6 +1,6 @@
 
 from util.api import (
-  Schema, StructureSchema, IndexedSchema,
+  Schema, StructureSchema, ArraySchema, IndexedSchema,
   Response, StructureResponse, IndexedResponse,
   types, map_type,
   constants,
@@ -10,13 +10,46 @@ from ..constants import model_schema_constants
 from ..errors import model_schema_errors
 from .base import BaseClientResponse, BaseMethodSchema
 
+class NullableSchema(StructureSchema):
+  def __init__(self, field, **kwargs):
+    self.field = field
+    super().__init__(
+      **kwargs,
+      children={
+        model_schema_constants.NULL: Schema(
+          types=types.BOOLEAN(),
+        ),
+      }
+    )
+
+  def passes_pre_response_checks(self, payload):
+    if not self.field.null:
+      self.active_response.add_error(model_schema_errors.NULLABLE_ON_NON_NULLABLE_FIELD(self.field.name))
+      return False
+
+    passes_pre_response_checks = super().passes_pre_response_checks(payload)
+    if model_schema_constants.NULL not in payload:
+      self.active_response.add_error(model_schema_errors.NULLABLE_MUST_CONTAIN_KEY(self.field.name))
+      return False
+
+    return passes_pre_response_checks
+
+  def responds_to_valid_payload(self, payload):
+    super().responds_to_valid_payload(payload)
+
+    null_response = self.active_response.get_child(model_schema_constants.NULL)
+    if not null_response.value:
+      self.active_response.add_error(model_schema_errors.NULLABLE_MUST_BE_TRUE(self.field.name))
+    else:
+      self.active_response = Response(self)
+
 class AttributeSetSchema(Schema):
   def __init__(self, attribute, **kwargs):
     self.attribute = attribute
     super().__init__(
       **kwargs,
       description=attribute.verbose_name,
-      server_types=map_type(attribute.get_internal_type()),
+      types=map_type(attribute.get_internal_type()),
     )
 
 class AttributesSetResponse(StructureResponse):
@@ -64,47 +97,80 @@ class AttributesSetSchema(StructureSchema):
 
     return passes_pre_response_checks
 
+class RelationshipSetPluralContainer:
+  def __init__(self, add=[], remove=[]):
+    self.to_add = add
+    self.to_remove = remove
+
+class RelationshipSetPluralSchema(StructureSchema):
+  def __init__(self, **kwargs):
+    super().__init__(
+      **kwargs,
+      children={
+        model_schema_constants.ADD: ArraySchema(
+          template=Schema(
+            types=types.UUID(),
+          ),
+        ),
+        model_schema_constants.REMOVE: ArraySchema(
+          template=Schema(
+            types=types.UUID(),
+          ),
+        ),
+      },
+    )
+
+  def responds_to_valid_payload(self, payload):
+    super().responds_to_valid_payload(payload)
+
+    if not self.active_response.has_errors():
+      add_response = self.active_response.get_child(model_schema_constants.ADD)
+      remove_response = self.active_response.get_child(model_schema_constants.REMOVE)
+
+      if add_response or remove_response:
+        self.active_response = Response(self)
+        self.active_response.add_value(
+          RelationshipSetPluralContainer(
+            add=(
+              [child.value for child in add_response.children]
+              if add_response is not None
+              else []
+            ),
+            remove=(
+              [child.value for child in remove_response.children]
+              if remove_response is not None
+              else []
+            ),
+          )
+        )
+
 class RelationshipSetSchema(Schema):
   def __init__(self, relationship, **kwargs):
     self.relationship = relationship
     super().__init__(
       **kwargs,
       description=relationship.name,
-      server_types=(
-        types.UUID()
+      types=(
+        [
+          types.UUID(),
+          types.STRUCTURE(
+            schema=NullableSchema(relationship),
+          ),
+        ]
         if relationship.one_to_one or relationship.many_to_one
-        else types.ARRAY()
+        else types.STRUCTURE(
+          schema=RelationshipSetPluralSchema(),
+        )
       ),
     )
 
 class RelationshipsSetResponse(StructureResponse):
-  def __init__(self, parent_schema):
-    super().__init__(parent_schema)
-
-  def add_child(self, child_key, child_response):
-    super().add_child(child_key, child_response)
-    if child_response.has_errors():
-      self.has_child_errors = True
-
   def get_relationships(self):
-    if not self.has_errors() and not self.is_empty:
-      return self.render()
-    return {}
+    pass
 
 class RelationshipsSetSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
-    self.non_nullable = {
-      relationship.name
-      for relationship in Model.objects.relationships()
-      if (
-        relationship.editable
-        and not relationship.has_default()
-        and not relationship.null
-        and not relationship.one_to_many
-        and not relationship.many_to_many
-      )
-    }
     super().__init__(
       **kwargs,
       response=RelationshipsSetResponse,
@@ -114,29 +180,7 @@ class RelationshipsSetSchema(StructureSchema):
       },
     )
 
-  def add_child(self, child_response):
-    super().add_child(child_response)
-    if child_response.has_errors():
-      self.has_child_errors = True
-
-  def passes_pre_response_checks(self, payload):
-    passes_pre_response_checks = super().passes_pre_response_checks(payload)
-    non_nullable_not_included = self.non_nullable - payload.keys()
-    if non_nullable_not_included:
-      self.active_response.add_error(model_schema_errors.NON_NULLABLE_NOT_INCLUDED(non_nullable_not_included))
-      return False
-
-    return passes_pre_response_checks
-
 class PrototypeResponse(StructureResponse):
-  def __init__(self, parent_schema):
-    super().__init__(parent_schema)
-
-  def add_child(self, child_key, child_response):
-    super().add_child(child_key, child_response)
-    if child_response.has_errors():
-      self.has_child_errors = True
-
   def get_prototype(self):
     if not self.has_errors():
       attributes_response = self.force_get_child(model_schema_constants.ATTRIBUTES)
@@ -176,11 +220,7 @@ class SetClientSchema(StructureSchema):
       **kwargs,
       response=SetClientResponse,
       children={
-        model_schema_constants.REFERENCE: Schema(server_types=types.UUID()),
-        model_schema_constants.TEMPORARY_IDS: IndexedSchema(
-          index_type=types.STRING(),
-          template=Schema(server_types=types.UUID()),
-        ),
+        model_schema_constants.REFERENCE: Schema(types=types.UUID()),
       },
     )
 
@@ -193,40 +233,30 @@ class SetSchema(BaseMethodSchema, IndexedSchema):
     super().__init__(
       **kwargs,
       response=SetResponse,
-      index_type=types.STRING(),
       template=PrototypeSchema(Model),
     )
 
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)
 
-    # 1. need to be able to set a field to null
-    # 2. need to be able to remove relationships from one-to-many or many-to-many.
-    # 3.
+    if not self.active_response.has_errors():
+      for prototype_id, prototype_response in self.active_response.children.items():
+        self.model.objects.update_from_schema(
+          id=prototype_id,
+          prototype=prototype_response.get_prototype(),
+        )
 
-    # temporary_ids = {}
-    # created = []
-    # for prototype_temporary_id, prototype_response in self.active_response.children.items():
-    #   prototype = prototype_response.get_prototype()
-    #   if prototype is not None:
-    #     instance = self.model.objects.create_from_schema(**prototype)
-    #     created.append(instance)
-    #     temporary_ids.update({
-    #       prototype_temporary_id: instance._id,
-    #     })
-    #
-    # if created:
-    #   create_client_payload = {
-    #     model_schema_constants.TEMPORARY_IDS: temporary_ids,
-    #   }
-    #   if self.reference_model is not None:
-    #     reference = self.reference_model.objects.from_queryset(created)
-    #     create_client_payload.update({
-    #       model_schema_constants.REFERENCE: reference,
-    #     })
-    #
-    #   self.active_response = SetClientSchema().respond(create_client_payload)
-    #   self.active_response.add_internal_queryset(created)
-    #
-    #   if self.reference_model is not None:
-    #     self.active_response.add_reference(reference)
+      set_client_payload = {}
+      full_queryset = self.model.objects.filter(id__in=self.active_response.children.keys())
+
+      if self.reference_model is not None:
+        reference = self.reference_model.objects.from_queryset(full_queryset)
+        set_client_payload.update({
+          model_schema_constants.REFERENCE: reference,
+        })
+
+      self.active_response = SetClientSchema().respond(set_client_payload)
+      self.active_response.add_internal_queryset(full_queryset)
+
+      if self.reference_model is not None:
+        self.active_response.add_reference(reference)

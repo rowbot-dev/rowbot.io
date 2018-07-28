@@ -44,8 +44,9 @@ class Manager(models.Manager, SchemaManagerMixin):
     ]
 
   def get(self, **kwargs):
-    if super().filter(**kwargs).exists():
-      return super().get(**kwargs)
+    filtered = super().filter(**kwargs)
+    if filtered.exists():
+      return filtered[0]
     return None
 
   def filter(self, *args, **kwargs):
@@ -77,6 +78,30 @@ class Manager(models.Manager, SchemaManagerMixin):
         relationship.add(related_object)
 
     return created
+
+  def update_from_schema(self, id=None, prototype={}):
+    if id is not None:
+      instance = self.get(id=id)
+
+      for property_key, property in prototype.items():
+        field = self.model._meta.get_field(property_key)
+        if field.is_relation:
+          if field.one_to_one or field.many_to_one:
+            related_object = field.related_model.objects.get(id=property)
+            setattr(instance, property_key, related_object)
+          elif field.one_to_many or field.many_to_many:
+            related_field = getattr(instance, property_key)
+            related_objects_to_add = field.related_model.objects.filter(id__in=property.to_add)
+            for item in related_objects_to_add:
+              related_field.add(item)
+
+            related_objects_to_remove = field.related_model.objects.filter(id__in=property.to_remove)
+            for item in related_objects_to_remove:
+              related_field.remove(item)
+        else:
+          setattr(instance, property_key, property)
+
+      instance.save()
 
   def query_check(self, key, value):
     tokens = key.split(query_directives.JOIN)

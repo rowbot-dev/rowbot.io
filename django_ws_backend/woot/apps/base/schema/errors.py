@@ -85,6 +85,45 @@ class InvalidQueryDirectiveError(Error):
       else self.description
     )
 
+class NullableMustContainKey(Error):
+  code = '014'
+  name = 'model_nullable_must_contain_key'
+  description = 'Nullable field command must contain null key'
+  description_with_arguments = 'Nullable for field <{}> must contain null key'
+
+  def __init__(self, field=None):
+    self.description = (
+      self.description_with_arguments.format(field)
+      if field is not None
+      else self.description
+    )
+
+class NullableMustBeTrue(Error):
+  code = '015'
+  name = 'model_nullable_must_be_true'
+  description = 'Nullable field must be true'
+  description_with_arguments = 'Nullable for field <{}> must be true'
+
+  def __init__(self, field=None):
+    self.description = (
+      self.description_with_arguments.format(field)
+      if field is not None
+      else self.description
+    )
+
+class NullableOnNonNullableField(Error):
+  code = '016'
+  name = 'model_nullable_on_non_nullable_field'
+  description = 'Nullable field command cannot be called on a non-nullable field'
+  description_with_arguments = 'Nullable cannot be called on field <{}>'
+
+  def __init__(self, field=None):
+    self.description = (
+      self.description_with_arguments.format(field)
+      if field is not None
+      else self.description
+    )
+
 class model_schema_errors:
   UNIFORM_INCLUSIVE = UniformInclusiveError
   NON_NULLABLE_NOT_INCLUDED = NonNullableNotIncludedError
@@ -95,3 +134,6 @@ class model_schema_errors:
   FIELD_DOES_NOT_EXIST = FieldDoesNotExistError
   MULTIPLE_DIRECTIVES_FOR_NON_RELATED_FIELD = MultipleDirectivesForNonRelatedFieldError
   INVALID_QUERY_DIRECTIVE = InvalidQueryDirectiveError
+  NULLABLE_MUST_CONTAIN_KEY = NullableMustContainKey
+  NULLABLE_MUST_BE_TRUE = NullableMustBeTrue
+  NULLABLE_ON_NON_NULLABLE_FIELD = NullableOnNonNullableField
