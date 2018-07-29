@@ -6,7 +6,7 @@ from django.db import models
 
 
 # Local
-from apps.base.models import Model
+from apps.base.models import Model, Manager
 
 # Role
 class RoleModel(Model):
@@ -35,6 +35,14 @@ class RolePermission(Model):
   model_name = models.CharField(max_length=255)
   name = models.CharField(max_length=255)
 
+class RoleManager(Manager):
+  def instance_methods(self):
+    return {
+      'something': {
+        'arguments': {},
+        'returns': 
+      },
+    }
 
 class Role(Model):
   class Meta:
@@ -51,6 +59,8 @@ class Role(Model):
   is_active = models.BooleanField(default=True)
   is_confirmed = models.BooleanField(default=False)
 
+  def something(self):
+    return 'something'
 
 class RoleInstance(Model):
   class Meta:
