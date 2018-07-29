@@ -69,11 +69,11 @@ class APITestCase(TestCase):
     self.assertTrue(True)
 
   def test_respond_role(self):
+    print(Reference.objects.all())
+
     payload = {
       'models': {
         'Role': {
-          'attributes': False,
-          'relationships': False,
           'methods': {
             'filter': {
               'composite': [
@@ -85,10 +85,6 @@ class APITestCase(TestCase):
             },
           },
         },
-        'Reference': {
-          'attributes': False,
-          'relationships': False,
-        },
       },
     }
 
@@ -96,21 +92,36 @@ class APITestCase(TestCase):
 
     print(json.dumps(response.render(), indent=2))
 
-    # self.assertTrue(False)
-    self.assertTrue(True)
+    print(Reference.objects.all())
+
+    reference_payload = {
+      'models': {
+        'Reference': {
+          'methods': {
+            'retrieve': [
+              Reference.objects.get()._id,
+            ],
+          },
+        },
+      },
+    }
+
+    reference_response = api.respond(reference_payload)
+
+    print(json.dumps(reference_response.render(), indent=2))
+
+    self.assertTrue(False)
+    # self.assertTrue(True)
 
   def test_create_role(self):
     payload = {
       'models': {
         'Role': {
           'methods': {
-            'run': {
-              self.role1._id: {
-                'something': {
-                  'argument1': 1,
-                  'argument2': 2,
-                },
-              },
+            'filter': {
+              'composite': [
+
+              ],
             },
           },
         },
@@ -121,5 +132,5 @@ class APITestCase(TestCase):
 
     print(json.dumps(response.render(), indent=2))
 
-    self.assertTrue(False)
-    # self.assertTrue(True)
+    # self.assertTrue(False)
+    self.assertTrue(True)
