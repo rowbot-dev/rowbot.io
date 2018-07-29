@@ -1,9 +1,12 @@
 
 import json
 
+from django.apps import AppConfig
 from django.test import TestCase
 
+from apps.reference.models import Reference
 from apps.base.schema.constants import model_schema_constants
+
 from ..api import api
 from ..models import Member, Role, RoleModel, Club
 
@@ -100,23 +103,42 @@ class APITestCase(TestCase):
     payload = {
       'models': {
         'Role': {
+          'attributes': False,
+          'relationships': False,
           'methods': {
-            'set': {
-              self.role1._id: {
-                model_schema_constants.ATTRIBUTES: {
-                  'nickname': 'asdlkjwerlkwjer',
+            'filter': {
+              'composite': [
+                {
+                  'key': 'member__username__contains',
+                  'value': 'a',
                 },
-                model_schema_constants.RELATIONSHIPS: {
-                  'member': self.member2._id,
-                },
-              },
+              ],
             },
+          },
+        },
+        'Reference': {
+          'attributes': False,
+          'relationships': False,
+        },
+      },
+    }
+
+    response = api.respond(payload)
+
+    print(json.dumps(response.render(), indent=2))
+
+    payload = {
+      'models': {
+        'Reference': {
+          'methods': {
+            'retrieve': [
+              Reference.objects.get()._id,
+            ],
           },
         },
       },
     }
 
-    print(self.member._id, self.member2._id)
     response = api.respond(payload)
 
     print(json.dumps(response.render(), indent=2))

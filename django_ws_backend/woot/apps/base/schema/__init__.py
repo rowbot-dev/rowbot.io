@@ -13,17 +13,21 @@ class ModelsSchemaWithReferences(StructureSchema):
   def __init__(self, reference_model=None, **kwargs):
     self.reference_model = reference_model
     super().__init__(**kwargs)
+
+    reference_model_schema = reference_model.objects.schema()
+
     for child in self.children.values():
       child.add_reference_model(reference_model)
+      reference_model_schema.add_model(child.model)
 
     self.children.update({
-      model_schema_constants.REFERENCE_MODEL: reference_model.objects.schema(),
+      model_schema_constants.REFERENCE_MODEL: reference_model_schema,
     })
 
   def responds_to_valid_payload(self, payload):
     super().responds_to_valid_payload(payload)
 
-    models_in_payload = self.active_response.children.keys() - set(model_schema_constants.REFERENCE_MODEL)
+    models_in_payload = set(self.active_response.children.keys())
 
     if models_in_payload:
       for model_name in models_in_payload:
@@ -46,6 +50,7 @@ class ModelsSchemaWithReferences(StructureSchema):
 
 class ModelSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
+    self.model = Model
     super().__init__(**kwargs)
     self.children = {
       model_schema_constants.ATTRIBUTES: Model.objects.schema_attributes(),

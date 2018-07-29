@@ -21,11 +21,15 @@ class GetClientSchema(StructureSchema):
       },
     )
 
+class GetResponse(StructureResponse, BaseClientResponse):
+  pass
+
 class GetSchema(BaseMethodSchema, ArraySchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(
       **kwargs,
+      response=GetResponse,
       template=Schema(
         types=types.UUID(),
       ),

@@ -18,11 +18,15 @@ class DeleteClientSchema(IndexedSchema):
       template=Schema(types=types.BOOLEAN()),
     )
 
+class DeleteResponse(ArrayResponse, BaseClientResponse):
+  pass
+
 class DeleteSchema(BaseMethodSchema, ArraySchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(
       **kwargs,
+      response=DeleteResponse,
       template=Schema(
         types=types.UUID(),
       ),
