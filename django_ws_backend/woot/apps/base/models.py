@@ -103,6 +103,13 @@ class Manager(models.Manager, SchemaManagerMixin):
 
       instance.save()
 
+  def run_instance_method(self, id=None, method_name=None, arguments=None):
+    if id is not None and method_name is not None:
+      instance = self.get(id=id)
+      instance_method = getattr(instance, method_name)
+
+      return instance_method(**arguments)
+
   def query_check(self, key, value):
     tokens = key.split(query_directives.JOIN)
     query_errors = []

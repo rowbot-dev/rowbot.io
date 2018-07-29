@@ -2,12 +2,14 @@
 from util.merge import merge
 from util.api import Schema, StructureSchema, types, constants
 
+
 from .constants import model_schema_constants
 from .errors import model_schema_errors
 from .attributes import AttributeSchema
 from .relationships import RelationshipSchema
 from .instances import InstancesSchema, InstanceAttributeSchema, InstanceRelationshipSchema
 from .methods import ModelMethodsSchema
+from .methods.base import BaseMethodSchema, BaseClientResponse
 
 class ModelsSchemaWithReferences(StructureSchema):
   def __init__(self, reference_model=None, **kwargs):
@@ -102,7 +104,10 @@ class SchemaManagerMixin:
     return InstanceRelationshipSchema(self.model)
 
   def schema_instance_methods(self):
-    return Schema(description='No available instance methods')
+    return BaseMethodSchema(
+      description='No available instance methods, sir.',
+      response=BaseClientResponse,
+    )
 
   def schema_instances(self):
     return InstancesSchema(self.model)

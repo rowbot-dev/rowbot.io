@@ -1,11 +1,11 @@
 
 # Local
-from apps.rowbot.models.asset import AssetModel, Asset, AssetInstance
-from apps.rowbot.models.club import Club
-from apps.rowbot.models.event import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
-from apps.rowbot.models.member import Member, AuthenticationToken
-from apps.rowbot.models.role import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
-from apps.rowbot.models.team import TeamModel, Team, TeamInstance, TeamRecord
+from .asset import AssetModel, Asset, AssetInstance
+from .club import Club
+from .event import EventModel, EventNotificationModel, Event, EventInstance, EventNotification
+from .member import Member, AuthenticationToken
+from .role import RoleModel, RolePermission, Role, RoleInstance, RoleRecord
+from .team import TeamModel, Team, TeamInstance, TeamRecord
 
 '''
 

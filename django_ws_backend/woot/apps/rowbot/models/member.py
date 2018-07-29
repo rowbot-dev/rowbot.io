@@ -19,31 +19,6 @@ class member_constants:
   omitted_relationships = ['logentry']
 
 class MemberManager(BaseUserManager, Manager):
-  def schema_instance_methods(self, authorization=None):
-    return StructureSchema(
-      description='Methods for the Member model',
-      children={
-        self.model.send_activation_email.__name__: Schema(
-          description='Send the activation email to the member',
-          types=types.BOOLEAN('A value of true will trigger this method'),
-        ),
-        self.model.activate.__name__: StructureSchema(
-          description='Send the activation email to the member',
-          children={
-            model_schema_constants.ARGUMENTS: StructureSchema(
-              description='',
-              children={
-                'activation_key': Schema(
-                  description='',
-                  types=types.UUID(),
-                ),
-              },
-            ),
-          },
-        ),
-      },
-    )
-
   def attributes(self):
     attributes = super().attributes()
     return [

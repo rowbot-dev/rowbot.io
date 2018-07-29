@@ -103,37 +103,15 @@ class APITestCase(TestCase):
     payload = {
       'models': {
         'Role': {
-          'attributes': False,
-          'relationships': False,
           'methods': {
-            'filter': {
-              'composite': [
-                {
-                  'key': 'member__username__contains',
-                  'value': 'a',
+            'run': {
+              self.role1._id: {
+                'something': {
+                  'argument1': 1,
+                  'argument2': 2,
                 },
-              ],
+              },
             },
-          },
-        },
-        'Reference': {
-          'attributes': False,
-          'relationships': False,
-        },
-      },
-    }
-
-    response = api.respond(payload)
-
-    print(json.dumps(response.render(), indent=2))
-
-    payload = {
-      'models': {
-        'Reference': {
-          'methods': {
-            'retrieve': [
-              Reference.objects.get()._id,
-            ],
           },
         },
       },

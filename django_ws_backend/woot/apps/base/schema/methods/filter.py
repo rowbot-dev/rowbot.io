@@ -115,6 +115,9 @@ class CompositeResponse(ArrayResponse):
 
   def get_query(self):
     if not self.has_child_errors:
+      if not self.children:
+        return None
+
       query = Q()
       for child in self.children:
         if self.OR:

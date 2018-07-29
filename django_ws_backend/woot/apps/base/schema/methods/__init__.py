@@ -13,13 +13,14 @@ class ModelMethodsSchema(StructureSchema):
     self.model = Model
     super().__init__(
       **kwargs,
-      description='No available model methods',
+      description='Model methods available for {}'.format(Model.__name__),
       children={
         model_schema_constants.FILTER: FilterSchema(Model),
         model_schema_constants.CREATE: CreateSchema(Model),
         model_schema_constants.DELETE: DeleteSchema(Model),
         model_schema_constants.GET: GetSchema(Model),
         model_schema_constants.SET: SetSchema(Model),
+        model_schema_constants.RUN: Model.objects.schema_instance_methods(),
       },
     )
 

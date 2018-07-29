@@ -12,7 +12,6 @@ class model_schema_constants:
   PAGINATE = 'paginate'
   CREATE = 'create'
   DELETE = 'delete'
-  ARGUMENTS = '_arguments'
   GET = 'get'
   SET = 'set'
   KEY = 'key'
@@ -24,3 +23,4 @@ class model_schema_constants:
   ADD = 'add'
   REMOVE = 'remove'
   NULL = 'null'
+  RUN = 'run'
