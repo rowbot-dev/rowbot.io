@@ -1,5 +1,5 @@
 
-from util.api import Schema, StructureSchema, StructureResponse
+from util.api import Schema, StructureSchema, StructureResponse, map_type
 
 class InstanceAttributeResponse(StructureResponse):
   pass
@@ -12,7 +12,9 @@ class InstanceAttributeSchema(StructureSchema):
       response=InstanceAttributeResponse,
       description='No available instance methods',
       children={
-        attribute_field.name: Schema()
+        attribute_field.name: Schema(
+          types=map_type(attribute_field.get_internal_type())
+        )
         for attribute_field
         in self.model.objects.attributes()
       },

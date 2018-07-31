@@ -10,4 +10,10 @@ class constants:
   TYPE = '_type'
   INDEX_TYPE = '_index_type'
   CLIENT = '_client'
-  NULL = 'null'
+  NULL = '__null'
+  PLAIN_TYPES = [
+    'CharField',
+    'BooleanField',
+    'PositiveIntegerField',
+    'IntegerField',
+  ]

@@ -114,11 +114,33 @@ class APITestCase(TestCase):
     self.assertTrue(True)
 
   def test_create_role(self):
-    payload = None
+    payload = {
+      'models': {
+        'Role': {
+          'attributes': {
+            'is_active': True,
+          },
+          'relationships': {
+            'member': True,
+          },
+          'methods': {
+            'filter': {
+              'composite': [
+                {
+                  'key': 'member__username__contains',
+                  'value': 'a',
+                },
+              ],
+            },
+          },
+        },
+      },
+    }
 
     response = api.respond(payload)
 
-    print(json.dumps(response.render(consolidate=True), indent=2))
+    # print(response.render())
+    print(json.dumps(response.render(), indent=2))
 
     self.assertTrue(False)
     # self.assertTrue(True)

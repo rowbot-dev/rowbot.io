@@ -18,7 +18,6 @@ class RelationshipResponse(StructureResponse):
     child_keys = self.children.keys()
 
     if not self.should_include_attributes:
-      self.should_render = False
       return []
 
     if not child_keys:

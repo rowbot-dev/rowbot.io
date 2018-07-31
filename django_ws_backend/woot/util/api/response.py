@@ -16,7 +16,9 @@ class Response():
     self.value = None
     self.rendered = None
     self.has_child_errors = False
-    self.should_render = True
+
+  def should_render(self):
+    return True
 
   def has_errors(self):
     return bool(self.errors) or self.has_child_errors
@@ -29,9 +31,9 @@ class Response():
   def add_value(self, value):
     self.value = value
 
-  def render(self, consolidate=False):
+  def render(self, top=True):
     if self.is_empty:
-      self.render_empty(consolidate=consolidate)
+      self.render_empty(top=top)
       return self.rendered
 
     if self.errors:
@@ -41,7 +43,7 @@ class Response():
     self.render_value()
     return self.rendered
 
-  def render_empty(self, consolidate=False):
+  def render_empty(self, top=False):
     self.rendered = {
       constants.DESCRIPTION: self.description,
       constants.TYPES: {
@@ -80,6 +82,9 @@ class StructureResponse(Response):
     super().__init__(parent_schema)
     self.children = {}
 
+  def should_render(self):
+    return bool(self.children)
+
   def add_child(self, child_key, child_response):
     self.children.update({child_key: child_response})
     if child_response.has_errors():
@@ -95,14 +100,14 @@ class StructureResponse(Response):
 
     return self.get_child(child_key)
 
-  def render_empty(self, consolidate=False):
-    super().render_empty(consolidate=consolidate)
+  def render_empty(self, top=False):
+    super().render_empty(top=top)
 
     if self.children:
       children = {}
       for child_key, child_response in self.children.items():
         children.update({
-          child_key: child_response.render(),
+          child_key: child_response.render(top=False),
         })
         self.errors.update({
           error.code: error
@@ -116,7 +121,7 @@ class StructureResponse(Response):
         constants.CHILDREN: children,
       })
 
-      if consolidate:
+      if top:
         self.rendered.update({
           constants.ERRORS: {
             error.code: error.render()
@@ -131,7 +136,7 @@ class StructureResponse(Response):
     self.rendered = {
       child_key: child_response.render()
       for child_key, child_response in self.children.items()
-      if child_response.should_render
+      if child_response.should_render()
     }
 
 class ArrayResponse(Response):
@@ -145,8 +150,8 @@ class ArrayResponse(Response):
     if child_response.has_errors():
       self.has_child_errors = True
 
-  def render_empty(self, consolidate=False):
-    super().render_empty(consolidate=consolidate)
+  def render_empty(self, top=False):
+    super().render_empty()
     template_response = self.template_schema.respond()
     self.rendered.update({
       constants.TEMPLATE: template_response.render(),
@@ -178,8 +183,8 @@ class IndexedResponse(Response):
     if child_response.has_errors():
       self.has_child_errors = True
 
-  def render_empty(self, consolidate=False):
-    super().render_empty(consolidate=consolidate)
+  def render_empty(self, top=False):
+    super().render_empty()
     template_response = self.template_schema.respond()
     self.rendered.update({
       constants.TEMPLATE: template_response.render(),

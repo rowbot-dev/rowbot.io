@@ -11,20 +11,11 @@ from ..constants import model_schema_constants
 from .attributes import InstanceAttributeSchema
 from .relationships import InstanceRelationshipSchema
 
-class InstanceResponse(StructureResponse):
-  def render_value(self):
-    self.rendered = {
-      child_key: child_response.render()
-      for child_key, child_response in self.children.items()
-      if child_response.children
-    }
-
 class InstanceSchema(StructureSchema):
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(
       **kwargs,
-      response=InstanceResponse,
       children={
         model_schema_constants.ATTRIBUTES: Model.objects.schema_instance_attributes(),
         model_schema_constants.RELATIONSHIPS: Model.objects.schema_instance_relationships(),

@@ -146,7 +146,11 @@ class Manager(models.Manager, SchemaManagerMixin):
 
   def serialize_attributes(self, instance, attributes=None):
     return {
-      attribute_field.name: str(getattr(instance, attribute_field.name))
+      attribute_field.name: (
+        str(getattr(instance, attribute_field.name))
+        if attribute_field.get_internal_type() not in constants.PLAIN_TYPES
+        else getattr(instance, attribute_field.name)
+      )
       for attribute_field
       in self.attributes()
       if attributes is None or attribute_field.name in attributes
