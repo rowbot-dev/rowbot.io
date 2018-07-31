@@ -1,0 +1,49 @@
+Goal:
+
+To create a consistent data transport format that includes built-in error handling and recursively nested data structures.
+
+Contents:
+
+- Goal
+- Contents
+- Introduction
+- Schema and Response objects
+- Examples
+
+Introduction:
+
+The motivation behind the creation of the recursive schema for transporting data is the lack of solid connection between the database representation of the resources and the means of accessing them through a conventional REST API. The following points are the major concerns:
+
+1. The lack of a handshake between client and server introducing the full capabilities of the API, and verifying that every request and response adheres to a consistent format.
+2. The lack of support for arbitrarily formed structures used in filtering data and other complex requests.
+3. The lack of support for consistent error handling including verbose error messages with machine-readable components.
+
+To solve these problems, a recursive schema can used to represent data moving in and out of a system. The schema is a specification that accepts a plaintext blob, known as the "payload". The payload is split into pieces based on the specification and passed down recursively through the schema. Each part of the schema responds identically according to a set of standard methods, yielding a "response" object which is composed back up the tree into the final response delivered back out of the system.
+
+A very simple example of a schema might be an array, whose elements could either be an integer or another array. These can be nested recursively, e.g.
+
+<multilinecode>
+[
+  5,
+  3,
+  [
+    4,
+    2,
+  ]
+]
+</multilinecode>
+
+Each integer value could specify the number of characters to extract from a payload. Given a payload in plaintext such as "breaking point", it could be split in the following way:
+
+<multilinecode>
+[
+  "break",
+  "ing",
+  [
+    " poi",
+    "nt",
+  ]
+]
+</multilinecode>
+
+This would be the result of first assigning the corresponding number of characters to each integer, and when an array element is encountered, pass the number of characters corresponding to the sum of the elements. This process of splitting the payload will begin again with the child array. This can continue indefinitely.

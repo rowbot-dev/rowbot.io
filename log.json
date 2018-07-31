@@ -143,6 +143,15 @@
         "children": {
           "instances": "My new idea is that the instances indexed schema should only be used for input. The reason is, the values of attributes, relationships, and instances methods should be accessed via model methods such as get and filter.",
         }
+      },
+      "20180731": {
+        "description": "Having finished the basic schema system, a few things have become clearer to me. Things like authentication, authorization, and permissions will require some changes to the way data is passed up and down.",
+        "children": {
+          "authentication": "This process can be done by calling methods on a created database object, so nothing needs to change about this. The only difference comes when an authorization token is returned at the end. The token must go from being returned normally to being included in every request.",
+          "authorization": "This token should be extracted by the client and included as an argument to every function run.",
+          "consolidation": "Errors should be rendered in a reduced form and should be collected at the top level when reporting the full schema. This can be done by getting child errors during the render-none stage of the parent. The parent can modify the child errors to add a reduced flag and copy the errors to its own array. This process will continue up the chain until the top level is reached.",
+          ""
+        }
       }
     }
   },
