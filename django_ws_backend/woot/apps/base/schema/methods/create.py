@@ -15,7 +15,7 @@ class AttributeCreateSchema(Schema):
     self.attribute = attribute
     super().__init__(
       **kwargs,
-      description=attribute.verbose_name,
+      description=str(attribute.verbose_name),
       types=map_type(attribute.get_internal_type()),
     )
 
@@ -34,6 +34,10 @@ class AttributesCreateResponse(StructureResponse):
     return {}
 
 class AttributesCreateSchema(StructureSchema):
+  available_errors = StructureSchema.available_errors + [
+    model_schema_errors.NON_NULLABLE_NOT_INCLUDED(),
+  ]
+
   def __init__(self, Model, **kwargs):
     self.model = Model
     self.non_nullable = {
@@ -92,6 +96,10 @@ class RelationshipsCreateResponse(StructureResponse):
     return {}
 
 class RelationshipsCreateSchema(StructureSchema):
+  available_errors = StructureSchema.available_errors + [
+    model_schema_errors.NON_NULLABLE_NOT_INCLUDED(),
+  ]
+
   def __init__(self, Model, **kwargs):
     self.model = Model
     self.non_nullable = {
@@ -156,6 +164,10 @@ class PrototypeResponse(StructureResponse):
         return prototype
 
 class PrototypeSchema(StructureSchema):
+  available_errors = StructureSchema.available_errors + [
+    model_schema_errors.MUST_CONTAIN_ALL_NON_NULLABLE(),
+  ]
+
   def __init__(self, Model, **kwargs):
     self.model = Model
     super().__init__(

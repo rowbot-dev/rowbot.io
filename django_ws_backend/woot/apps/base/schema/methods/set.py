@@ -11,6 +11,12 @@ from ..errors import model_schema_errors
 from .base import BaseClientResponse, BaseMethodSchema
 
 class NullableSchema(StructureSchema):
+  available_errors = StructureSchema.available_errors + [
+    model_schema_errors.NULLABLE_ON_NON_NULLABLE_FIELD(),
+    model_schema_errors.NULLABLE_MUST_CONTAIN_KEY(),
+    model_schema_errors.NULLABLE_MUST_BE_TRUE(),
+  ]
+
   def __init__(self, field, **kwargs):
     self.field = field
     super().__init__(
@@ -54,7 +60,7 @@ class AttributeSetSchema(Schema):
     self.attribute = attribute
     super().__init__(
       **kwargs,
-      description=attribute.verbose_name,
+      description=str(attribute.verbose_name),
       response=AttributeValueResponse,
       types=[
         map_type(attribute.get_internal_type()),

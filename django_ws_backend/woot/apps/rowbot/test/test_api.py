@@ -110,27 +110,15 @@ class APITestCase(TestCase):
 
     print(json.dumps(reference_response.render(), indent=2))
 
-    self.assertTrue(False)
-    # self.assertTrue(True)
+    # self.assertTrue(False)
+    self.assertTrue(True)
 
   def test_create_role(self):
-    payload = {
-      'models': {
-        'Role': {
-          'methods': {
-            'filter': {
-              'composite': [
-
-              ],
-            },
-          },
-        },
-      },
-    }
+    payload = None
 
     response = api.respond(payload)
 
-    print(json.dumps(response.render(), indent=2))
+    print(json.dumps(response.render(consolidate=True), indent=2))
 
-    # self.assertTrue(False)
-    self.assertTrue(True)
+    self.assertTrue(False)
+    # self.assertTrue(True)
